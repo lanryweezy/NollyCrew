@@ -1,18 +1,27 @@
+databases:
+  - name: nollycrewhub-db
+    engine: PostgreSQL
+    plan: starter
+    region: oregon
+    postgresMajorVersion: 15
+
 services:
   - type: web
     name: nollycrewhub
     env: node
-    buildCommand: npm install && npm run build
-    startCommand: npm start
+    buildCommand: npm install && npm run db:migrate && npm run build
+    startCommand: NODE_ENV=production node server/index.js
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 10000
-      - key: DATABASE_URL
-        sync: false
+      - fromDatabase:
+          name: nollycrewhub-db
+          property: connectionString
+        key: DATABASE_URL
       - key: JWT_SECRET
-        sync: false
+        generateValue: true
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_CLIENT_SECRET
@@ -23,10 +32,3 @@ services:
         sync: false
     healthCheckPath: /api/health
     autoDeploy: true
-
-  - type: database
-    name: nollycrewhub-db
-    engine: PostgreSQL
-    plan: starter
-    region: oregon
-    postgresMajorVersion: 15
