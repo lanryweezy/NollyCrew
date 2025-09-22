@@ -3,10 +3,9 @@ import cookieParser from "cookie-parser";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import dotenv from "dotenv";
+import path from "path";
 
 dotenv.config();
-
-import cookieParser from "cookie-parser";
 
 const app = express();
 app.use(cookieParser());
@@ -60,7 +59,10 @@ app.use((req, res, next) => {
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
-    serveStatic(app);
+    app.use(express.static(path.join(__dirname, '../public')));
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(__dirname, '../public', 'index.html'));
+    });
   }
 
   // ALWAYS serve the app on the port specified in the environment variable PORT

@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: nollycrewhub
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: PAYSTACK_SECRET_KEY
+        sync: false
+      - key: PAYSTACK_PUBLIC_KEY
+        sync: false
+    healthCheckPath: /api/health
+    autoDeploy: true
+
+  - type: database
+    name: nollycrewhub-db
+    engine: PostgreSQL
+    plan: starter
+    region: oregon
+    postgresMajorVersion: 15
