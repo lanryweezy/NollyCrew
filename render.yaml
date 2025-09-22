@@ -10,7 +10,7 @@ services:
     name: nollycrewhub
     env: node
     buildCommand: npm install && npm run db:migrate && npm run build
-    startCommand: NODE_ENV=production node server/index.js
+    startCommand: NODE_ENV=production tsx server/index.ts
     envVars:
       - key: NODE_ENV
         value: production
