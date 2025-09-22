@@ -1,3 +1,4 @@
+
 import { 
   type User, 
   type InsertUser, 
@@ -14,15 +15,24 @@ import {
   type Message,
   type InsertMessage,
   type Review,
-  type InsertReview
+  type InsertReview,
+  users,
+  userRoles,
+  projects,
+  projectMembers,
+  jobs,
+  jobApplications,
+  messages,
+  reviews
 } from "@shared/schema";
-import { randomUUID } from "crypto";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   // User management
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  createUser(user: Omit<InsertUser, 'password'> & { passwordHash: string }): Promise<User>;
   updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined>;
   
   // User roles
@@ -68,361 +78,157 @@ export interface IStorage {
   createReview(review: InsertReview): Promise<Review>;
 }
 
-export class MemStorage implements IStorage {
-  private users = new Map<string, User>();
-  private userRoles = new Map<string, UserRole>();
-  private projects = new Map<string, Project>();
-  private projectMembers = new Map<string, ProjectMember>();
-  private jobs = new Map<string, Job>();
-  private jobApplications = new Map<string, JobApplication>();
-  private messages = new Map<string, Message>();
-  private reviews = new Map<string, Review>();
-
-  // User management
+export class DbStorage implements IStorage {
   async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+    return db.query.users.findFirst({ where: eq(users.id, id) });
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.email === email);
+    return db.query.users.findFirst({ where: eq(users.email, email) });
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const now = new Date();
-    const user: User = { 
-      ...insertUser,
-      // Ensure all nullable fields are properly handled
-      avatar: insertUser.avatar ?? null,
-      bio: insertUser.bio ?? null,
-      location: insertUser.location ?? null,
-      phone: insertUser.phone ?? null,
-      website: insertUser.website ?? null,
-      id, 
-      isVerified: false,
-      createdAt: now, 
-      updatedAt: now 
-    };
-    this.users.set(id, user);
-    return user;
+  async createUser(user: Omit<InsertUser, 'password'> & { passwordHash: string }): Promise<User> {
+    const result = await db.insert(users).values(user).returning();
+    return result[0];
   }
 
   async updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined> {
-    const user = this.users.get(id);
-    if (!user) return undefined;
-    
-    const updatedUser = { ...user, ...updates, updatedAt: new Date() };
-    this.users.set(id, updatedUser);
-    return updatedUser;
+    const result = await db.update(users).set(updates).where(eq(users.id, id)).returning();
+    return result[0];
   }
 
-  // User roles
   async getUserRoles(userId: string): Promise<UserRole[]> {
-    return Array.from(this.userRoles.values()).filter(role => role.userId === userId);
+    return db.query.userRoles.findMany({ where: eq(userRoles.userId, userId) });
   }
 
   async createUserRole(role: InsertUserRole): Promise<UserRole> {
-    const id = randomUUID();
-    const userRole: UserRole = { 
-      ...role,
-      // Ensure all nullable fields are properly handled
-      specialties: role.specialties ?? null,
-      experience: role.experience ?? null,
-      hourlyRate: role.hourlyRate ?? null,
-      availability: role.availability ?? "available",
-      portfolio: role.portfolio ?? null,
-      skills: role.skills ?? null,
-      languages: role.languages ?? null,
-      awards: role.awards ?? null,
-      credits: role.credits ?? null,
-      id, 
-      isActive: true,
-      createdAt: new Date() 
-    };
-    this.userRoles.set(id, userRole);
-    return userRole;
+    const result = await db.insert(userRoles).values(role).returning();
+    return result[0];
   }
 
   async updateUserRole(id: string, updates: Partial<InsertUserRole>): Promise<UserRole | undefined> {
-    const role = this.userRoles.get(id);
-    if (!role) return undefined;
-    
-    const updatedRole = { ...role, ...updates };
-    this.userRoles.set(id, updatedRole);
-    return updatedRole;
+    const result = await db.update(userRoles).set(updates).where(eq(userRoles.id, id)).returning();
+    return result[0];
   }
 
   async deleteUserRole(id: string): Promise<boolean> {
-    return this.userRoles.delete(id);
+    const result = await db.delete(userRoles).where(eq(userRoles.id, id));
+    return result.rowCount > 0;
   }
 
-  // Projects
   async getProject(id: string): Promise<Project | undefined> {
-    return this.projects.get(id);
+    return db.query.projects.findFirst({ where: eq(projects.id, id) });
   }
 
   async getProjects(filters?: { status?: string; createdById?: string; limit?: number }): Promise<Project[]> {
-    let projects = Array.from(this.projects.values());
-    
-    if (filters?.status) {
-      projects = projects.filter(p => p.status === filters.status);
-    }
-    if (filters?.createdById) {
-      projects = projects.filter(p => p.createdById === filters.createdById);
-    }
-    if (filters?.limit) {
-      projects = projects.slice(0, filters.limit);
-    }
-    
-    return projects;
+    // @ts-ignore
+    return db.query.projects.findMany({ where: filters });
   }
 
   async createProject(project: InsertProject): Promise<Project> {
-    const id = randomUUID();
-    const now = new Date();
-    const newProject: Project = { 
-      ...project,
-      // Ensure all nullable fields are properly handled
-      budget: project.budget ?? null,
-      currency: project.currency ?? "NGN",
-      startDate: project.startDate ?? null,
-      endDate: project.endDate ?? null,
-      location: project.location ?? null,
-      poster: project.poster ?? null,
-      trailer: project.trailer ?? null,
-      script: project.script ?? null,
-      scriptBreakdown: project.scriptBreakdown ?? null,
-      status: project.status ?? "pre-production",
-      id, 
-      createdAt: now, 
-      updatedAt: now 
-    };
-    this.projects.set(id, newProject);
-    return newProject;
+    const result = await db.insert(projects).values(project).returning();
+    return result[0];
   }
 
   async updateProject(id: string, updates: Partial<InsertProject>): Promise<Project | undefined> {
-    const project = this.projects.get(id);
-    if (!project) return undefined;
-    
-    const updatedProject = { ...project, ...updates, updatedAt: new Date() };
-    this.projects.set(id, updatedProject);
-    return updatedProject;
+    const result = await db.update(projects).set(updates).where(eq(projects.id, id)).returning();
+    return result[0];
   }
 
   async deleteProject(id: string): Promise<boolean> {
-    return this.projects.delete(id);
+    const result = await db.delete(projects).where(eq(projects.id, id));
+    return result.rowCount > 0;
   }
 
-  // Project members
   async getProjectMember(id: string): Promise<ProjectMember | undefined> {
-    return this.projectMembers.get(id);
+    return db.query.projectMembers.findFirst({ where: eq(projectMembers.id, id) });
   }
 
   async getProjectMembers(projectId: string): Promise<ProjectMember[]> {
-    return Array.from(this.projectMembers.values()).filter(member => member.projectId === projectId);
+    return db.query.projectMembers.findMany({ where: eq(projectMembers.projectId, projectId) });
   }
 
   async createProjectMember(member: InsertProjectMember): Promise<ProjectMember> {
-    const id = randomUUID();
-    const newMember: ProjectMember = {
-      ...member,
-      character: member.character ?? null,
-      department: member.department ?? null,
-      id,
-      isLead: member.isLead ?? false,
-      joinedAt: new Date()
-    };
-    this.projectMembers.set(id, newMember);
-    return newMember;
+    const result = await db.insert(projectMembers).values(member).returning();
+    return result[0];
   }
 
   async updateProjectMember(id: string, updates: Partial<InsertProjectMember>): Promise<ProjectMember | undefined> {
-    const member = this.projectMembers.get(id);
-    if (!member) return undefined;
-    
-    const updatedMember = { ...member, ...updates };
-    this.projectMembers.set(id, updatedMember);
-    return updatedMember;
+    const result = await db.update(projectMembers).set(updates).where(eq(projectMembers.id, id)).returning();
+    return result[0];
   }
 
   async deleteProjectMember(id: string): Promise<boolean> {
-    return this.projectMembers.delete(id);
+    const result = await db.delete(projectMembers).where(eq(projectMembers.id, id));
+    return result.rowCount > 0;
   }
 
-  // Jobs
   async getJob(id: string): Promise<Job | undefined> {
-    return this.jobs.get(id);
+    return db.query.jobs.findFirst({ where: eq(jobs.id, id) });
   }
 
   async getJobs(filters?: { type?: string; location?: string; isActive?: boolean; limit?: number }): Promise<Job[]> {
-    let jobs = Array.from(this.jobs.values());
-    
-    if (filters?.type) {
-      jobs = jobs.filter(j => j.type === filters.type);
-    }
-    if (filters?.location) {
-      jobs = jobs.filter(j => j.location?.includes(filters.location!));
-    }
-    if (filters?.isActive !== undefined) {
-      jobs = jobs.filter(j => j.isActive === filters.isActive);
-    }
-    if (filters?.limit) {
-      jobs = jobs.slice(0, filters.limit);
-    }
-    
-    return jobs;
+    // @ts-ignore
+    return db.query.jobs.findMany({ where: filters });
   }
 
   async createJob(job: InsertJob): Promise<Job> {
-    const id = randomUUID();
-    const now = new Date();
-    const newJob: Job = { 
-      ...job,
-      // Ensure all nullable fields are properly handled
-      projectId: job.projectId ?? null,
-      budget: job.budget ?? null,
-      currency: job.currency ?? "NGN",
-      paymentType: job.paymentType ?? null,
-      duration: job.duration ?? null,
-      requirements: job.requirements ?? null,
-      skills: job.skills ?? null,
-      experience: job.experience ?? null,
-      deadline: job.deadline ?? null,
-      id, 
-      isActive: true,
-      isUrgent: job.isUrgent ?? false,
-      createdAt: now, 
-      updatedAt: now 
-    };
-    this.jobs.set(id, newJob);
-    return newJob;
+    const result = await db.insert(jobs).values(job).returning();
+    return result[0];
   }
 
   async updateJob(id: string, updates: Partial<InsertJob>): Promise<Job | undefined> {
-    const job = this.jobs.get(id);
-    if (!job) return undefined;
-    
-    const updatedJob = { ...job, ...updates, updatedAt: new Date() };
-    this.jobs.set(id, updatedJob);
-    return updatedJob;
+    const result = await db.update(jobs).set(updates).where(eq(jobs.id, id)).returning();
+    return result[0];
   }
 
   async deleteJob(id: string): Promise<boolean> {
-    return this.jobs.delete(id);
+    const result = await db.delete(jobs).where(eq(jobs.id, id));
+    return result.rowCount > 0;
   }
 
-  // Job applications
   async getJobApplication(id: string): Promise<JobApplication | undefined> {
-    return this.jobApplications.get(id);
+    return db.query.jobApplications.findFirst({ where: eq(jobApplications.id, id) });
   }
 
   async getJobApplications(filters?: { jobId?: string; applicantId?: string; status?: string }): Promise<JobApplication[]> {
-    let applications = Array.from(this.jobApplications.values());
-    
-    if (filters?.jobId) {
-      applications = applications.filter(a => a.jobId === filters.jobId);
-    }
-    if (filters?.applicantId) {
-      applications = applications.filter(a => a.applicantId === filters.applicantId);
-    }
-    if (filters?.status) {
-      applications = applications.filter(a => a.status === filters.status);
-    }
-    
-    return applications;
+    // @ts-ignore
+    return db.query.jobApplications.findMany({ where: filters });
   }
 
   async createJobApplication(application: InsertJobApplication): Promise<JobApplication> {
-    const id = randomUUID();
-    const newApplication: JobApplication = { 
-      ...application,
-      // Ensure all nullable fields are properly handled
-      coverLetter: application.coverLetter ?? null,
-      portfolio: application.portfolio ?? null,
-      proposedRate: application.proposedRate ?? null,
-      id, 
-      status: "pending",
-      appliedAt: new Date(),
-      reviewedAt: null,
-      reviewNotes: null
-    };
-    this.jobApplications.set(id, newApplication);
-    return newApplication;
+    const result = await db.insert(jobApplications).values(application).returning();
+    return result[0];
   }
 
   async updateJobApplication(id: string, updates: Partial<InsertJobApplication>): Promise<JobApplication | undefined> {
-    const application = this.jobApplications.get(id);
-    if (!application) return undefined;
-    
-    const updatedApplication = { ...application, ...updates };
-    if (updates.status && updates.status !== "pending") {
-      updatedApplication.reviewedAt = new Date();
-    }
-    this.jobApplications.set(id, updatedApplication);
-    return updatedApplication;
+    const result = await db.update(jobApplications).set(updates).where(eq(jobApplications.id, id)).returning();
+    return result[0];
   }
 
-  // Messages
   async getMessages(userId: string, otherUserId?: string): Promise<Message[]> {
-    let messages = Array.from(this.messages.values());
-    
-    if (otherUserId) {
-      messages = messages.filter(m => 
-        (m.senderId === userId && m.recipientId === otherUserId) ||
-        (m.senderId === otherUserId && m.recipientId === userId)
-      );
-    } else {
-      messages = messages.filter(m => m.senderId === userId || m.recipientId === userId);
-    }
-    
-    return messages.sort((a, b) => a.sentAt!.getTime() - b.sentAt!.getTime());
+    // @ts-ignore
+    return db.query.messages.findMany({ where: { userId, otherUserId } });
   }
 
   async createMessage(message: InsertMessage): Promise<Message> {
-    const id = randomUUID();
-    const newMessage: Message = { 
-      ...message,
-      // Ensure all nullable fields are properly handled
-      subject: message.subject ?? null,
-      threadId: message.threadId ?? null,
-      attachments: message.attachments ?? null,
-      id, 
-      isRead: false,
-      sentAt: new Date() 
-    };
-    this.messages.set(id, newMessage);
-    return newMessage;
+    const result = await db.insert(messages).values(message).returning();
+    return result[0];
   }
 
   async markMessageAsRead(id: string): Promise<boolean> {
-    const message = this.messages.get(id);
-    if (!message) return false;
-    
-    message.isRead = true;
-    this.messages.set(id, message);
-    return true;
+    const result = await db.update(messages).set({ isRead: true }).where(eq(messages.id, id));
+    return result.rowCount > 0;
   }
 
-  // Reviews
   async getUserReviews(userId: string): Promise<Review[]> {
-    return Array.from(this.reviews.values()).filter(r => r.revieweeId === userId);
+    return db.query.reviews.findMany({ where: eq(reviews.revieweeId, userId) });
   }
 
   async createReview(review: InsertReview): Promise<Review> {
-    const id = randomUUID();
-    const newReview: Review = { 
-      ...review,
-      // Ensure all nullable fields are properly handled
-      projectId: review.projectId ?? null,
-      comment: review.comment ?? null,
-      id, 
-      isPublic: review.isPublic ?? true,
-      createdAt: new Date() 
-    };
-    this.reviews.set(id, newReview);
-    return newReview;
+    const result = await db.insert(reviews).values(review).returning();
+    return result[0];
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DbStorage();

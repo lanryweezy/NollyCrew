@@ -31,7 +31,71 @@ const authenticateToken = async (req: any, res: any, next: any) => {
   }
 };
 
+import { Issuer, generators } from 'openid-client';
+
+// Google Auth client
+let googleClient: any;
+Issuer.discover('https://accounts.google.com')
+  .then(googleIssuer => {
+    googleClient = new googleIssuer.Client({
+      client_id: process.env.GOOGLE_CLIENT_ID!,
+      client_secret: process.env.GOOGLE_CLIENT_SECRET!,
+      redirect_uris: ['http://localhost:5000/api/auth/google/callback'],
+      response_types: ['code'],
+    });
+  });
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  app.get('/api/auth/google', (req, res) => {
+    const code_verifier = generators.codeVerifier();
+    const code_challenge = generators.codeChallenge(code_verifier);
+    const scope = 'openid email profile';
+
+    const authUrl = googleClient.authorizationUrl({
+      scope,
+      code_challenge,
+      code_challenge_method: 'S256',
+    });
+
+    res.cookie('code_verifier', code_verifier, { httpOnly: true });
+    res.redirect(authUrl);
+  });
+
+  app.get('/api/auth/google/callback', async (req, res) => {
+    const params = googleClient.callbackParams(req);
+    const code_verifier = req.cookies.code_verifier;
+
+    try {
+      const tokenSet = await googleClient.callback('http://localhost:5000/api/auth/google/callback', params, { code_verifier });
+      const claims = tokenSet.claims();
+
+      let user = await storage.getUserByEmail(claims.email!);
+
+      if (!user) {
+        const newUser = {
+          email: claims.email!,
+          firstName: claims.given_name || '',
+          lastName: claims.family_name || '',
+          avatar: claims.picture || null,
+        };
+        // Create a dummy password hash, as it's required by the schema
+        const passwordHash = await bcrypt.hash(generators.random(), 10);
+        user = await storage.createUser({ ...newUser, passwordHash });
+      }
+
+      const token = jwt.sign(
+        { userId: user.id, email: user.email },
+        JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+
+      res.redirect(`/?token=${token}`);
+    } catch (error) {
+      console.error('Google callback error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   // Authentication routes
   app.post('/api/auth/register', async (req, res) => {
     try {
@@ -116,6 +180,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ user: userWithoutPassword, roles: userRoles });
     } catch (error) {
       console.error('Get user error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Paystack Payment Routes
+  const paystack = require('paystack-api')(process.env.PAYSTACK_SECRET_KEY);
+
+  app.post('/api/payment/paystack/initialize', authenticateToken, async (req: any, res) => {
+    try {
+      const { amount, email } = req.body;
+
+      if (!amount || !email) {
+        return res.status(400).json({ error: 'Amount and email are required' });
+      }
+
+      const response = await paystack.transaction.initialize({
+        amount: amount * 100, // amount in kobo
+        email,
+        callback_url: 'http://localhost:5000/api/payment/paystack/callback',
+      });
+
+      res.json({ authorization_url: response.data.authorization_url });
+    } catch (error) {
+      console.error('Paystack initialization error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  app.get('/api/payment/paystack/callback', async (req, res) => {
+    try {
+      const { reference } = req.query;
+      const response = await paystack.transaction.verify({ reference });
+
+      if (response.data.status === 'success') {
+        // Payment was successful, you can update your database here
+        res.redirect('/payment/success');
+      } else {
+        res.redirect('/payment/error');
+      }
+    } catch (error) {
+      console.error('Paystack callback error:', error);
       res.status(500).json({ error: 'Internal server error' });
     }
   });
