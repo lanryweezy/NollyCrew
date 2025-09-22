@@ -8,7 +8,7 @@
     "build": "npm run build:client && npm run build:server",
     "build:client": "vite build",
     "build:server": "echo 'Copying server files...' && mkdir -p dist/server && cp -r server/* dist/server/ && mkdir -p dist/shared && cp -r shared/* dist/shared/",
-    "start": "NODE_ENV=production node server/index.js",
+    "start": "NODE_ENV=production tsx server/index.ts",
     "check": "tsc",
     "test": "vitest",
     "db:push": "drizzle-kit push",
