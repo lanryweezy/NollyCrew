@@ -35,22 +35,12 @@ const authenticateToken = async (req: any, res: any, next: any) => {
 import * as openidClient from 'openid-client';
 import { URL } from 'url';
 
-// Google Auth client
-let googleConfig: openidClient.Configuration;
-
-(async () => {
   try {
     const clientMetadata = {
         client_secret: process.env.GOOGLE_CLIENT_SECRET!,
         redirect_uris: ['http://localhost:5000/api/auth/google/callback'],
         response_types: ['code'],
     };
-    googleConfig = await openidClient.discovery(new URL('https://accounts.google.com'), process.env.GOOGLE_CLIENT_ID!, clientMetadata);
-  } catch (error) {
-    console.error('Failed to discover google openid configuration', error);
-    process.exit(1);
-  }
-})();
 
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -58,29 +48,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/health', (req, res) => {
     res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
   });
-  app.get('/api/auth/google', async (req, res) => {
-    const code_verifier = openidClient.randomPKCECodeVerifier();
-    const code_challenge = await openidClient.calculatePKCECodeChallenge(code_verifier);
-    const scope = 'openid email profile';
 
-    const authUrl = openidClient.buildAuthorizationUrl(googleConfig, {
-      scope,
-      code_challenge,
-      code_challenge_method: 'S256',
-    });
 
-    res.cookie('code_verifier', code_verifier, { httpOnly: true });
-    res.redirect(authUrl.href);
-  });
-
-  app.get('/api/auth/google/callback', async (req, res) => {
-    const code_verifier = req.cookies.code_verifier;
-
+  app.get('/api/auth/google/callback', async (req, res, next) => {
     try {
-      const currentUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
-      const tokenSet = await openidClient.authorizationCodeGrant(googleConfig, new URL(currentUrl), { pkceCodeVerifier: code_verifier });
-      const claims = tokenSet.claims();
-
       let user = await storage.getUserByEmail(claims.email!);
 
       if (!user) {
@@ -103,8 +74,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.redirect(`/?token=${token}`);
     } catch (error) {
-      console.error('Google callback error:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      next(error);
     }
   });
 
