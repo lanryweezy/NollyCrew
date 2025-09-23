@@ -3,12 +3,15 @@
   "version": "1.0.0",
   "type": "module",
   "license": "MIT",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "dev": "NODE_ENV=development tsx server/index.ts",
     "build": "npm run build:client && npm run build:server",
     "build:client": "vite build",
-    "build:server": "echo 'Copying server files...' && mkdir -p dist/server && cp -r server/* dist/server/ && mkdir -p dist/shared && cp -r shared/* dist/shared/",
-    "start": "NODE_ENV=production tsx server/index.ts",
+    "build:server": "node -e \"const fs=require('fs'),path=require('path');['dist/server','dist/shared'].forEach(d=>{if(!fs.existsSync(d))fs.mkdirSync(d,{recursive:true})});['server','shared'].forEach(src=>{const dst='dist/'+src;fs.readdirSync(src).forEach(f=>{const srcPath=path.join(src,f),dstPath=path.join(dst,f);if(fs.lstatSync(srcPath).isDirectory()){if(!fs.existsSync(dstPath))fs.mkdirSync(dstPath,{recursive:true});fs.readdirSync(srcPath).forEach(sf=>fs.copyFileSync(path.join(srcPath,sf),path.join(dstPath,sf)))}else fs.copyFileSync(srcPath,dstPath)})})\"",
+    "start": "cross-env NODE_ENV=production tsx --esm server/index.ts",
     "check": "tsc",
     "test": "vitest",
     "db:push": "drizzle-kit push",
@@ -112,6 +115,7 @@
     "@vitejs/plugin-react": "^4.3.2",
     "@vitest/ui": "^3.2.4",
     "autoprefixer": "^10.4.20",
+    "cross-env": "^10.0.0",
     "drizzle-kit": "^0.30.4",
     "esbuild": "^0.25.0",
     "postcss": "^8.4.47",
