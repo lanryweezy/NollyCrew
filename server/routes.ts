@@ -35,13 +35,6 @@ const authenticateToken = async (req: any, res: any, next: any) => {
 import * as openidClient from 'openid-client';
 import { URL } from 'url';
 
-// Google Auth client
-let googleConfig: openidClient.Configuration | undefined;
-
-async function getGoogleConfig() {
-  if (googleConfig) {
-    return googleConfig;
-  }
 
   try {
     const clientMetadata = {
@@ -49,14 +42,7 @@ async function getGoogleConfig() {
         redirect_uris: ['http://localhost:5000/api/auth/google/callback'],
         response_types: ['code'],
     };
-    const config = await openidClient.discovery(new URL('https://accounts.google.com'), process.env.GOOGLE_CLIENT_ID!, clientMetadata);
-    googleConfig = config;
-    return config;
-  } catch (error) {
-    console.error('Failed to discover google openid configuration', error);
-    throw new Error('Failed to configure Google authentication');
-  }
-}
+
 
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -64,18 +50,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/health', (req, res) => {
     res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
   });
-  app.get('/api/auth/google', async (req, res, next) => {
-    try {
-      const config = await getGoogleConfig();
-      const code_verifier = openidClient.randomPKCECodeVerifier();
-      const code_challenge = await openidClient.calculatePKCECodeChallenge(code_verifier);
-      const scope = 'openid email profile';
 
-      const authUrl = openidClient.buildAuthorizationUrl(config, {
-        scope,
-        code_challenge,
-        code_challenge_method: 'S256',
-      });
 
       res.cookie('code_verifier', code_verifier, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax' });
       res.redirect(authUrl.href);
