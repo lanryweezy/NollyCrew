@@ -35,12 +35,14 @@ const authenticateToken = async (req: any, res: any, next: any) => {
 import * as openidClient from 'openid-client';
 import { URL } from 'url';
 
+
   try {
     const clientMetadata = {
         client_secret: process.env.GOOGLE_CLIENT_SECRET!,
         redirect_uris: ['http://localhost:5000/api/auth/google/callback'],
         response_types: ['code'],
     };
+
 
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -50,29 +52,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
+      res.cookie('code_verifier', code_verifier, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax' });
+      res.redirect(authUrl.href);
+    } catch (error) {
+        next(error);
+    }
+  });
+
   app.get('/api/auth/google/callback', async (req, res, next) => {
     try {
-      let user = await storage.getUserByEmail(claims.email!);
+        const config = await getGoogleConfig();
+        const code_verifier = req.cookies.code_verifier;
+        const currentUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
+        const tokenSet = await openidClient.authorizationCodeGrant(config, new URL(currentUrl), { pkceCodeVerifier: code_verifier });
+        const claims = tokenSet.claims();
 
-      if (!user) {
-        const newUser = {
-          email: claims.email!,
-          firstName: claims.given_name || '',
-          lastName: claims.family_name || '',
-          avatar: claims.picture || null,
-        };
-        // Create a dummy password hash, as it's required by the schema
-        const passwordHash = await bcrypt.hash(openidClient.randomNonce(), 10);
-        user = await storage.createUser({ ...newUser, passwordHash });
-      }
+        let user = await storage.getUserByEmail(claims.email!);
 
-      const token = jwt.sign(
-        { userId: user.id, email: user.email },
-        JWT_SECRET,
-        { expiresIn: '7d' }
-      );
+        if (!user) {
+          const newUser = {
+            email: claims.email!,
+            firstName: claims.given_name || '',
+            lastName: claims.family_name || '',
+            avatar: claims.picture || null,
+          };
+          // Create a dummy password hash, as it's required by the schema
+          const passwordHash = await bcrypt.hash(openidClient.randomNonce(), 10);
+          user = await storage.createUser({ ...newUser, passwordHash });
+        }
 
-      res.redirect(`/?token=${token}`);
+        const token = jwt.sign(
+          { userId: user.id, email: user.email },
+          JWT_SECRET,
+          { expiresIn: '7d' }
+        );
+
+        res.redirect(`/?token=${token}`);
     } catch (error) {
       next(error);
     }
