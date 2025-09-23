@@ -2,8 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { storage } from "./storage";
-import { insertUserSchema, insertUserRoleSchema, insertJobSchema, insertProjectSchema, insertJobApplicationSchema } from "@shared/schema";
+import { storage } from "./storage.js";
+import { insertUserSchema, insertUserRoleSchema, insertJobSchema, insertProjectSchema, insertJobApplicationSchema } from "../shared/schema.js";
 import { z } from "zod";
 import paystackapi from 'paystack-api';
 
@@ -32,66 +32,12 @@ const authenticateToken = async (req: any, res: any, next: any) => {
   }
 };
 
-import * as openidClient from 'openid-client';
-import { URL } from 'url';
-
-
-  try {
-    const clientMetadata = {
-        client_secret: process.env.GOOGLE_CLIENT_SECRET!,
-        redirect_uris: ['http://localhost:5000/api/auth/google/callback'],
-        response_types: ['code'],
-    };
-
-
-
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint for Render
   app.get('/api/health', (req, res) => {
     res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
-
-      res.cookie('code_verifier', code_verifier, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax' });
-      res.redirect(authUrl.href);
-    } catch (error) {
-        next(error);
-    }
-  });
-
-  app.get('/api/auth/google/callback', async (req, res, next) => {
-    try {
-        const config = await getGoogleConfig();
-        const code_verifier = req.cookies.code_verifier;
-        const currentUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
-        const tokenSet = await openidClient.authorizationCodeGrant(config, new URL(currentUrl), { pkceCodeVerifier: code_verifier });
-        const claims = tokenSet.claims();
-
-        let user = await storage.getUserByEmail(claims.email!);
-
-        if (!user) {
-          const newUser = {
-            email: claims.email!,
-            firstName: claims.given_name || '',
-            lastName: claims.family_name || '',
-            avatar: claims.picture || null,
-          };
-          // Create a dummy password hash, as it's required by the schema
-          const passwordHash = await bcrypt.hash(openidClient.randomNonce(), 10);
-          user = await storage.createUser({ ...newUser, passwordHash });
-        }
-
-        const token = jwt.sign(
-          { userId: user.id, email: user.email },
-          JWT_SECRET,
-          { expiresIn: '7d' }
-        );
-
-        res.redirect(`/?token=${token}`);
-    } catch (error) {
-      next(error);
-    }
-  });
 
   // Authentication routes
   app.post('/api/auth/register', async (req, res) => {

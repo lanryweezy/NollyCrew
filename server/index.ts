@@ -1,7 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import cookieParser from "cookie-parser";
-import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+import { registerRoutes } from "./routes.js";
+import { setupVite, serveStatic, log } from "./vite.js";
 import dotenv from "dotenv";
 import path, { dirname } from "path";
 import { fileURLToPath } from 'url';

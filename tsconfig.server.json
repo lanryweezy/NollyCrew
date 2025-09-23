@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": ".",
+    "noEmit": false,
+    "allowImportingTsExtensions": false,
+    "module": "ESNext",
+    "target": "ES2022",
+    "moduleResolution": "bundler",
+    "jsx": "preserve",
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["./shared/*"]
+    }
+  },
+  "include": ["server/**/*", "shared/**/*", "types/**/*.d.ts"],
+  "exclude": ["node_modules", "dist", "client", "server/vite.ts", "vite.config.ts"]
+}
+
