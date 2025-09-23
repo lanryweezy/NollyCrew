@@ -1,7 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import cookieParser from "cookie-parser";
 import { registerRoutes } from "./routes.js";
-import { setupVite, serveStatic, log } from "./vite.js";
 import dotenv from "dotenv";
 import path, { dirname } from "path";
 import { fileURLToPath } from 'url';
@@ -10,6 +9,16 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 dotenv.config();
+
+function log(message: string) {
+  const formattedTime = new Date().toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+  console.log(`${formattedTime} [server] ${message}`);
+}
 
 const app = express();
 app.use(cookieParser());
@@ -60,14 +69,10 @@ app.use((req, res, next) => {
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
-    app.use(express.static(path.join(__dirname, '../public')));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(__dirname, '../public', 'index.html'));
-    });
-  }
+  app.use(express.static(path.join(__dirname, '../public')));
+  app.get('*', (_req, res) => {
+    res.sendFile(path.join(__dirname, '../public', 'index.html'));
+  });
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
   // Other ports are firewalled. Default to 5000 if not specified.
