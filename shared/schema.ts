@@ -3,6 +3,15 @@ import { pgTable, text, varchar, timestamp, integer, decimal, jsonb, boolean, pr
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Waitlist table for collecting early-access emails
+export const waitlist = pgTable("waitlist", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: text("email").notNull().unique(),
+  name: text("name"),
+  source: text("source"), // optional: landing, referral, etc
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 // Users table with multi-role support
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -233,6 +242,14 @@ export const insertReviewSchema = createInsertSchema(reviews).omit({
   rating: z.number().min(1).max(5),
 });
 
+// Waitlist insert schema
+export const insertWaitlistSchema = createInsertSchema(waitlist).omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  email: z.string().email(),
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -250,3 +267,5 @@ export type Message = typeof messages.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type Review = typeof reviews.$inferSelect;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
+export type Waitlist = typeof waitlist.$inferSelect;
+export type InsertWaitlist = z.infer<typeof insertWaitlistSchema>;

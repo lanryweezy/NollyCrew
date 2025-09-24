@@ -42,6 +42,9 @@ export default function Hero({}: HeroProps) {
           From script to screen, we make filmmaking collaboration seamless.
         </p>
 
+        {/* Waitlist form */}
+        <WaitlistForm />
+
         {/* Role Selection */}
         <div className="flex flex-wrap justify-center gap-4 mb-8">
           {[
@@ -107,5 +110,57 @@ export default function Hero({}: HeroProps) {
         </div>
       </div>
     </section>
+  );
+}
+
+function WaitlistForm() {
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email) return;
+    setStatus("loading");
+    try {
+      const res = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, name, source: "landing" }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      setStatus("success");
+    } catch {
+      setStatus("error");
+    }
+  }
+
+  return (
+    <form onSubmit={onSubmit} className="mx-auto max-w-2xl flex flex-col sm:flex-row gap-3 mb-12">
+      <input
+        type="email"
+        required
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Enter your email"
+        className="flex-1 rounded-md border px-3 py-2"
+      />
+      <input
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Name (optional)"
+        className="flex-1 rounded-md border px-3 py-2"
+      />
+      <Button
+        disabled={status === "loading"}
+        className="rounded-md bg-primary text-primary-foreground px-4 py-2 font-medium disabled:opacity-60"
+      >
+        {status === "loading" ? "Joining…" : status === "success" ? "Joined!" : "Join waitlist"}
+      </Button>
+      {status === "error" && (
+        <span className="text-sm text-red-500">Something went wrong. Try again.</span>
+      )}
+    </form>
   );
 }

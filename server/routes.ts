@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { storage } from "./storage.js";
-import { insertUserSchema, insertUserRoleSchema, insertJobSchema, insertProjectSchema, insertJobApplicationSchema } from "../shared/schema.js";
+import { insertUserSchema, insertUserRoleSchema, insertJobSchema, insertProjectSchema, insertJobApplicationSchema, insertWaitlistSchema } from "../shared/schema.js";
 import { z } from "zod";
 import paystackapi from 'paystack-api';
 
@@ -36,6 +36,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint for Render
   app.get('/api/health', (req, res) => {
     res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
+  // Waitlist endpoint
+  app.post('/api/waitlist', async (req, res) => {
+    try {
+      const data = insertWaitlistSchema.parse(req.body);
+      // For MVP, just log and return 201. Later, persist to DB.
+      console.log('[waitlist] signup:', data.email, data.name || null, data.source || null);
+      res.status(201).json({ ok: true });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: 'Invalid input data', details: error.errors });
+      }
+      res.status(500).json({ error: 'Internal server error' });
+    }
   });
 
 
