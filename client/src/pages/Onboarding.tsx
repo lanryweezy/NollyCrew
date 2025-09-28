@@ -225,9 +225,10 @@ export default function Onboarding() {
               <div className="flex flex-wrap gap-2">
                 {selectedRoles.map((roleId) => {
                   const role = roleOptions.find(r => r.id === roleId);
+                  const IconComponent = role?.icon;
                   return (
                     <Badge key={roleId} variant="secondary" className="flex items-center gap-1">
-                      <role?.icon className="w-3 h-3" />
+                      {IconComponent && <IconComponent className="w-3 h-3" />}
                       {role?.title}
                     </Badge>
                   );
