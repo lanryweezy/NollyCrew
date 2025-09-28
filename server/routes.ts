@@ -42,8 +42,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/waitlist', async (req, res) => {
     try {
       const data = insertWaitlistSchema.parse(req.body);
-      // For MVP, just log and return 201. Later, persist to DB.
-      console.log('[waitlist] signup:', data.email, data.name || null, data.source || null);
+      
+      // Submit to Google Form if configured
+      const googleFormUrl = process.env.GOOGLE_FORM_URL;
+      const emailEntry = process.env.GOOGLE_FORM_EMAIL_ENTRY;
+      const nameEntry = process.env.GOOGLE_FORM_NAME_ENTRY;
+      const sourceEntry = process.env.GOOGLE_FORM_SOURCE_ENTRY;
+      
+      if (googleFormUrl && emailEntry) {
+        try {
+          const formData = new URLSearchParams();
+          formData.append(emailEntry, data.email);
+          if (nameEntry && data.name) formData.append(nameEntry, data.name);
+          if (sourceEntry && data.source) formData.append(sourceEntry, data.source);
+          
+          const response = await fetch(googleFormUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formData.toString(),
+          });
+          
+          if (response.ok) {
+            console.log('[waitlist] submitted to Google Form:', data.email);
+          } else {
+            console.error('[waitlist] Google Form submission failed:', response.status);
+          }
+        } catch (error) {
+          console.error('[waitlist] Google Form error:', error);
+        }
+      } else {
+        // Fallback: just log if Google Form not configured
+        console.log('[waitlist] signup (no Google Form):', data.email, data.name || null, data.source || null);
+      }
+      
       res.status(201).json({ ok: true });
     } catch (error) {
       if (error instanceof z.ZodError) {

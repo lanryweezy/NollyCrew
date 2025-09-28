@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
+import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -19,7 +21,10 @@ import {
   Settings, 
   LogOut,
   Menu,
-  X 
+  X,
+  Home,
+  Briefcase,
+  Users
 } from "lucide-react";
 
 export interface NavigationProps {
@@ -40,6 +45,8 @@ export default function Navigation({
   messages = 2 
 }: NavigationProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [, setLocation] = useLocation();
+  const { logout } = useAuth();
 
   const roleColor = {
     actor: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
@@ -59,20 +66,42 @@ export default function Navigation({
             </div>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-6">
-              <Button variant="ghost" data-testid="nav-discover">
-                Discover
-              </Button>
-              <Button variant="ghost" data-testid="nav-projects">
-                Projects
-              </Button>
-              <Button variant="ghost" data-testid="nav-jobs">
-                Jobs
-              </Button>
-              <Button variant="ghost" data-testid="nav-community">
-                Community
-              </Button>
-            </div>
+            {isAuthenticated && (
+              <div className="hidden md:flex items-center gap-6">
+                <Button 
+                  variant="ghost" 
+                  onClick={() => setLocation("/dashboard")}
+                  data-testid="nav-dashboard"
+                >
+                  <Home className="w-4 h-4 mr-2" />
+                  Dashboard
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  onClick={() => setLocation("/jobs")}
+                  data-testid="nav-jobs"
+                >
+                  <Briefcase className="w-4 h-4 mr-2" />
+                  Jobs
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  onClick={() => setLocation("/projects")}
+                  data-testid="nav-projects"
+                >
+                  <Film className="w-4 h-4 mr-2" />
+                  Projects
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  onClick={() => setLocation("/profile")}
+                  data-testid="nav-profile"
+                >
+                  <User className="w-4 h-4 mr-2" />
+                  Profile
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Right Side */}
@@ -147,16 +176,28 @@ export default function Navigation({
                   <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem data-testid="menu-profile">
+                    <DropdownMenuItem 
+                      data-testid="menu-profile"
+                      onClick={() => setLocation("/profile")}
+                    >
                       <User className="mr-2 h-4 w-4" />
                       Profile
                     </DropdownMenuItem>
-                    <DropdownMenuItem data-testid="menu-settings">
+                    <DropdownMenuItem 
+                      data-testid="menu-settings"
+                      onClick={() => setLocation("/profile?tab=settings")}
+                    >
                       <Settings className="mr-2 h-4 w-4" />
                       Settings
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem data-testid="menu-logout">
+                    <DropdownMenuItem 
+                      data-testid="menu-logout"
+                      onClick={() => {
+                        logout();
+                        setLocation("/");
+                      }}
+                    >
                       <LogOut className="mr-2 h-4 w-4" />
                       Log out
                     </DropdownMenuItem>
@@ -165,10 +206,17 @@ export default function Navigation({
               </>
             ) : (
               <>
-                <Button variant="ghost" data-testid="button-login">
+                <Button 
+                  variant="ghost" 
+                  onClick={() => setLocation("/login")}
+                  data-testid="button-login"
+                >
                   Log In
                 </Button>
-                <Button data-testid="button-signup">
+                <Button 
+                  onClick={() => setLocation("/register")}
+                  data-testid="button-signup"
+                >
                   Sign Up
                 </Button>
               </>
@@ -191,22 +239,65 @@ export default function Navigation({
         {isMobileMenuOpen && (
           <div className="md:hidden border-t py-4">
             <div className="flex flex-col gap-2">
-              <Button variant="ghost" className="justify-start" data-testid="mobile-discover">
-                Discover
-              </Button>
-              <Button variant="ghost" className="justify-start" data-testid="mobile-projects">
-                Projects
-              </Button>
-              <Button variant="ghost" className="justify-start" data-testid="mobile-jobs">
-                Jobs
-              </Button>
-              <Button variant="ghost" className="justify-start" data-testid="mobile-community">
-                Community
-              </Button>
-              <Button variant="ghost" className="justify-start" data-testid="mobile-search">
-                <Search className="w-4 h-4 mr-2" />
-                Search
-              </Button>
+              {isAuthenticated ? (
+                <>
+                  <Button 
+                    variant="ghost" 
+                    className="justify-start" 
+                    onClick={() => setLocation("/dashboard")}
+                    data-testid="mobile-dashboard"
+                  >
+                    <Home className="w-4 h-4 mr-2" />
+                    Dashboard
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="justify-start" 
+                    onClick={() => setLocation("/jobs")}
+                    data-testid="mobile-jobs"
+                  >
+                    <Briefcase className="w-4 h-4 mr-2" />
+                    Jobs
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="justify-start" 
+                    onClick={() => setLocation("/projects")}
+                    data-testid="mobile-projects"
+                  >
+                    <Film className="w-4 h-4 mr-2" />
+                    Projects
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="justify-start" 
+                    onClick={() => setLocation("/profile")}
+                    data-testid="mobile-profile"
+                  >
+                    <User className="w-4 h-4 mr-2" />
+                    Profile
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button 
+                    variant="ghost" 
+                    className="justify-start" 
+                    onClick={() => setLocation("/login")}
+                    data-testid="mobile-login"
+                  >
+                    Log In
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="justify-start" 
+                    onClick={() => setLocation("/register")}
+                    data-testid="mobile-signup"
+                  >
+                    Sign Up
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         )}
