@@ -198,47 +198,47 @@ export const insertUserSchema = createInsertSchema(users).omit({
   createdAt: true,
   updatedAt: true,
   passwordHash: true,
-}).extend({
+} as any).extend({
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 export const insertUserRoleSchema = createInsertSchema(userRoles).omit({
   id: true,
   createdAt: true,
-});
+} as any);
 
 export const insertProjectSchema = createInsertSchema(projects).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-});
+} as any);
 
 export const insertProjectMemberSchema = createInsertSchema(projectMembers).omit({
   id: true,
   joinedAt: true,
-});
+} as any);
 
 export const insertJobSchema = createInsertSchema(jobs).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-});
+} as any);
 
 export const insertJobApplicationSchema = createInsertSchema(jobApplications).omit({
   id: true,
   appliedAt: true,
   reviewedAt: true,
-});
+} as any);
 
 export const insertMessageSchema = createInsertSchema(messages).omit({
   id: true,
   sentAt: true,
-});
+} as any);
 
 export const insertReviewSchema = createInsertSchema(reviews).omit({
   id: true,
   createdAt: true,
-}).extend({
+} as any).extend({
   rating: z.number().min(1).max(5),
 });
 
@@ -246,8 +246,10 @@ export const insertReviewSchema = createInsertSchema(reviews).omit({
 export const insertWaitlistSchema = createInsertSchema(waitlist).omit({
   id: true,
   createdAt: true,
-}).extend({
+} as any).extend({
   email: z.string().email(),
+  name: z.string().optional(),
+  source: z.string().optional(),
 });
 
 // Types

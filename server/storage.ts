@@ -24,8 +24,8 @@ import {
   jobApplications,
   messages,
   reviews
-} from "../shared/schema.js";
-import { db } from "./db.js";
+} from "../shared/schema";
+import { db } from "./db";
 import { eq } from "drizzle-orm";
 
 export interface IStorage {

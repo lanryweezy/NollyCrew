@@ -1,9 +1,9 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import { storage } from "./storage.js";
-import { insertUserSchema, insertUserRoleSchema, insertJobSchema, insertProjectSchema, insertJobApplicationSchema, insertWaitlistSchema } from "../shared/schema.js";
+import * as jwt from "jsonwebtoken";
+import { storage } from "./storage";
+import { insertUserSchema, insertUserRoleSchema, insertJobSchema, insertProjectSchema, insertJobApplicationSchema, insertWaitlistSchema } from "../shared/schema";
 import { z } from "zod";
 import paystackapi from 'paystack-api';
 
@@ -90,7 +90,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
   app.post('/api/auth/register', async (req, res) => {
     try {
-      const userData = insertUserSchema.parse(req.body);
+      const userData = insertUserSchema.parse(req.body) as any;
       
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(userData.email);
@@ -246,7 +246,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const roleData = insertUserRoleSchema.parse({
         ...req.body,
         userId
-      });
+      }) as any;
 
       // Check if user already has this role
       const existingRoles = await storage.getUserRoles(userId);
