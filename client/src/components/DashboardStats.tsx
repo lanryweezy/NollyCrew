@@ -76,108 +76,72 @@ export default function DashboardStats({ userRole, stats }: DashboardStatsProps)
 }
 
 // Role-specific stat configurations
-export const getStatsForRole = (role: "actor" | "crew" | "producer") => {
+export const getStatsForRole = (role: "actor" | "crew" | "producer", data: any) => {
   const baseStats = {
     actor: [
       {
-        title: "Profile Views",
-        value: "2,847",
-        change: 12.5,
-        changeLabel: "this month",
-        icon: Eye,
-        trend: "up" as const
+        title: "Applications Sent",
+        value: data?.recentApplications?.length || 0,
+        icon: Briefcase,
       },
       {
-        title: "Applications Sent",
-        value: 23,
-        change: -5.2,
-        changeLabel: "vs last month",
-        icon: Briefcase,
-        trend: "down" as const
+        title: "Unread Messages",
+        value: data?.unreadMessagesCount || 0,
+        icon: MessageCircle,
+      },
+      {
+        title: "Profile Views",
+        value: "Coming Soon",
+        icon: Eye,
       },
       {
         title: "Average Rating",
-        value: "4.8",
-        change: 2.1,
-        changeLabel: "improved",
+        value: "Coming Soon",
         icon: Star,
-        trend: "up" as const
-      },
-      {
-        title: "Messages",
-        value: 48,
-        change: 18.7,
-        changeLabel: "new this week",
-        icon: MessageCircle,
-        trend: "up" as const
       }
     ],
     crew: [
       {
-        title: "Job Offers",
-        value: 15,
-        change: 25.0,
-        changeLabel: "this month",
+        title: "Active Projects",
+        value: data?.recentProjects?.length || 0,
         icon: Briefcase,
-        trend: "up" as const
+      },
+      {
+        title: "Unread Messages",
+        value: data?.unreadMessagesCount || 0,
+        icon: MessageCircle,
+      },
+      {
+        title: "Job Offers",
+        value: "Coming Soon",
+        icon: Briefcase,
       },
       {
         title: "Total Earnings",
-        value: "₦2.4M",
-        change: 15.3,
-        changeLabel: "this quarter",
+        value: "Coming Soon",
         icon: DollarSign,
-        trend: "up" as const
-      },
-      {
-        title: "Client Rating",
-        value: "4.9",
-        change: 3.2,
-        changeLabel: "improved",
-        icon: Star,
-        trend: "up" as const
-      },
-      {
-        title: "Active Projects",
-        value: 6,
-        change: 0,
-        changeLabel: "ongoing",
-        icon: Users,
-        trend: "neutral" as const
       }
     ],
     producer: [
       {
         title: "Active Projects",
-        value: 8,
-        change: 14.3,
-        changeLabel: "new this quarter",
+        value: data?.recentProjects?.length || 0,
         icon: Briefcase,
-        trend: "up" as const
+      },
+      {
+        title: "Unread Messages",
+        value: data?.unreadMessagesCount || 0,
+        icon: MessageCircle,
       },
       {
         title: "Team Members",
-        value: 342,
-        change: 8.1,
-        changeLabel: "hired",
+        value: "Coming Soon",
         icon: Users,
-        trend: "up" as const
       },
       {
         title: "Total Budget",
-        value: "₦450M",
-        change: 22.5,
-        changeLabel: "allocated",
+        value: "Coming Soon",
         icon: DollarSign,
-        trend: "up" as const
-      },
-      {
-        title: "Completion Rate",
-        value: "94%",
-        change: 2.3,
-        changeLabel: "improved",
-        icon: Star,
-        trend: "up" as const
       }
     ]
   };
