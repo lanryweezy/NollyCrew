@@ -16,6 +16,10 @@ import Jobs from "@/pages/Jobs";
 import Projects from "@/pages/Projects";
 import Profile from "@/pages/Profile";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import TalentSearch from "@/pages/TalentSearch";
+import Messages from "@/pages/Messages";
+import Auditions from "@/pages/Auditions";
+import TalentProfile from "@/pages/TalentProfile";
 
 function Router() {
   return (
@@ -41,6 +45,26 @@ function Router() {
       <Route path="/jobs">
         <ProtectedRoute>
           <Jobs />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/talent">
+        <ProtectedRoute>
+          <TalentSearch />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/messages">
+        <ProtectedRoute>
+          <Messages />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/auditions">
+        <ProtectedRoute>
+          <Auditions />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/talent/:userId">
+        <ProtectedRoute>
+          <TalentProfile />
         </ProtectedRoute>
       </Route>
       <Route path="/projects">

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
@@ -31,6 +31,8 @@ import {
   Settings,
   Upload
 } from "lucide-react";
+import { api } from "@/lib/api";
+import PageHeader from "@/components/PageHeader";
 
 export default function Profile() {
   const [, setLocation] = useLocation();
@@ -39,6 +41,9 @@ export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [isLoading, setIsLoading] = useState(false);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [newRating, setNewRating] = useState<number>(5);
+  const [newComment, setNewComment] = useState<string>("");
 
   // Form state
   const [formData, setFormData] = useState({
@@ -150,6 +155,31 @@ export default function Profile() {
     }
   };
 
+  useEffect(() => {
+    const loadReviews = async () => {
+      try {
+        if (!user?.id) return;
+        const { reviews } = await api.listUserReviews(user.id);
+        setReviews(reviews);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    loadReviews();
+  }, [user?.id]);
+
+  const submitReview = async () => {
+    try {
+      if (!user?.id) return;
+      const { review } = await api.createUserReview(user.id, { rating: newRating, comment: newComment });
+      setReviews(prev => [review, ...prev]);
+      setNewRating(5);
+      setNewComment("");
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const getInitials = () => {
     return `${user?.firstName?.[0] || ''}${user?.lastName?.[0] || ''}`.toUpperCase();
   };
@@ -169,6 +199,10 @@ export default function Profile() {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-8">
+        <PageHeader 
+          title="Profile"
+          subtitle="Manage your professional profile and showcase your work"
+        />
         {/* Profile Header */}
         <Card className="mb-8">
           <CardContent className="pt-6">
@@ -461,6 +495,31 @@ export default function Profile() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Reviews */}
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle>Reviews</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-start gap-2">
+              <Input type="number" min={1} max={5} value={newRating} onChange={e => setNewRating(Number(e.target.value))} className="w-24" />
+              <Textarea placeholder="Leave a comment (optional)" value={newComment} onChange={e => setNewComment(e.target.value)} />
+              <Button onClick={submitReview}>Submit</Button>
+            </div>
+            <div className="space-y-3">
+              {reviews.map((r) => (
+                <div key={r.id} className="border rounded p-3">
+                  <div className="font-medium">Rating: {r.rating}/5</div>
+                  {r.comment && <div className="text-sm text-muted-foreground mt-1">{r.comment}</div>}
+                </div>
+              ))}
+              {!reviews.length && (
+                <div className="text-sm text-muted-foreground">No reviews yet</div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

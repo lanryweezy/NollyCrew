@@ -15,13 +15,18 @@ export default function ProtectedRoute({
   redirectTo = "/login" 
 }: ProtectedRouteProps) {
   const [, setLocation] = useLocation();
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, roles } = useAuth();
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       setLocation(redirectTo);
+      return;
     }
-  }, [isAuthenticated, loading, setLocation, redirectTo]);
+    // basic onboarding guardrail: if authenticated but has no roles, send to onboarding
+    if (!loading && isAuthenticated && (!roles || roles.length === 0)) {
+      setLocation('/onboarding');
+    }
+  }, [isAuthenticated, loading, roles, setLocation, redirectTo]);
 
   if (loading) {
     return (

@@ -121,6 +121,25 @@ class AuthService {
     }
   }
 
+  async refreshToken(): Promise<string | null> {
+    try {
+      const res = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      if (data.token) {
+        this.token = data.token;
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('auth_token', data.token);
+        }
+        return data.token;
+      }
+    } catch {}
+    return null;
+  }
+
   async addUserRole(roleData: {
     role: 'actor' | 'crew' | 'producer';
     specialties?: string[];
@@ -155,6 +174,10 @@ class AuthService {
   }
 
   logout(): void {
+    // Clear server refresh cookie (best-effort)
+    try {
+      fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => {});
+    } catch {}
     this.token = null;
     this.user = null;
     this.roles = [];

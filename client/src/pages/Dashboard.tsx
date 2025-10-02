@@ -22,6 +22,7 @@ import {
   Bell,
   MessageSquare
 } from "lucide-react";
+import PageHeader from "@/components/PageHeader";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
@@ -184,11 +185,10 @@ export default function Dashboard() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">{roleContent.title}</h1>
-          <p className="text-muted-foreground">{roleContent.subtitle}</p>
-        </div>
+        <PageHeader 
+          title={roleContent.title}
+          subtitle={roleContent.subtitle}
+        />
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

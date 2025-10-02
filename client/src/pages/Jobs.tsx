@@ -25,6 +25,8 @@ import {
   Film,
   Camera
 } from "lucide-react";
+import PageHeader from "@/components/PageHeader";
+import ListSkeleton from "@/components/ListSkeleton";
 
 export default function Jobs() {
   const [, setLocation] = useLocation();
@@ -34,6 +36,7 @@ export default function Jobs() {
   const [selectedType, setSelectedType] = useState("all");
   const [selectedLocation, setSelectedLocation] = useState("all");
   const [activeTab, setActiveTab] = useState("browse");
+  const [loadingList, setLoadingList] = useState(false);
 
   // Mock job data
   const mockJobs = [
@@ -176,16 +179,11 @@ export default function Jobs() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Find Opportunities</h1>
-            <p className="text-muted-foreground">
-              Discover casting calls, crew positions, and production opportunities
-            </p>
-          </div>
-          {getRoleBasedActions()}
-        </div>
+        <PageHeader 
+          title="Find Opportunities"
+          subtitle="Discover casting calls, crew positions, and production opportunities"
+          rightActions={getRoleBasedActions()}
+        />
 
         {/* Search and Filters */}
         <Card className="mb-8">
@@ -198,7 +196,11 @@ export default function Jobs() {
                   <Input
                     placeholder="Search jobs, companies, or keywords..."
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      setLoadingList(true);
+                      setTimeout(() => setLoadingList(false), 350);
+                    }}
                     className="pl-10"
                   />
                 </div>
@@ -266,16 +268,20 @@ export default function Jobs() {
             </div>
 
             {/* Job Listings */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {filteredJobs.map((job) => (
-                <JobCard
-                  key={job.id}
-                  {...job}
-                  onApply={() => handleApply(job.id)}
-                  onBookmark={() => handleBookmark(job.id)}
-                />
-              ))}
-            </div>
+            {loadingList ? (
+              <ListSkeleton rows={6} />
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {filteredJobs.map((job) => (
+                  <JobCard
+                    key={job.id}
+                    {...job}
+                    onApply={() => handleApply(job.id)}
+                    onBookmark={() => handleBookmark(job.id)}
+                  />
+                ))}
+              </div>
+            )}
 
             {filteredJobs.length === 0 && (
               <Card>

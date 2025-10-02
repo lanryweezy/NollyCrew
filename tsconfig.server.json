@@ -21,4 +21,3 @@
   "include": ["server/**/*", "shared/**/*", "types/**/*.d.ts"],
   "exclude": ["node_modules", "dist", "client", "server/vite.ts", "vite.config.ts"]
 }
-

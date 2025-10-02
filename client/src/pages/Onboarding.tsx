@@ -161,8 +161,11 @@ export default function Onboarding() {
           </div>
           <h1 className="text-4xl font-bold mb-4">Welcome to NollyCrew!</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Let's set up your professional profile. Choose the roles that best describe your involvement in the film industry.
+            Let's set up your professional profile. Choose at least one role to unlock the app features.
           </p>
+          <div className="mt-3 text-sm text-amber-700 bg-amber-100 inline-block px-3 py-1 rounded">
+            Tip: You can always add or change roles later in your profile.
+          </div>
         </div>
 
         {/* Role Selection */}

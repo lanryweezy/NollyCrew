@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -24,8 +24,18 @@ import {
   X,
   Home,
   Briefcase,
-  Users
+  Users,
+  Command
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { 
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 
 export interface NavigationProps {
   isAuthenticated?: boolean;
@@ -45,14 +55,40 @@ export default function Navigation({
   messages = 2 
 }: NavigationProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [, setLocation] = useLocation();
+  const [path, setLocation] = useLocation();
   const { logout } = useAuth();
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const roleColor = {
     actor: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
     crew: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
     producer: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
   };
+
+  // Keyboard shortcut for search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === '/' && !isSearchOpen && isAuthenticated) {
+        e.preventDefault();
+        setIsSearchOpen(true);
+      }
+      if (e.key === 'Escape' && isSearchOpen) {
+        setIsSearchOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isSearchOpen, isAuthenticated]);
+
+  const quickActions = [
+    { label: "Browse Jobs", icon: Briefcase, action: () => setLocation("/jobs") },
+    { label: "Find Talent", icon: Users, action: () => setLocation("/talent") },
+    { label: "My Projects", icon: Film, action: () => setLocation("/projects") },
+    { label: "Messages", icon: MessageCircle, action: () => setLocation("/messages") },
+    { label: "Profile", icon: User, action: () => setLocation("/profile") },
+  ];
 
   return (
     <nav className="border-b bg-background/95 backdrop-blur-sm sticky top-0 z-50">
@@ -69,7 +105,7 @@ export default function Navigation({
             {isAuthenticated && (
               <div className="hidden md:flex items-center gap-6">
                 <Button 
-                  variant="ghost" 
+                  variant={path === "/dashboard" ? "secondary" : "ghost"}
                   onClick={() => setLocation("/dashboard")}
                   data-testid="nav-dashboard"
                 >
@@ -77,7 +113,7 @@ export default function Navigation({
                   Dashboard
                 </Button>
                 <Button 
-                  variant="ghost" 
+                  variant={path === "/jobs" ? "secondary" : "ghost"}
                   onClick={() => setLocation("/jobs")}
                   data-testid="nav-jobs"
                 >
@@ -85,7 +121,15 @@ export default function Navigation({
                   Jobs
                 </Button>
                 <Button 
-                  variant="ghost" 
+                  variant={path === "/talent" ? "secondary" : "ghost"}
+                  onClick={() => setLocation("/talent")}
+                  data-testid="nav-talent"
+                >
+                  <Users className="w-4 h-4 mr-2" />
+                  Talent
+                </Button>
+                <Button 
+                  variant={path === "/projects" ? "secondary" : "ghost"}
                   onClick={() => setLocation("/projects")}
                   data-testid="nav-projects"
                 >
@@ -93,7 +137,15 @@ export default function Navigation({
                   Projects
                 </Button>
                 <Button 
-                  variant="ghost" 
+                  variant={path === "/messages" ? "secondary" : "ghost"}
+                  onClick={() => setLocation("/messages")}
+                  data-testid="nav-messages"
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Messages
+                </Button>
+                <Button 
+                  variant={path === "/profile" ? "secondary" : "ghost"}
                   onClick={() => setLocation("/profile")}
                   data-testid="nav-profile"
                 >
@@ -106,15 +158,23 @@ export default function Navigation({
 
           {/* Right Side */}
           <div className="flex items-center gap-4">
-            {/* Search */}
-            <Button 
-              variant="ghost" 
-              size="icon"
-              className="hidden sm:flex"
-              data-testid="button-search"
-            >
-              <Search className="w-4 h-4" />
-            </Button>
+            {/* Compact Search */}
+            {isAuthenticated && (
+              <div className="hidden sm:flex items-center gap-2">
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => setIsSearchOpen(true)}
+                  data-testid="button-search"
+                  className="relative"
+                >
+                  <Search className="w-4 h-4" />
+                </Button>
+                <div className="text-xs text-muted-foreground hidden lg:block">
+                  Press <kbd className="px-1 py-0.5 bg-muted rounded text-xs">/</kbd> to search
+                </div>
+              </div>
+            )}
 
             {isAuthenticated ? (
               <>
@@ -262,11 +322,29 @@ export default function Navigation({
                   <Button 
                     variant="ghost" 
                     className="justify-start" 
+                    onClick={() => setLocation("/talent")}
+                    data-testid="mobile-talent"
+                  >
+                    <Users className="w-4 h-4 mr-2" />
+                    Talent
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="justify-start" 
                     onClick={() => setLocation("/projects")}
                     data-testid="mobile-projects"
                   >
                     <Film className="w-4 h-4 mr-2" />
                     Projects
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="justify-start" 
+                    onClick={() => setLocation("/messages")}
+                    data-testid="mobile-messages"
+                  >
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    Messages
                   </Button>
                   <Button 
                     variant="ghost" 
@@ -302,6 +380,54 @@ export default function Navigation({
           </div>
         )}
       </div>
+
+      {/* Search Dialog */}
+      <CommandDialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
+        <CommandInput placeholder="Search jobs, talent, projects..." />
+        <CommandList>
+          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandGroup heading="Quick Actions">
+            {quickActions.map((action) => (
+              <CommandItem
+                key={action.label}
+                onSelect={() => {
+                  action.action();
+                  setIsSearchOpen(false);
+                }}
+              >
+                <action.icon className="mr-2 h-4 w-4" />
+                <span>{action.label}</span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+          <CommandGroup heading="Navigation">
+            <CommandItem onSelect={() => { setLocation("/dashboard"); setIsSearchOpen(false); }}>
+              <Home className="mr-2 h-4 w-4" />
+              <span>Dashboard</span>
+            </CommandItem>
+            <CommandItem onSelect={() => { setLocation("/jobs"); setIsSearchOpen(false); }}>
+              <Briefcase className="mr-2 h-4 w-4" />
+              <span>Jobs</span>
+            </CommandItem>
+            <CommandItem onSelect={() => { setLocation("/talent"); setIsSearchOpen(false); }}>
+              <Users className="mr-2 h-4 w-4" />
+              <span>Talent Search</span>
+            </CommandItem>
+            <CommandItem onSelect={() => { setLocation("/projects"); setIsSearchOpen(false); }}>
+              <Film className="mr-2 h-4 w-4" />
+              <span>Projects</span>
+            </CommandItem>
+            <CommandItem onSelect={() => { setLocation("/messages"); setIsSearchOpen(false); }}>
+              <MessageCircle className="mr-2 h-4 w-4" />
+              <span>Messages</span>
+            </CommandItem>
+            <CommandItem onSelect={() => { setLocation("/profile"); setIsSearchOpen(false); }}>
+              <User className="mr-2 h-4 w-4" />
+              <span>Profile</span>
+            </CommandItem>
+          </CommandGroup>
+        </CommandList>
+      </CommandDialog>
     </nav>
   );
 }

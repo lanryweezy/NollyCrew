@@ -121,8 +121,16 @@ export class DbStorage implements IStorage {
   }
 
   async getProjects(filters?: { status?: string; createdById?: string; limit?: number }): Promise<Project[]> {
+    const { status, createdById, limit } = filters || {};
     // @ts-ignore
-    return db.query.projects.findMany({ where: filters });
+    const rows: Project[] = await db.query.projects.findMany({
+      where: (p: any, { and, eq }: any) => and(
+        status ? eq(p.status, status) : undefined,
+        createdById ? eq(p.createdById, createdById) : undefined,
+      ),
+      limit: limit && Number.isFinite(limit) ? Math.max(1, Math.min(100, limit)) : undefined,
+    });
+    return rows;
   }
 
   async createProject(project: InsertProject): Promise<Project> {
@@ -168,8 +176,29 @@ export class DbStorage implements IStorage {
   }
 
   async getJobs(filters?: { type?: string; location?: string; isActive?: boolean; limit?: number }): Promise<Job[]> {
+    const { type, location, isActive, limit } = filters || {};
     // @ts-ignore
-    return db.query.jobs.findMany({ where: filters });
+    const rows: Job[] = await db.query.jobs.findMany({
+      where: (j: any, { and, eq, ilike }: any) => and(
+        type ? eq(j.type, type) : undefined,
+        typeof isActive === 'boolean' ? eq(j.isActive, isActive) : undefined,
+        // drizzle's ilike may not be available depending on dialect; fallback later if needed
+        location ? ilike ? ilike(j.location, `%${location}%`) : undefined : undefined,
+      ),
+      limit: limit && Number.isFinite(limit) ? Math.max(1, Math.min(100, limit)) : undefined,
+    });
+    // Fallback for location filter if ilike not present
+    if (location && (!rows.length || typeof rows[0] === 'undefined')) {
+      // @ts-ignore
+      const all: Job[] = await db.query.jobs.findMany({
+        where: (j: any, { and, eq }: any) => and(
+          type ? eq(j.type, type) : undefined,
+          typeof isActive === 'boolean' ? eq(j.isActive, isActive) : undefined,
+        ),
+      });
+      return all.filter(j => j.location?.toLowerCase().includes(location.toLowerCase())).slice(0, limit ?? 50);
+    }
+    return rows;
   }
 
   async createJob(job: InsertJob): Promise<Job> {
@@ -207,8 +236,55 @@ export class DbStorage implements IStorage {
   }
 
   async getMessages(userId: string, otherUserId?: string): Promise<Message[]> {
+    if (otherUserId) {
+      // Fetch messages between two users (both directions) ordered by time
+      // @ts-ignore
+      return db.query.messages.findMany({
+        where: (m: any, { and, or, eq }: any) => and(
+          or(
+            and(eq(m.senderId, userId), eq(m.recipientId, otherUserId)),
+            and(eq(m.senderId, otherUserId), eq(m.recipientId, userId))
+          )
+        ),
+        orderBy: (m: any, { asc }: any) => [asc(m.sentAt)],
+      });
+    }
     // @ts-ignore
-    return db.query.messages.findMany({ where: { userId, otherUserId } });
+    return db.query.messages.findMany({
+      where: (m: any, { or, eq }: any) => or(eq(m.senderId, userId), eq(m.recipientId, userId)),
+      orderBy: (m: any, { asc }: any) => [asc(m.sentAt)],
+    });
+  }
+
+  // Talent search helpers
+  async searchTalent(filters: { role?: string; location?: string; skills?: string[]; limit?: number }): Promise<UserRole[]> {
+    const { role, location, skills, limit } = filters;
+    // Base query by role/isActive in DB
+    // @ts-ignore
+    let rows: UserRole[] = await db.query.userRoles.findMany({
+      where: (ur: any, { and, eq }: any) => and(
+        eq(ur.isActive, true),
+        role ? eq(ur.role, role) : undefined,
+      ),
+      limit: Math.min(200, limit ?? 50),
+    });
+    // Join with users for location filter
+    if (location) {
+      const userIds = Array.from(new Set(rows.map(r => r.userId)));
+      // @ts-ignore
+      const userRows: User[] = await db.query.users.findMany({
+        where: (u: any, { inArray }: any) => inArray(u.id, userIds),
+      });
+      const usersById = new Map<string, User>(userRows.map(u => [u.id, u]));
+      rows = rows.filter(r => {
+        const u = usersById.get(r.userId);
+        return u?.location?.toLowerCase().includes(location.toLowerCase());
+      });
+    }
+    if (skills && skills.length > 0) {
+      rows = rows.filter(r => (r.skills || []).some(s => skills.some(k => s.toLowerCase().includes(k.toLowerCase()))));
+    }
+    return rows.slice(0, limit ?? 50);
   }
 
   async createMessage(message: InsertMessage): Promise<Message> {
