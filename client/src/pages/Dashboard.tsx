@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth";
 import Navigation from "@/components/Navigation";
 import ThemeToggle from "@/components/ThemeToggle";
-import DashboardStats from "@/components/DashboardStats";
+import DashboardStats, { getStatsForRole } from "@/components/DashboardStats";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -121,6 +121,9 @@ export default function Dashboard() {
     return roles[0].role;
   };
 
+  const primaryRole = getPrimaryRole();
+  const roleStats = getStatsForRole(primaryRole);
+
   const getRoleBasedContent = () => {
     const primaryRole = getPrimaryRole();
     
@@ -192,7 +195,7 @@ export default function Dashboard() {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <DashboardStats />
+          <DashboardStats userRole={primaryRole} stats={roleStats} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

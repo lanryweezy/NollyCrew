@@ -1,8 +1,10 @@
+import * as dotenv from "dotenv";
+dotenv.config();
+
 import express, { type Request, Response, NextFunction } from "express";
 import cookieParser from "cookie-parser";
 import { registerRoutes } from "./routes";
-import './worker'; // no-op import when running web, worker will early-exit if env flag not set
-import * as dotenv from "dotenv";
+// import './worker'; // no-op import when running web, worker will early-exit if env flag not set
 import path, { dirname } from "path";
 import { fileURLToPath } from 'url';
 import { logger } from './utils/logger';
@@ -11,8 +13,6 @@ import { securityMiddleware } from './middleware/security';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-dotenv.config();
 
 // Validate required environment variables in production
 if (process.env.NODE_ENV === 'production') {
@@ -112,11 +112,21 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || '5000', 10);
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    logger.info(`Server started on port ${port}`);
-  });
+  
+  // Check if we're running on Windows (reusePort is not supported)
+  const isWindows = process.platform === 'win32';
+  
+  if (isWindows) {
+    server.listen(port, "0.0.0.0", () => {
+      logger.info(`Server started on port ${port}`);
+    });
+  } else {
+    server.listen({
+      port,
+      host: "0.0.0.0",
+      reusePort: true,
+    }, () => {
+      logger.info(`Server started on port ${port}`);
+    });
+  }
 })();

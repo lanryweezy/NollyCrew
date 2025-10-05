@@ -103,3 +103,4 @@
 {"timestamp":"2025-10-02T12:48:39.453Z","level":"warn","message":"Registration attempt with existing email","meta":{"email":"existing@example.com"}}
 {"timestamp":"2025-10-02T12:48:39.612Z","level":"info","message":"User logged in successfully","meta":{"email":"test@example.com"}}
 {"timestamp":"2025-10-02T12:48:39.627Z","level":"warn","message":"Login attempt with non-existent email","meta":{"email":"wrong@example.com"}}
+{"timestamp":"2025-10-02T15:37:35.682Z","level":"info","message":"Server started on port 3000"}

@@ -139,8 +139,7 @@ export default function Profile() {
       await addRole({
         role: "actor",
         experience: "mid",
-        specialties: ["Drama", "Comedy"],
-        isActive: true
+        specialties: ["Drama", "Comedy"]
       });
       toast({
         title: "Role added!",
@@ -229,7 +228,7 @@ export default function Profile() {
                     {formData.firstName} {formData.lastName}
                   </h1>
                   <p className="text-muted-foreground">
-                    {roles.map(role => role.role).join(", ")}
+                    {(roles || []).map(role => role.role).join(", ")}
                   </p>
                   <div className="flex items-center gap-1 mt-2">
                     <Star className="w-4 h-4 text-yellow-500" />
@@ -242,7 +241,7 @@ export default function Profile() {
               {/* Profile Actions */}
               <div className="flex-1 flex flex-col justify-between">
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {roles.map((role) => (
+                  {(roles || []).map((role) => (
                     <Badge key={role.id} variant="secondary">
                       {role.role}
                     </Badge>
@@ -508,13 +507,13 @@ export default function Profile() {
               <Button onClick={submitReview}>Submit</Button>
             </div>
             <div className="space-y-3">
-              {reviews.map((r) => (
+              {(reviews || []).map((r) => (
                 <div key={r.id} className="border rounded p-3">
                   <div className="font-medium">Rating: {r.rating}/5</div>
                   {r.comment && <div className="text-sm text-muted-foreground mt-1">{r.comment}</div>}
                 </div>
               ))}
-              {!reviews.length && (
+              {(!reviews || reviews.length === 0) && (
                 <div className="text-sm text-muted-foreground">No reviews yet</div>
               )}
             </div>

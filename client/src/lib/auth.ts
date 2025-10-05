@@ -77,6 +77,7 @@ class AuthService {
   }
 
   async login(email: string, password: string): Promise<AuthResponse> {
+    console.log('Attempting login with:', { email, password });
     const response = await fetch('/api/auth/login', {
       method: 'POST',
       headers: {
@@ -84,10 +85,18 @@ class AuthService {
       },
       body: JSON.stringify({ email, password }),
     });
+    console.log('Login response:', response.status, response.statusText);
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Login failed');
+      console.error('Login failed with status:', response.status);
+      const errorText = await response.text();
+      console.error('Error response body:', errorText);
+      try {
+        const error = JSON.parse(errorText);
+        throw new Error(error.error || 'Login failed');
+      } catch (e) {
+        throw new Error('Login failed with status ' + response.status);
+      }
     }
 
     const authData: AuthResponse = await response.json();

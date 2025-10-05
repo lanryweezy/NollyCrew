@@ -84,7 +84,7 @@ export default function TalentSearch() {
   const hireToProject = async (candidate: any) => {
     try {
       if (!selectedProjectId) return;
-      await api.addProjectMember(selectedProjectId, { userId: candidate.userId || candidate.user_id || candidate.userId ?? candidate.userId, role: candidate.role });
+      await api.addProjectMember(selectedProjectId, { userId: (candidate.userId || candidate.user_id) ?? candidate.userId, role: candidate.role });
       alert('Added to project');
     } catch (e) {
       console.error(e);

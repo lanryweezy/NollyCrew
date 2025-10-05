@@ -20,6 +20,7 @@ import TalentSearch from "@/pages/TalentSearch";
 import Messages from "@/pages/Messages";
 import Auditions from "@/pages/Auditions";
 import TalentProfile from "@/pages/TalentProfile";
+import TestProxy from "./test-proxy";
 
 function Router() {
   return (
@@ -27,6 +28,7 @@ function Router() {
       <Route path="/" component={LandingPage} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
+      <Route path="/test-proxy" component={TestProxy} />
       <Route path="/payment" component={Payment} />
       <Route path="/payment/success" component={PaymentSuccess} />
       <Route path="/payment/error" component={PaymentError} />

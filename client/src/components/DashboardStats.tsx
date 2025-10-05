@@ -63,9 +63,12 @@ function StatCard({ title, value, change, changeLabel, icon: Icon, trend = "neut
 }
 
 export default function DashboardStats({ userRole, stats }: DashboardStatsProps) {
+  // Fallback to empty array if stats is undefined
+  const safeStats = stats || [];
+  
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4" data-testid={`dashboard-stats-${userRole}`}>
-      {stats.map((stat, index) => (
+      {safeStats.map((stat, index) => (
         <StatCard
           key={index}
           {...stat}
@@ -76,8 +79,8 @@ export default function DashboardStats({ userRole, stats }: DashboardStatsProps)
 }
 
 // Role-specific stat configurations
-export const getStatsForRole = (role: "actor" | "crew" | "producer") => {
-  const baseStats = {
+export const getStatsForRole = (role: "actor" | "crew" | "producer"): StatCardProps[] => {
+  const baseStats: Record<string, StatCardProps[]> = {
     actor: [
       {
         title: "Profile Views",
@@ -85,7 +88,7 @@ export const getStatsForRole = (role: "actor" | "crew" | "producer") => {
         change: 12.5,
         changeLabel: "this month",
         icon: Eye,
-        trend: "up" as const
+        trend: "up"
       },
       {
         title: "Applications Sent",
@@ -93,7 +96,7 @@ export const getStatsForRole = (role: "actor" | "crew" | "producer") => {
         change: -5.2,
         changeLabel: "vs last month",
         icon: Briefcase,
-        trend: "down" as const
+        trend: "down"
       },
       {
         title: "Average Rating",
@@ -101,7 +104,7 @@ export const getStatsForRole = (role: "actor" | "crew" | "producer") => {
         change: 2.1,
         changeLabel: "improved",
         icon: Star,
-        trend: "up" as const
+        trend: "up"
       },
       {
         title: "Messages",
@@ -109,7 +112,7 @@ export const getStatsForRole = (role: "actor" | "crew" | "producer") => {
         change: 18.7,
         changeLabel: "new this week",
         icon: MessageCircle,
-        trend: "up" as const
+        trend: "up"
       }
     ],
     crew: [
@@ -119,7 +122,7 @@ export const getStatsForRole = (role: "actor" | "crew" | "producer") => {
         change: 25.0,
         changeLabel: "this month",
         icon: Briefcase,
-        trend: "up" as const
+        trend: "up"
       },
       {
         title: "Total Earnings",
@@ -127,7 +130,7 @@ export const getStatsForRole = (role: "actor" | "crew" | "producer") => {
         change: 15.3,
         changeLabel: "this quarter",
         icon: DollarSign,
-        trend: "up" as const
+        trend: "up"
       },
       {
         title: "Client Rating",
@@ -135,7 +138,7 @@ export const getStatsForRole = (role: "actor" | "crew" | "producer") => {
         change: 3.2,
         changeLabel: "improved",
         icon: Star,
-        trend: "up" as const
+        trend: "up"
       },
       {
         title: "Active Projects",
@@ -143,7 +146,7 @@ export const getStatsForRole = (role: "actor" | "crew" | "producer") => {
         change: 0,
         changeLabel: "ongoing",
         icon: Users,
-        trend: "neutral" as const
+        trend: "neutral"
       }
     ],
     producer: [
@@ -153,7 +156,7 @@ export const getStatsForRole = (role: "actor" | "crew" | "producer") => {
         change: 14.3,
         changeLabel: "new this quarter",
         icon: Briefcase,
-        trend: "up" as const
+        trend: "up"
       },
       {
         title: "Team Members",
@@ -161,7 +164,7 @@ export const getStatsForRole = (role: "actor" | "crew" | "producer") => {
         change: 8.1,
         changeLabel: "hired",
         icon: Users,
-        trend: "up" as const
+        trend: "up"
       },
       {
         title: "Total Budget",
@@ -169,7 +172,7 @@ export const getStatsForRole = (role: "actor" | "crew" | "producer") => {
         change: 22.5,
         changeLabel: "allocated",
         icon: DollarSign,
-        trend: "up" as const
+        trend: "up"
       },
       {
         title: "Completion Rate",
@@ -177,10 +180,11 @@ export const getStatsForRole = (role: "actor" | "crew" | "producer") => {
         change: 2.3,
         changeLabel: "improved",
         icon: Star,
-        trend: "up" as const
+        trend: "up"
       }
     ]
   };
 
-  return baseStats[role];
+  // Return stats for the role, or default to actor stats if role not found
+  return baseStats[role] || baseStats.actor;
 };
