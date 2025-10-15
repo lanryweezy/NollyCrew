@@ -24,7 +24,7 @@ This document lists all the environment variables required for the application t
 
 ### Application Settings
 - `NODE_ENV` - Environment mode (automatically set to `production` on Render)
-- `PORT` - Port number (automatically set by Render, defaults to 10000)
+- `PORT` - Port number (automatically set by Render, defaults to 5000)
 
 ## Setting Up on Render
 
@@ -50,6 +50,8 @@ PAYSTACK_SECRET_KEY=your-paystack-secret-key
 PAYSTACK_PUBLIC_KEY=your-paystack-public-key
 NODE_ENV=development
 PORT=5000
+CLIENT_URL=http://localhost:5173
+CORS_ORIGIN=http://localhost:5173
 ```
 
 ## Security Notes

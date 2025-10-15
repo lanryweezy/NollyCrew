@@ -3,13 +3,14 @@ dotenv.config();
 
 import express, { type Request, Response, NextFunction } from "express";
 import cookieParser from "cookie-parser";
-import { registerRoutes } from "./routes";
+import { registerRoutes } from "./routes.js";
 // import './worker'; // no-op import when running web, worker will early-exit if env flag not set
 import path, { dirname } from "path";
 import { fileURLToPath } from 'url';
 import { logger } from './utils/logger';
 import { errorHandler } from './middleware/errorHandler';
 import { securityMiddleware } from './middleware/security';
+import { initializeWebSocketServer } from './websocket';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -97,6 +98,9 @@ app.use((req, res, next) => {
   }
 
   const server = await registerRoutes(app);
+
+  // Initialize WebSocket server
+  const wsServer = initializeWebSocketServer(server);
 
   // Error handling middleware (must be last)
   app.use(errorHandler);

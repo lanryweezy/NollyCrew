@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/api";
 import PageHeader from "@/components/PageHeader";
+import PortfolioGallery from "@/components/PortfolioGallery";
 
 export default function Profile() {
   const [, setLocation] = useLocation();
@@ -411,6 +412,27 @@ export default function Profile() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Portfolio Gallery */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Film className="w-5 h-5" />
+                  Portfolio Highlights
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <PortfolioGallery 
+                  items={mockPortfolio.map(item => ({
+                    id: item.id,
+                    type: "image",
+                    title: item.title,
+                    url: item.image,
+                    description: item.description
+                  })).slice(0, 3)}
+                />
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="portfolio" className="space-y-6">
@@ -422,18 +444,15 @@ export default function Profile() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {mockPortfolio.map((item) => (
-                    <Card key={item.id} className="overflow-hidden">
-                      <div className="aspect-video bg-muted"></div>
-                      <CardContent className="pt-4">
-                        <h3 className="font-semibold mb-1">{item.title}</h3>
-                        <p className="text-sm text-muted-foreground mb-2">{item.role} • {item.year}</p>
-                        <p className="text-sm">{item.description}</p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                <PortfolioGallery 
+                  items={mockPortfolio.map(item => ({
+                    id: item.id,
+                    type: "image",
+                    title: item.title,
+                    url: item.image,
+                    description: item.description
+                  }))}
+                />
                 <Button variant="outline" className="w-full mt-4">
                   <Plus className="w-4 h-4 mr-2" />
                   Add Portfolio Item

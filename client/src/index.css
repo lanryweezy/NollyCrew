@@ -326,3 +326,111 @@
     inset: -1px;
   }
 }
+
+/* Custom responsive utilities for better mobile experience */
+@layer utilities {
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .text-shadow-md {
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
+  }
+  
+  .text-shadow-lg {
+    text-shadow: 0 15px 30px rgba(0, 0, 0, 0.11), 0 5px 15px rgba(0, 0, 0, 0.08);
+  }
+  
+  .text-shadow-none {
+    text-shadow: none;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .scrollbar-default {
+    -ms-overflow-style: auto;
+    scrollbar-width: auto;
+  }
+  
+  .scrollbar-default::-webkit-scrollbar {
+    display: block;
+  }
+  
+  /* Better focus styles for accessibility */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background;
+  }
+  
+  /* Smooth transitions for interactive elements */
+  .transition-colors-fast {
+    @apply transition-colors duration-150 ease-in-out;
+  }
+  
+  .transition-all-fast {
+    @apply transition-all duration-150 ease-in-out;
+  }
+  
+  .transition-transform-fast {
+    @apply transition-transform duration-150 ease-in-out;
+  }
+  
+  /* Card hover effects */
+  .card-hover {
+    @apply transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg;
+  }
+  
+  /* Button hover effects */
+  .button-hover {
+    @apply transition-all duration-200 ease-in-out transform hover:scale-[1.02];
+  }
+  
+  /* Input focus effects */
+  .input-focus {
+    @apply focus:ring-2 focus:ring-primary/30 focus:border-primary;
+  }
+  
+  /* Mobile-specific utilities */
+  @media (max-width: 640px) {
+    .mobile-p-4 {
+      @apply px-4 py-3;
+    }
+    
+    .mobile-text-lg {
+      font-size: 1.125rem;
+      line-height: 1.75rem;
+    }
+    
+    .mobile-grid-cols-1 {
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+    
+    .mobile-hidden {
+      display: none;
+    }
+  }
+  
+  /* Tablet-specific utilities */
+  @media (min-width: 641px) and (max-width: 1024px) {
+    .tablet-grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  
+  /* Desktop-specific utilities */
+  @media (min-width: 1025px) {
+    .desktop-grid-cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    
+    .desktop-grid-cols-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+}

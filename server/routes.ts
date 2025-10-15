@@ -4,7 +4,7 @@ dotenv.config();
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import { sign as jwtSign, verify as jwtVerify } from "./utils/jwt";
 import { storage } from "./storage";
 import { insertUserSchema, insertUserRoleSchema, insertJobSchema, insertProjectSchema, insertJobApplicationSchema, insertWaitlistSchema, insertMessageSchema, insertReviewSchema } from "../shared/schema";
 import { z } from "zod";
@@ -65,7 +65,7 @@ const authenticateToken = async (req: any, res: any, next: any) => {
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    const decoded = jwtVerify(token, JWT_SECRET as string) as any;
     const user = await storage.getUser(decoded.userId);
     if (!user) {
       return res.status(401).json({ error: 'Invalid token' });
@@ -186,9 +186,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Generate JWT token
-      const token = jwt.sign(
+      const token = jwtSign(
         { userId: user.id, email: user.email }, 
-        JWT_SECRET, 
+        JWT_SECRET as string, 
         { expiresIn: '7d' }
       );
 
@@ -208,7 +208,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Request email verification (sends a signed token; integrate email provider later)
   app.post('/api/auth/request-verify', authRateLimiter, authenticateToken, async (req: any, res) => {
     try {
-      const token = jwt.sign({ userId: req.user.id }, EMAIL_TOKEN_SECRET, { expiresIn: '1d' });
+      const token = jwtSign({ userId: req.user.id }, EMAIL_TOKEN_SECRET as string, { expiresIn: '1d' });
       // In a real system, send via email. For MVP, log token and return a hint.
       logger.info('[email-verify] token generated', { userId: req.user.id, email: req.user.email });
       res.json({ ok: true });
@@ -223,7 +223,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { token } = req.body as any;
       if (!token) return res.status(400).json({ error: 'token required' });
-      const payload = jwt.verify(token, EMAIL_TOKEN_SECRET) as any;
+      const payload = jwtVerify(token, EMAIL_TOKEN_SECRET as string) as any;
       const user = await storage.getUser(payload.userId);
       if (!user) return res.status(400).json({ error: 'Invalid token' });
       const updated = await storage.updateUser(user.id, { isVerified: true } as any);
@@ -248,7 +248,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const user = await storage.getUserByEmail(email);
       if (user) {
-        const token = jwt.sign({ userId: user.id }, RESET_TOKEN_SECRET, { expiresIn: '1h' });
+        const token = jwtSign({ userId: user.id }, RESET_TOKEN_SECRET as string, { expiresIn: '1h' });
         logger.info('[password-reset] token generated', { email });
       }
       // Always respond ok to avoid user enumeration
@@ -271,7 +271,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const payload = jwt.verify(token, RESET_TOKEN_SECRET) as any;
+      const payload = jwtVerify(token, RESET_TOKEN_SECRET as string) as any;
       const user = await storage.getUser(payload.userId);
       if (!user) return res.status(400).json({ error: 'Invalid token' });
       
@@ -318,9 +318,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Generate JWT token
-      const token = jwt.sign(
+      const token = jwtSign(
         { userId: user.id, email: user.email }, 
-        JWT_SECRET, 
+        JWT_SECRET as string, 
         { expiresIn: '7d' }
       );
       
@@ -357,12 +357,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Generate JWT token
-      const token = jwt.sign(
+      const token = jwtSign(
         { userId: user.id, email: user.email }, 
-        JWT_SECRET, 
+        JWT_SECRET as string, 
         { expiresIn: '7d' }
       );
-      const refreshToken = jwt.sign({ userId: user.id }, REFRESH_SECRET, { expiresIn: '30d' });
+      const refreshToken = jwtSign({ userId: user.id }, REFRESH_SECRET as string, { expiresIn: '30d' });
       res.cookie('refresh_token', refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -397,10 +397,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const token = req.cookies?.refresh_token;
       if (!token) return res.status(401).json({ error: 'No refresh token' });
-      const payload = jwt.verify(token, REFRESH_SECRET) as any;
+      const payload = jwtVerify(token, REFRESH_SECRET as string) as any;
       const user = await storage.getUser(payload.userId);
       if (!user) return res.status(401).json({ error: 'Invalid refresh token' });
-      const accessToken = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+      const accessToken = jwtSign({ userId: user.id, email: user.email }, JWT_SECRET as string, { expiresIn: '7d' });
       res.json({ token: accessToken });
     } catch (error) {
       logger.warn('Invalid refresh token', { error: (error as Error).message });
@@ -487,6 +487,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Back-compat route for tests expecting /api/users/:userId/roles
+  app.post('/api/users/:userId/roles', authenticateToken, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      if (userId !== req.user.id) {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+      const roleData = insertUserRoleSchema.parse({ ...req.body, userId });
+      // Ensure user doesn't already have this role
+      const existing = await storage.getUserRoles(userId);
+      if ((existing as Array<{ role?: string }>).some((r) => r.role === (roleData as any).role)) {
+        return res.status(400).json({ error: 'User already has this role' });
+      }
+      const newRole = await storage.createUserRole({
+        ...roleData,
+        userId: req.user.id
+      });
+      res.status(201).json({ role: newRole });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: 'Invalid input data', details: error.errors });
+      }
+      logger.error('Create role error', { error: (error as Error).message, userId: req.user?.id });
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   app.get('/api/profile/roles', authenticateToken, async (req: any, res) => {
     try {
       const roles = await storage.getUserRoles(req.user.id);
@@ -517,11 +544,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/projects', authenticateToken, async (req: any, res) => {
     try {
-      const { status, limit } = req.query;
+      const { status, limit } = req.query as any;
       const projects = await storage.getProjects({
         status: status as string,
         createdById: req.user.id,
-        limit: limit ? parseInt(limit as string) : undefined
+        limit: typeof limit === 'string' ? parseInt(limit) : undefined
       });
       res.json(projects);
     } catch (error) {
@@ -596,12 +623,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Job management routes
   app.post('/api/jobs', authenticateToken, async (req: any, res) => {
     try {
-      const jobData = insertJobSchema.parse(req.body);
-      const job = await storage.createJob({
-        ...jobData,
-        postedById: req.user.id
-      });
-      res.status(201).json(job);
+      const withDefaults = {
+        ...req.body,
+        postedById: req.user.id,
+        currency: req.body?.currency ?? 'NGN',
+        isActive: typeof req.body?.isActive === 'boolean' ? req.body.isActive : true,
+      };
+      const jobData = insertJobSchema.parse(withDefaults);
+      const job = await storage.createJob(jobData as any);
+      res.status(201).json({ job });
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: 'Invalid input data', details: error.errors });
@@ -613,13 +643,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/jobs', async (req: any, res) => {
     try {
-      const { status, roleType, limit } = req.query;
+      const { type, location, isActive, limit } = req.query as any;
       const jobs = await storage.getJobs({
-        status: status as string,
-        roleType: roleType as string,
-        limit: limit ? parseInt(limit as string) : undefined
+        type: type as string,
+        // drizzle layer supports optional location via ilike fallback
+        // @ts-ignore
+        location: location as string,
+        isActive: typeof isActive === 'string' ? isActive === 'true' : true,
+        limit: typeof limit === 'string' ? parseInt(limit) : undefined
       });
-      res.json(jobs);
+      res.json({ jobs });
     } catch (error) {
       logger.error('Get jobs error', { error: (error as Error).message });
       res.status(500).json({ error: 'Internal server error' });
@@ -648,14 +681,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!job) {
         return res.status(404).json({ error: 'Job not found' });
       }
-      
-      const applicationData = insertJobApplicationSchema.parse(req.body);
-      const application = await storage.createJobApplication({
-        ...applicationData,
-        jobId,
-        applicantId: req.user.id
-      });
-      res.status(201).json(application);
+
+      // Prevent duplicate application by same user
+      const existing = await storage.getJobApplications({ jobId, applicantId: req.user.id });
+      if (existing && existing.length) {
+        return res.status(400).json({ error: 'You have already applied to this job' });
+      }
+
+      const applicationData = insertJobApplicationSchema.parse({ ...req.body, jobId, applicantId: req.user.id });
+      const application = await storage.createJobApplication(applicationData as any);
+      res.status(201).json({ application });
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: 'Invalid input data', details: error.errors });
@@ -706,10 +741,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(400).json({ error: 'Failed to extract text from PDF' });
         }
       } else if (req.body.scriptUrl) {
-        scriptUrl = req.body.scriptUrl;
+        scriptUrl = req.body.scriptUrl as string;
         // Fetch script from URL
         try {
-          const response = await fetch(scriptUrl);
+          const response = await fetch(scriptUrl as string);
           const contentType = response.headers.get('content-type');
           if (contentType && contentType.includes('application/pdf')) {
             const arrayBuffer = await response.arrayBuffer();
@@ -728,7 +763,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else if (project.script) {
         // Use existing project script
         try {
-          const response = await fetch(project.script);
+          const response = await fetch(project.script as string);
           const contentType = response.headers.get('content-type');
           if (contentType && contentType.includes('application/pdf')) {
             const arrayBuffer = await response.arrayBuffer();
@@ -747,7 +782,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Add job to queue for async processing (if queue is available)
       if (scriptAnalysisQueue) {
-        const job = await scriptAnalysisQueue.add('analyze-script', {
+        const job: any = await scriptAnalysisQueue.add('analyze-script', {
           projectId,
           scriptText: finalScriptText,
           scriptUrl: scriptUrl || project.script || null,
@@ -849,7 +884,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Add job to queue for async processing (if queue is available)
       if (castingRecommendationQueue) {
-        const job = await castingRecommendationQueue.add('generate-recommendations', {
+        const job: any = await castingRecommendationQueue.add('generate-recommendations', {
           role: role || 'Actor',
           requirements: requirements || '',
           candidates: candidateData,
@@ -908,7 +943,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Add job to queue for async processing (if queue is available)
       if (scheduleOptimizationQueue) {
-        const job = await scheduleOptimizationQueue.add('optimize-schedule', {
+        const job: any = await scheduleOptimizationQueue.add('optimize-schedule', {
           projectId,
           scenes,
           constraints,
@@ -964,7 +999,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Add job to queue for async processing (if queue is available)
       if (marketingContentQueue) {
-        const job = await marketingContentQueue.add('generate-content', {
+        const job: any = await marketingContentQueue.add('generate-content', {
           projectTitle,
           genre,
           synopsis,
@@ -1072,11 +1107,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Reviews/Ratings
   app.post('/api/reviews', authenticateToken, async (req: any, res) => {
     try {
-      const reviewData = insertReviewSchema.parse(req.body);
-      const review = await storage.createReview({
-        ...reviewData,
-        reviewerId: req.user.id
-      });
+      const reviewData = insertReviewSchema.parse(req.body) as any;
+      const review = await storage.createReview(Object.assign({}, reviewData, { reviewerId: req.user.id }) as any);
       res.status(201).json(review);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -1124,6 +1156,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       console.error('Send message error:', error);
       res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Analytics routes
+  const { predictProjectSuccess, generateFinancialReport, generatePerformanceBenchmarks, generateTrendAnalysis } = await import('./analytics');
+
+  // Predictive Analytics - Project Success Prediction
+  app.get('/api/analytics/predict/project-success', authenticateToken, async (req: any, res) => {
+    try {
+      const predictions = await predictProjectSuccess(req.user.id);
+      res.json({ predictions });
+    } catch (error) {
+      console.error('Project success prediction error:', error);
+      res.status(500).json({ error: 'Failed to generate project success predictions' });
+    }
+  });
+
+  // Financial Reporting
+  app.get('/api/analytics/financial-report', authenticateToken, async (req: any, res) => {
+    try {
+      const report = await generateFinancialReport(req.user.id);
+      res.json({ report });
+    } catch (error) {
+      console.error('Financial report generation error:', error);
+      res.status(500).json({ error: 'Failed to generate financial report' });
+    }
+  });
+
+  // Performance Benchmarks
+  app.get('/api/analytics/performance-benchmarks', authenticateToken, async (req: any, res) => {
+    try {
+      const benchmarks = await generatePerformanceBenchmarks(req.user.id);
+      res.json({ benchmarks });
+    } catch (error) {
+      console.error('Performance benchmark generation error:', error);
+      res.status(500).json({ error: 'Failed to generate performance benchmarks' });
+    }
+  });
+
+  // Trend Analysis
+  app.get('/api/analytics/trend-analysis', authenticateToken, async (req: any, res) => {
+    try {
+      const trends = await generateTrendAnalysis(req.user.id);
+      res.json({ trends });
+    } catch (error) {
+      console.error('Trend analysis generation error:', error);
+      res.status(500).json({ error: 'Failed to generate trend analysis' });
     }
   });
 

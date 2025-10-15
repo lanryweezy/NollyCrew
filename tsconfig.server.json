@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "dist",
+    "outDir": "dist/server",
     "rootDir": ".",
     "noEmit": false,
     "allowImportingTsExtensions": false,
@@ -19,5 +19,15 @@
     }
   },
   "include": ["server/**/*", "shared/**/*", "types/**/*.d.ts"],
-  "exclude": ["node_modules", "dist", "client", "server/vite.ts", "vite.config.ts"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "client",
+    "server/vite.ts",
+    "vite.config.ts",
+    "server/tests",
+    "server/__tests__",
+    "server/**/*.test.ts",
+    "server/**/*.spec.ts"
+  ]
 }

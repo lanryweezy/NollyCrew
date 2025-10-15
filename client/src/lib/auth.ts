@@ -105,6 +105,38 @@ class AuthService {
   }
 
   async getCurrentUser(): Promise<{ user: User; roles: UserRole[] } | null> {
+    // DEMO MODE: Bypass authentication for demonstration
+    if (process.env.NODE_ENV === 'development' || process.env.DEMO_MODE === 'true') {
+      // Return a mock user for demo purposes
+      const mockUser: User = {
+        id: 'demo-user-id',
+        email: 'demo@example.com',
+        firstName: 'Demo',
+        lastName: 'User',
+        isVerified: true,
+      };
+      
+      const mockRoles: UserRole[] = [
+        {
+          id: 'demo-role-1',
+          userId: 'demo-user-id',
+          role: 'actor',
+          isActive: true,
+        },
+        {
+          id: 'demo-role-2',
+          userId: 'demo-user-id',
+          role: 'producer',
+          isActive: true,
+        }
+      ];
+      
+      this.user = mockUser;
+      this.roles = mockRoles;
+      return { user: mockUser, roles: mockRoles };
+    }
+    
+    // Original authentication logic
     if (!this.token) return null;
 
     try {
@@ -208,6 +240,11 @@ class AuthService {
   }
 
   isAuthenticated(): boolean {
+    // DEMO MODE: Always return true for demonstration
+    if (process.env.NODE_ENV === 'development' || process.env.DEMO_MODE === 'true') {
+      return true;
+    }
+    
     return !!this.token;
   }
 

@@ -8,12 +8,15 @@ let redisClient: ReturnType<typeof createClient> | null = null;
 // Initialize Redis client if environment variables are set
 if (process.env.REDIS_HOST) {
   try {
-    redisClient = createClient({
-      host: process.env.REDIS_HOST,
-      port: parseInt(process.env.REDIS_PORT || '6379'),
-      password: process.env.REDIS_PASSWORD,
-      db: parseInt(process.env.REDIS_DB || '0')
-    });
+    // ioredis options have changed in redis v4 client; use url string
+    const port = parseInt(process.env.REDIS_PORT || '6379');
+    const db = parseInt(process.env.REDIS_DB || '0');
+    const password = process.env.REDIS_PASSWORD;
+    const host = process.env.REDIS_HOST;
+    const url = password
+      ? `redis://:${password}@${host}:${port}/${db}`
+      : `redis://${host}:${port}/${db}`;
+    redisClient = createClient({ url });
     
     redisClient.on('error', (err) => {
       logger.error('Redis client error', { error: err.message });
@@ -41,7 +44,7 @@ export const cache = (duration: number = 300) => {
       
       if (cachedResponse) {
         logger.debug('Cache hit', { key });
-        return res.json(JSON.parse(cachedResponse));
+        return res.json(JSON.parse(cachedResponse as string));
       }
       
       logger.debug('Cache miss', { key });

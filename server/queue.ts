@@ -7,10 +7,10 @@ import { logger } from './utils/logger';
 const redisAvailable = false;
 
 // Export null queues to disable all Redis functionality
-export const scriptAnalysisQueue = null;
-export const scheduleOptimizationQueue = null;
-export const castingRecommendationQueue = null;
-export const marketingContentQueue = null;
+export const scriptAnalysisQueue: Queue.Queue | null = null;
+export const scheduleOptimizationQueue: Queue.Queue | null = null;
+export const castingRecommendationQueue: Queue.Queue | null = null;
+export const marketingContentQueue: Queue.Queue | null = null;
 
 // Job status tracking - always returns null to indicate job not found
 export interface JobStatus {

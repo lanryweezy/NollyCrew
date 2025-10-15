@@ -2,6 +2,25 @@
 
 NollyCrew: The AI-powered operating system for Nollywood—an all-in-one super-app connecting producers, actors, and crew.
 
+## 🚀 Key Features
+
+### Real-Time Collaboration
+- Live chat system with presence tracking
+- Collaborative script editing with conflict resolution
+- Real-time project updates and notifications
+
+### Advanced Project Management
+- Gantt charts for visual project timeline management
+- Resource allocation tracking for crew, equipment, and budget
+- Milestone management with automated progress updates
+- Risk management dashboard with proactive identification tools
+
+### Enhanced Analytics & Reporting
+- Predictive analytics with machine learning models
+- Financial reporting with automated budget tracking
+- Performance benchmarks against industry standards
+- Trend analysis with historical data insights
+
 ## 🚀 Production Deployment Guide
 
 This guide will help you deploy NollyCrewHub to production environment.
@@ -116,6 +135,10 @@ The application includes built-in health checks at `/api/health` endpoint.
 - Request logging
 - Memory usage monitoring
 - Efficient API responses
+
+## 🌐 Port Configuration
+
+The application uses port 5000 by default to avoid conflicts with other applications that might be running on port 3000. See `PORT_CONFIGURATION.md` for detailed configuration options.
 
 ## 🆘 Support
 

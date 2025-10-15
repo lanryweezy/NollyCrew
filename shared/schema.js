@@ -2,6 +2,14 @@ import { sql } from "drizzle-orm";
 import { pgTable, text, varchar, timestamp, integer, decimal, jsonb, boolean, index, unique } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+// Waitlist table for collecting early-access emails
+export const waitlist = pgTable("waitlist", {
+    id: varchar("id").primaryKey().default(sql `gen_random_uuid()`),
+    email: text("email").notNull().unique(),
+    name: text("name"),
+    source: text("source"), // optional: landing, referral, etc
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+});
 // Users table with multi-role support
 export const users = pgTable("users", {
     id: varchar("id").primaryKey().default(sql `gen_random_uuid()`),
@@ -215,4 +223,13 @@ export const insertReviewSchema = createInsertSchema(reviews).omit({
     createdAt: true,
 }).extend({
     rating: z.number().min(1).max(5),
+});
+// Waitlist insert schema
+export const insertWaitlistSchema = createInsertSchema(waitlist).omit({
+    id: true,
+    createdAt: true,
+}).extend({
+    email: z.string().email(),
+    name: z.string().optional(),
+    source: z.string().optional(),
 });
