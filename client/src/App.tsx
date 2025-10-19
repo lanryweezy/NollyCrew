@@ -20,6 +20,12 @@ import TalentSearch from "@/pages/TalentSearch";
 import Messages from "@/pages/Messages";
 import Auditions from "@/pages/Auditions";
 import TalentProfile from "@/pages/TalentProfile";
+import TestProxy from "./test-proxy";
+import Calendar from "@/pages/Calendar";
+import Analytics from "@/pages/Analytics";
+import Collaboration from "@/pages/Collaboration";
+import EnhancedAnalytics from "@/pages/EnhancedAnalytics";
+import { ResponsiveToastProvider } from "@/components/ResponsiveToast";
 
 function Router() {
   return (
@@ -27,6 +33,7 @@ function Router() {
       <Route path="/" component={LandingPage} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
+      <Route path="/test-proxy" component={TestProxy} />
       <Route path="/payment" component={Payment} />
       <Route path="/payment/success" component={PaymentSuccess} />
       <Route path="/payment/error" component={PaymentError} />
@@ -77,6 +84,26 @@ function Router() {
           <Profile />
         </ProtectedRoute>
       </Route>
+      <Route path="/calendar">
+        <ProtectedRoute>
+          <Calendar />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/analytics">
+        <ProtectedRoute>
+          <Analytics />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/collaboration">
+        <ProtectedRoute>
+          <Collaboration />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/analytics/enhanced">
+        <ProtectedRoute>
+          <EnhancedAnalytics />
+        </ProtectedRoute>
+      </Route>
       
       {/* Fallback to 404 */}
       <Route component={NotFound} />
@@ -88,7 +115,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
+        <ResponsiveToastProvider />
         <Router />
       </TooltipProvider>
     </QueryClientProvider>

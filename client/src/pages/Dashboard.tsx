@@ -26,6 +26,10 @@ import {
   AlertTriangle
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import ResponsiveGrid from "@/components/ResponsiveGrid";
+import ResponsiveSection from "@/components/ResponsiveSection";
+import ResponsiveButton from "@/components/ResponsiveButton";
+import ResponsiveTypography from "@/components/ResponsiveTypography";
 
 const fetchDashboardData = async () => {
   const token = authService.getToken();
@@ -60,6 +64,7 @@ export default function Dashboard() {
   };
 
   const primaryRole = getPrimaryRole();
+  const roleStats = getStatsForRole(primaryRole);
 
   const getRoleBasedContent = () => {
     switch (primaryRole) {
@@ -141,39 +146,42 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <ResponsiveSection padding="medium">
         <PageHeader 
           title={roleContent.title}
           subtitle={roleContent.subtitle}
         />
 
-        <div className="mb-8">
-          <DashboardStats userRole={primaryRole} stats={stats} />
-        </div>
+        {/* Stats Overview */}
+        <ResponsiveGrid cols={{ xs: 2, sm: 2, md: 4 }} className="mb-6 sm:mb-8">
+          <DashboardStats userRole={primaryRole} stats={roleStats} />
+        </ResponsiveGrid>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6 sm:space-y-8">
+            {/* Quick Actions */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5" />
+                  <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
                   Quick Actions
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <ResponsiveGrid cols={{ xs: 1, sm: 3 }}>
                   {roleContent.quickActions.map((action, index) => (
                     <Button
                       key={index}
                       variant="outline"
-                      className="h-auto p-4 flex flex-col items-center gap-2"
+                      className="h-auto p-3 sm:p-4 flex flex-col items-center gap-2"
                       onClick={action.action}
                     >
-                      <action.icon className="w-6 h-6" />
-                      <span className="text-sm">{action.label}</span>
+                      <action.icon className="w-5 h-5 sm:w-6 sm:h-6" />
+                      <span className="text-xs sm:text-sm text-center">{action.label}</span>
                     </Button>
                   ))}
-                </div>
+                </ResponsiveGrid>
               </CardContent>
             </Card>
 
@@ -184,141 +192,179 @@ export default function Dashboard() {
               </TabsList>
               
               <TabsContent value="overview" className="space-y-4">
-                {dashboardData?.recentApplications.map((app: any) => (
-                  <Card key={app.id} className="hover:shadow-md transition-shadow">
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between">
+                {recentJobs.map((job) => (
+                  <Card key={job.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="font-semibold text-lg">{app.jobTitle || 'Job Title'}</h3>
-                            <Badge variant={app.status === 'pending' ? 'secondary' : 'default'}>
-                              {app.status}
-                            </Badge>
+                          <div className="flex flex-wrap items-center gap-2 mb-2">
+                            <ResponsiveTypography variant="h4">
+                              {job.title}
+                            </ResponsiveTypography>
+                            {job.isUrgent && (
+                              <Badge variant="destructive" className="text-xs">Urgent</Badge>
+                            )}
                           </div>
-                          <p className="text-muted-foreground mb-2">{app.coverLetter}</p>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <p className="text-muted-foreground text-sm mb-2">{job.company}</p>
+                          <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground mb-2">
                             <div className="flex items-center gap-1">
-                              <Clock className="w-4 h-4" />
-                              Applied on {new Date(app.appliedAt).toLocaleDateString()}
+                              <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
+                              {job.location}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+                              {job.deadline}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Users className="w-3 h-3 sm:w-4 sm:h-4" />
+                              {job.applicants} applicants
                             </div>
                           </div>
+                          <p className="text-primary font-medium text-sm sm:text-base mt-2">{job.budget}</p>
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => setLocation(`/jobs/${app.jobId}`)}>
-                          View Job
-                        </Button>
+                        <ResponsiveButton variant="outline" size="sm" className="w-full sm:w-auto">
+                          View Details
+                        </ResponsiveButton>
                       </div>
                     </CardContent>
                   </Card>
                 ))}
-                <Button variant="outline" className="w-full" onClick={() => setLocation("/jobs")}>
-                  View All Applications
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
+                <ResponsiveButton 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => setLocation("/jobs")}
+                  icon={<ArrowRight className="w-4 h-4 ml-2" />}
+                  iconPosition="right"
+                >
+                  View All Jobs
+                </ResponsiveButton>
               </TabsContent>
 
               <TabsContent value="projects" className="space-y-4">
                 {dashboardData?.recentProjects.map((project: any) => (
                   <Card key={project.id} className="hover:shadow-md transition-shadow">
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between">
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="font-semibold text-lg">{project.title}</h3>
-                            <Badge variant="secondary">{project.type}</Badge>
+                          <div className="flex flex-wrap items-center gap-2 mb-2">
+                            <ResponsiveTypography variant="h4">
+                              {project.title}
+                            </ResponsiveTypography>
+                            <Badge variant="secondary" className="text-xs">{project.genre}</Badge>
                           </div>
-                          <p className="text-muted-foreground mb-2">{project.description}</p>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                          <p className="text-muted-foreground text-sm mb-2">Director: {project.director}</p>
+                          <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground mb-3">
                             <div className="flex items-center gap-1">
-                              <Calendar className="w-4 h-4" />
-                              {new Date(project.startDate).toLocaleDateString()} - {new Date(project.endDate).toLocaleDateString()}
+                              <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
+                              {project.startDate} - {project.deadline}
                             </div>
                             <div className="flex items-center gap-1">
-                              <Badge>{project.status}</Badge>
+                              <Users className="w-3 h-3 sm:w-4 sm:h-4" />
+                              {project.teamSize} team members
                             </div>
                           </div>
+                          <div className="space-y-2 mb-3">
+                            <div className="flex justify-between text-xs sm:text-sm">
+                              <span>Progress</span>
+                              <span>{project.progress}%</span>
+                            </div>
+                            <div className="w-full bg-muted rounded-full h-2">
+                              <div 
+                                className="bg-primary h-2 rounded-full transition-all"
+                                style={{ width: `${project.progress}%` }}
+                              />
+                            </div>
+                          </div>
+                          <p className="text-primary font-medium text-sm sm:text-base">Budget: {project.budget}</p>
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => setLocation(`/projects/${project.id}`)}>
+                        <ResponsiveButton variant="outline" size="sm" className="w-full sm:w-auto">
                           Manage
-                        </Button>
+                        </ResponsiveButton>
                       </div>
                     </CardContent>
                   </Card>
                 ))}
-                <Button variant="outline" className="w-full" onClick={() => setLocation("/projects")}>
+                <ResponsiveButton 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => setLocation("/projects")}
+                  icon={<ArrowRight className="w-4 h-4 ml-2" />}
+                  iconPosition="right"
+                >
                   View All Projects
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
+                </ResponsiveButton>
               </TabsContent>
             </Tabs>
           </div>
 
-          <div className="space-y-6">
+          {/* Sidebar */}
+          <div className="space-y-6 sm:space-y-8">
+            {/* Notifications */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Bell className="w-5 h-5" />
+                  <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
                   Notifications
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-2 p-4 bg-muted rounded-lg">
-                  <MessageSquare className="w-5 h-5 text-primary" />
-                  <p className="text-sm">
-                    You have <span className="font-bold text-primary">{dashboardData?.unreadMessagesCount}</span> unread messages.
-                  </p>
-                </div>
-                <Button variant="outline" size="sm" className="w-full mt-4" onClick={() => setLocation('/messages')}>
-                  View Messages
-                </Button>
+              <CardContent className="space-y-4">
+                {notifications.map((notification) => (
+                  <div 
+                    key={notification.id} 
+                    className={`p-3 sm:p-4 rounded-lg border ${
+                      !notification.isRead ? 'bg-primary/5 border-primary/20' : 'bg-muted/50'
+                    }`}
+                  >
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
+                      <div className="flex-1">
+                        <h4 className="font-medium text-sm">{notification.title}</h4>
+                        <p className="text-xs text-muted-foreground mt-1">{notification.message}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{notification.time}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <ResponsiveButton variant="outline" size="sm" className="w-full">
+                  View All Notifications
+                </ResponsiveButton>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Users className="w-5 h-5" />
+                  <Users className="w-4 h-4 sm:w-5 sm:h-5" />
                   Recent Connections
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">Coming soon.</p>
+                {[
+                  { name: "Funke Akindele", role: "Actor", avatar: "FA" },
+                  { name: "Kemi Adetiba", role: "Director", avatar: "KA" },
+                  { name: "Tunde Cinematography", role: "Crew", avatar: "TC" }
+                ].map((connection, index) => (
+                  <div key={index} className="flex items-center gap-3">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                      <span className="text-xs sm:text-sm font-semibold text-primary">{connection.avatar}</span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{connection.name}</p>
+                      <p className="text-xs text-muted-foreground">{connection.role}</p>
+                    </div>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 sm:h-9 sm:w-9">
+                      <MessageSquare className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+                <ResponsiveButton variant="outline" size="sm" className="w-full">
+                  View All Connections
+                </ResponsiveButton>
               </CardContent>
             </Card>
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
-
-function DashboardSkeleton() {
-  return (
-    <div className="min-h-screen bg-background">
-      <div className="relative">
-        <Skeleton className="h-16" />
-      </div>
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <Skeleton className="h-12 w-1/2 mb-4" />
-        <Skeleton className="h-8 w-1/3 mb-8" />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Skeleton className="h-28" />
-          <Skeleton className="h-28" />
-          <Skeleton className="h-28" />
-          <Skeleton className="h-28" />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
-            <Skeleton className="h-40" />
-            <Skeleton className="h-80" />
-          </div>
-          <div className="space-y-6">
-            <Skeleton className="h-60" />
-            <Skeleton className="h-60" />
-          </div>
-        </div>
-      </div>
+      </ResponsiveSection>
     </div>
   );
 }

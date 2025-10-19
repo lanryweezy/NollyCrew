@@ -1,0 +1,161 @@
+{"timestamp":"2025-10-05T07:34:41.546Z","level":"info","message":"User logged in successfully","meta":{"userId":"30328982-4d8c-4275-874f-0ce33f9d8af3","email":"test@example.com"}}
+{"timestamp":"2025-10-05T07:34:41.567Z","level":"info","message":"[yjutcwt7] POST /api/auth/login 200 in 2144ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0c…"}
+{"timestamp":"2025-10-05T07:46:52.862Z","level":"info","message":"Server started on port 3000"}
+{"timestamp":"2025-10-05T08:01:17.841Z","level":"info","message":"Server started on port 3000"}
+{"timestamp":"2025-10-05T09:55:05.184Z","level":"error","message":"Unhandled error","meta":{"message":"Bad escaped character in JSON at position 9 (line 1 column 10)","stack":"SyntaxError: Bad escaped character in JSON at position 9 (line 1 column 10)\n    at JSON.parse (<anonymous>)\n    at parse (C:\\Users\\lanry\\Desktop\\NollyCrewHub\\node_modules\\body-parser\\lib\\types\\json.js:92:19)\n    at C:\\Users\\lanry\\Desktop\\NollyCrewHub\\node_modules\\body-parser\\lib\\read.js:128:18\n    at AsyncResource.runInAsyncScope (node:async_hooks:214:14)\n    at invokeCallback (C:\\Users\\lanry\\Desktop\\NollyCrewHub\\node_modules\\raw-body\\index.js:238:16)\n    at done (C:\\Users\\lanry\\Desktop\\NollyCrewHub\\node_modules\\raw-body\\index.js:227:7)\n    at IncomingMessage.onEnd (C:\\Users\\lanry\\Desktop\\NollyCrewHub\\node_modules\\raw-body\\index.js:287:7)\n    at IncomingMessage.emit (node:events:518:28)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)","url":"/api/auth/login","method":"POST","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584","ip":"127.0.0.1"}}
+{"timestamp":"2025-10-05T09:56:38.539Z","level":"info","message":"Server started on port 3000"}
+{"timestamp":"2025-10-05T09:58:54.939Z","level":"info","message":"Server started on port 3000"}
+{"timestamp":"2025-10-05T10:10:46.262Z","level":"info","message":"Server started on port 3000"}
+{"timestamp":"2025-10-05T10:20:04.586Z","level":"info","message":"Server started on port 3000"}
+{"timestamp":"2025-10-05T15:04:23.321Z","level":"info","message":"User logged in successfully","meta":{"userId":"30328982-4d8c-4275-874f-0ce33f9d8af3","email":"test@example.com"}}
+{"timestamp":"2025-10-05T15:04:23.327Z","level":"info","message":"[97z4krvu] POST /api/auth/login 200 in 321ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce…"}
+{"timestamp":"2025-10-05T15:06:06.592Z","level":"info","message":"User logged in successfully","meta":{"userId":"30328982-4d8c-4275-874f-0ce33f9d8af3","email":"test@example.com"}}
+{"timestamp":"2025-10-05T15:06:06.599Z","level":"info","message":"[gnhiryee] POST /api/auth/login 200 in 119ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce…"}
+{"timestamp":"2025-10-05T15:07:15.333Z","level":"info","message":"[dfiq9dfe] POST /api/auth/login 429 in 3ms :: {\"error\":\"Too many requests\",\"message\":\"Rate…"}
+{"timestamp":"2025-10-05T15:07:18.029Z","level":"info","message":"[2w2rkvq7] POST /api/auth/login 429 in 1ms :: {\"error\":\"Too many requests\",\"message\":\"Rate…"}
+{"timestamp":"2025-10-05T15:07:21.665Z","level":"info","message":"[3udg4l0j] POST /api/auth/login 429 in 5ms :: {\"error\":\"Too many requests\",\"message\":\"Rate…"}
+{"timestamp":"2025-10-05T15:07:23.863Z","level":"info","message":"[080sjc74] GET /api/auth/google 302 in 15ms"}
+{"timestamp":"2025-10-05T15:08:14.418Z","level":"info","message":"[n5n8pn1m] POST /api/auth/login 429 in 2ms :: {\"error\":\"Too many requests\",\"message\":\"Rate…"}
+{"timestamp":"2025-10-05T15:10:46.356Z","level":"info","message":"Server started on port 3000"}
+{"timestamp":"2025-10-05T15:11:07.657Z","level":"info","message":"User logged in successfully","meta":{"userId":"30328982-4d8c-4275-874f-0ce33f9d8af3","email":"test@example.com"}}
+{"timestamp":"2025-10-05T15:11:07.663Z","level":"info","message":"[esllst2l] POST /api/auth/login 200 in 195ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce…"}
+{"timestamp":"2025-10-05T15:17:34.025Z","level":"info","message":"User logged in successfully","meta":{"userId":"30328982-4d8c-4275-874f-0ce33f9d8af3","email":"test@example.com"}}
+{"timestamp":"2025-10-05T15:17:34.026Z","level":"info","message":"[cel6iyny] POST /api/auth/login 200 in 74ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce3…"}
+{"timestamp":"2025-10-05T15:17:34.235Z","level":"info","message":"[bvizfwnr] GET /api/auth/me 200 in 63ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:17:41.139Z","level":"info","message":"[nzmfb8zf] GET /api/auth/me 304 in 66ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:17:49.861Z","level":"info","message":"[6i090n24] GET /api/auth/me 304 in 86ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:20:41.165Z","level":"info","message":"[t9waz74l] GET /api/auth/me 304 in 19ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:21:43.599Z","level":"info","message":"[hlzl0rqa] GET /api/auth/me 304 in 48ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:21:45.604Z","level":"info","message":"[p47iqda9] GET /api/auth/me 304 in 22ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:21:45.691Z","level":"info","message":"[5g0pb507] GET /api/auth/me 304 in 23ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:21:45.743Z","level":"info","message":"[gk5me7r1] GET /api/auth/me 304 in 25ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:24:24.227Z","level":"info","message":"[yep4yz5e] POST /api/users/30328982-4d8c-4275-874f-0ce33f9d8af3/roles 404 in 9ms"}
+{"timestamp":"2025-10-05T15:24:26.047Z","level":"info","message":"[zr71fgte] GET /api/auth/me 304 in 25ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:24:26.076Z","level":"info","message":"[4huqswsc] GET /api/auth/me 304 in 18ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:24:37.221Z","level":"info","message":"[rb0pja5s] GET /api/auth/me 304 in 21ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:24:37.247Z","level":"info","message":"[rcwkhjzz] GET /api/auth/me 304 in 17ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:24:41.368Z","level":"info","message":"[bm8et3hk] GET /api/auth/me 304 in 55ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:24:41.565Z","level":"info","message":"[6razkkc6] GET /api/talent/search 200 in 239ms :: []"}
+{"timestamp":"2025-10-05T15:24:41.580Z","level":"info","message":"[c0xw337l] GET /api/projects 200 in 240ms :: []"}
+{"timestamp":"2025-10-05T15:25:21.037Z","level":"info","message":"[r93piqcq] GET /api/auth/me 304 in 26ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:25:34.380Z","level":"info","message":"User logged in successfully","meta":{"userId":"30328982-4d8c-4275-874f-0ce33f9d8af3","email":"test@example.com"}}
+{"timestamp":"2025-10-05T15:25:34.382Z","level":"info","message":"[a70bl21m] POST /api/auth/login 200 in 92ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce3…"}
+{"timestamp":"2025-10-05T15:25:34.446Z","level":"info","message":"[qmfr7t21] GET /api/auth/me 304 in 12ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:25:34.500Z","level":"info","message":"[5hstw8e7] GET /api/auth/me 304 in 11ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:25:34.583Z","level":"info","message":"[eldlcv7c] GET /api/auth/me 304 in 19ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:25:34.606Z","level":"info","message":"[ojuzjth3] GET /api/auth/me 304 in 13ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:25:37.291Z","level":"info","message":"[t2evkt98] GET /api/auth/me 304 in 17ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:25:37.331Z","level":"info","message":"[o5fftt0g] GET /api/auth/me 304 in 27ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:28:25.722Z","level":"info","message":"[8i8lpho8] GET /api/auth/me 304 in 34ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:28:25.764Z","level":"info","message":"[lvfdm42r] GET /api/auth/me 304 in 21ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:28:25.825Z","level":"info","message":"[yik45bnx] GET /api/users/30328982-4d8c-4275-874f-0ce33f9d8af3/reviews 200 in 28ms :: []"}
+{"timestamp":"2025-10-05T15:29:17.567Z","level":"info","message":"[t9g37acn] GET /api/auth/me 304 in 18ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:29:18.397Z","level":"info","message":"[dht1eveq] GET /api/auth/me 304 in 14ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:29:18.451Z","level":"info","message":"[arbbi1h7] GET /api/auth/me 304 in 20ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:29:18.474Z","level":"info","message":"[wflbp0o0] GET /api/auth/me 304 in 16ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:29:32.175Z","level":"info","message":"[u4jm7gbu] GET /api/auth/me 304 in 18ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:29:32.204Z","level":"info","message":"[33s20rev] GET /api/auth/me 304 in 13ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:29:39.241Z","level":"info","message":"[3z64g4ll] GET /api/auth/me 304 in 19ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:29:39.266Z","level":"info","message":"[vlodk3sx] GET /api/auth/me 304 in 17ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:29:40.875Z","level":"info","message":"[effbmhcs] GET /api/auth/me 304 in 61ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:29:40.884Z","level":"info","message":"[7gk2qijc] GET /api/talent/search 304 in 58ms :: []"}
+{"timestamp":"2025-10-05T15:29:40.894Z","level":"info","message":"[ziq1hdxm] GET /api/projects 304 in 56ms :: []"}
+{"timestamp":"2025-10-05T15:30:35.254Z","level":"info","message":"[5q8ofzvl] GET /api/auth/me 304 in 21ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:30:35.434Z","level":"info","message":"[m0e0wy1d] GET /api/auth/me 304 in 23ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:30:35.496Z","level":"info","message":"[glcdazwv] GET /api/auth/me 304 in 23ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:30:35.780Z","level":"info","message":"[l9pbqyxt] GET /api/auth/me 304 in 15ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:41:01.116Z","level":"info","message":"[ul5l1amz] GET /api/auth/me 304 in 56ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:41:01.156Z","level":"info","message":"[5lri7ffe] GET /api/auth/me 304 in 29ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:41:12.431Z","level":"info","message":"[4ljpk5ac] GET /api/auth/me 304 in 28ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:41:12.458Z","level":"info","message":"[onsj8r22] GET /api/auth/me 304 in 17ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:41:22.649Z","level":"info","message":"[4a7awzqm] GET /api/projects/1/script/versions 404 in 31ms :: {\"error\":\"Project not found\"}"}
+{"timestamp":"2025-10-05T15:41:48.521Z","level":"info","message":"[dqjlupd7] GET /api/auth/me 304 in 14ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:41:48.540Z","level":"info","message":"[56xnpwb0] GET /api/auth/me 304 in 11ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:42:21.675Z","level":"info","message":"[caf8x0tf] GET /api/auth/me 304 in 79ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:42:21.710Z","level":"info","message":"[oibjfc9a] GET /api/projects 304 in 72ms :: []"}
+{"timestamp":"2025-10-05T15:42:21.715Z","level":"info","message":"[ew2befuw] GET /api/talent/search 304 in 102ms :: []"}
+{"timestamp":"2025-10-05T15:42:29.609Z","level":"info","message":"[ukwb1c3c] GET /api/auth/me 304 in 36ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:42:30.454Z","level":"info","message":"[xe9sik9u] GET /api/auth/me 304 in 9ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d8…"}
+{"timestamp":"2025-10-05T15:42:30.493Z","level":"info","message":"[48pw2eom] GET /api/auth/me 304 in 11ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:42:30.515Z","level":"info","message":"[ds1telpe] GET /api/auth/me 304 in 13ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:42:46.661Z","level":"info","message":"[k6pug9to] GET /api/auth/me 304 in 20ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:42:46.681Z","level":"info","message":"[3c6z3355] GET /api/auth/me 304 in 10ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:42:58.990Z","level":"info","message":"[xgphujaj] GET /api/auth/me 304 in 19ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:42:59.013Z","level":"info","message":"[dehge2ey] GET /api/auth/me 304 in 12ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:43:00.517Z","level":"info","message":"[p202vs07] GET /api/auth/me 304 in 20ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:43:00.530Z","level":"info","message":"[r7rvlkgw] GET /api/talent/search 304 in 24ms :: []"}
+{"timestamp":"2025-10-05T15:43:00.547Z","level":"info","message":"[htvpgrpu] GET /api/projects 304 in 27ms :: []"}
+{"timestamp":"2025-10-05T15:47:52.760Z","level":"info","message":"[zqtxukzq] GET /api/auth/me 304 in 47ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:47:55.770Z","level":"info","message":"[ubkgg062] GET /api/auth/me 304 in 118ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9…"}
+{"timestamp":"2025-10-05T15:47:55.873Z","level":"info","message":"[3qfjqqrr] GET /api/auth/me 304 in 73ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:47:55.951Z","level":"info","message":"[hv5b1nkz] GET /api/auth/me 304 in 51ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:47:58.349Z","level":"info","message":"[cpw5rkar] GET /api/auth/me 304 in 25ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:47:58.395Z","level":"info","message":"[t9xydbzc] GET /api/auth/me 304 in 16ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:48:15.834Z","level":"info","message":"[tsx7zpfk] GET /api/auth/me 304 in 27ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:48:15.897Z","level":"info","message":"[lc6gdvmr] GET /api/auth/me 304 in 37ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:48:19.166Z","level":"info","message":"[un9lzzvl] GET /api/auth/me 304 in 19ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:48:19.202Z","level":"info","message":"[ongdsl8r] GET /api/auth/me 304 in 23ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:48:21.429Z","level":"info","message":"[4cxn2rxu] GET /api/auth/me 304 in 19ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:48:21.465Z","level":"info","message":"[i4k43oe4] GET /api/auth/me 304 in 25ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:48:21.520Z","level":"info","message":"[m6qbbwns] GET /api/users/30328982-4d8c-4275-874f-0ce33f9d8af3/reviews 304 in 22ms :: []"}
+{"timestamp":"2025-10-05T15:49:05.318Z","level":"info","message":"[ad6ejtui] GET /api/auth/me 304 in 86ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:49:05.381Z","level":"info","message":"[uw9wuueb] GET /api/auth/me 304 in 42ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:49:08.924Z","level":"info","message":"[ygyw1gex] GET /api/auth/me 304 in 31ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:49:08.952Z","level":"info","message":"[k5owagct] GET /api/auth/me 304 in 15ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:49:14.590Z","level":"info","message":"[j7yk8wmm] GET /api/auth/me 304 in 28ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:49:14.628Z","level":"info","message":"[wrk7zhcc] GET /api/auth/me 304 in 20ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:49:16.569Z","level":"info","message":"[vpe23qjk] GET /api/auth/me 304 in 54ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:49:16.643Z","level":"info","message":"[eofmpc2b] GET /api/projects 304 in 65ms :: []"}
+{"timestamp":"2025-10-05T15:49:16.659Z","level":"info","message":"[3rounon8] GET /api/talent/search 304 in 50ms :: []"}
+{"timestamp":"2025-10-05T15:51:57.654Z","level":"info","message":"[sqsxy913] GET /api/auth/me 304 in 35ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:51:58.558Z","level":"info","message":"[rpyl5v2r] GET /api/auth/me 304 in 20ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:51:58.633Z","level":"info","message":"[21cftepm] GET /api/auth/me 304 in 26ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:51:58.687Z","level":"info","message":"[41qee2ov] GET /api/auth/me 304 in 31ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:52:01.395Z","level":"info","message":"[u1jbguyn] GET /api/auth/me 304 in 22ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:52:01.439Z","level":"info","message":"[i2i5puco] GET /api/auth/me 304 in 18ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:52:04.904Z","level":"info","message":"[214u69tt] GET /api/auth/me 304 in 34ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:52:04.939Z","level":"info","message":"[nsrhzirq] GET /api/auth/me 304 in 21ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:52:31.779Z","level":"info","message":"[mdxhhtp7] GET /api/projects/1/script/versions 404 in 14ms :: {\"error\":\"Project not found\"}"}
+{"timestamp":"2025-10-05T15:52:45.948Z","level":"info","message":"[fmtjrdz6] GET /api/messages 200 in 313ms :: []"}
+{"timestamp":"2025-10-05T15:52:54.903Z","level":"info","message":"[n5yrap5q] GET /api/auth/me 304 in 36ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:52:55.779Z","level":"info","message":"[rd87xyjp] GET /api/auth/me 304 in 23ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:52:58.070Z","level":"info","message":"[jyht881n] GET /api/auth/me 304 in 40ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:52:58.115Z","level":"info","message":"[6vtijm9d] GET /api/auth/me 304 in 19ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:53:07.821Z","level":"info","message":"[kpat4b3e] GET /api/auth/me 304 in 47ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:53:07.831Z","level":"info","message":"[4h7n1e5g] GET /api/talent/search 304 in 45ms :: []"}
+{"timestamp":"2025-10-05T15:53:07.850Z","level":"info","message":"[48p9q1lb] GET /api/projects 304 in 58ms :: []"}
+{"timestamp":"2025-10-05T15:53:11.673Z","level":"info","message":"[4px2steu] GET /api/auth/me 304 in 15ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:53:12.049Z","level":"info","message":"[aum7nyhq] GET /api/auth/me 304 in 16ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:53:12.154Z","level":"info","message":"[pxhzoth2] GET /api/auth/me 304 in 20ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:53:12.206Z","level":"info","message":"[wzrv87gv] GET /api/auth/me 304 in 25ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:53:14.494Z","level":"info","message":"[p28z0ojb] GET /api/auth/me 304 in 20ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:53:14.522Z","level":"info","message":"[cgdteyi0] GET /api/auth/me 304 in 16ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:53:23.160Z","level":"info","message":"[sx8w1tqf] GET /api/auth/me 304 in 23ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:53:23.204Z","level":"info","message":"[w4yogdmp] GET /api/auth/me 304 in 22ms :: {\"user\":{\"id\":\"30328982-4d8c-4275-874f-0ce33f9d…"}
+{"timestamp":"2025-10-05T15:53:23.277Z","level":"info","message":"[rcb5dkxs] GET /api/users/30328982-4d8c-4275-874f-0ce33f9d8af3/reviews 304 in 16ms :: []"}
+{"timestamp":"2025-10-05T15:53:45.510Z","level":"info","message":"[p0w4s0nr] POST /api/auth/logout 401 in 1ms :: {\"error\":\"Access token required\"}"}
+{"timestamp":"2025-10-05T18:24:25.423Z","level":"error","message":"Registration error","meta":{"error":"[\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"email\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"firstName\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"lastName\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"password\"\n    ],\n    \"message\": \"Required\"\n  }\n]"}}
+{"timestamp":"2025-10-05T18:24:25.482Z","level":"error","message":"Registration error","meta":{"error":"[vitest] No \"default\" export is defined on the \"jsonwebtoken\" mock. Did you forget to return it from \"vi.mock\"?\nIf you need to partially mock a module, you can use \"importOriginal\" helper inside:\n"}}
+{"timestamp":"2025-10-05T18:24:25.540Z","level":"warn","message":"Registration attempt with existing email","meta":{"email":"existing@example.com"}}
+{"timestamp":"2025-10-05T18:24:25.564Z","level":"error","message":"Login error","meta":{"error":"[vitest] No \"default\" export is defined on the \"jsonwebtoken\" mock. Did you forget to return it from \"vi.mock\"?\nIf you need to partially mock a module, you can use \"importOriginal\" helper inside:\n"}}
+{"timestamp":"2025-10-05T18:24:25.586Z","level":"warn","message":"Login attempt with non-existent email","meta":{"email":"wrong@example.com"}}
+{"timestamp":"2025-10-05T18:27:24.263Z","level":"error","message":"Registration error","meta":{"error":"[\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"email\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"firstName\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"lastName\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"password\"\n    ],\n    \"message\": \"Required\"\n  }\n]"}}
+{"timestamp":"2025-10-05T18:27:24.322Z","level":"error","message":"Registration error","meta":{"error":"[vitest] No \"default\" export is defined on the \"jsonwebtoken\" mock. Did you forget to return it from \"vi.mock\"?\nIf you need to partially mock a module, you can use \"importOriginal\" helper inside:\n"}}
+{"timestamp":"2025-10-05T18:27:24.435Z","level":"warn","message":"Registration attempt with existing email","meta":{"email":"existing@example.com"}}
+{"timestamp":"2025-10-05T18:27:24.497Z","level":"error","message":"Login error","meta":{"error":"[vitest] No \"default\" export is defined on the \"jsonwebtoken\" mock. Did you forget to return it from \"vi.mock\"?\nIf you need to partially mock a module, you can use \"importOriginal\" helper inside:\n"}}
+{"timestamp":"2025-10-05T18:27:24.596Z","level":"warn","message":"Login attempt with non-existent email","meta":{"email":"wrong@example.com"}}
+{"timestamp":"2025-10-05T18:40:10.327Z","level":"error","message":"Registration error","meta":{"error":"[\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"email\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"firstName\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"lastName\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"password\"\n    ],\n    \"message\": \"Required\"\n  }\n]"}}
+{"timestamp":"2025-10-05T18:40:10.477Z","level":"info","message":"User registered successfully","meta":{"userId":"1","email":"test@example.com"}}
+{"timestamp":"2025-10-05T18:40:10.557Z","level":"warn","message":"Registration attempt with existing email","meta":{"email":"existing@example.com"}}
+{"timestamp":"2025-10-05T18:40:10.689Z","level":"info","message":"User logged in successfully","meta":{"email":"test@example.com"}}
+{"timestamp":"2025-10-05T18:40:10.791Z","level":"warn","message":"Login attempt with non-existent email","meta":{"email":"wrong@example.com"}}
+{"timestamp":"2025-10-05T18:41:42.895Z","level":"error","message":"Registration error","meta":{"error":"[\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"email\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"firstName\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"lastName\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"password\"\n    ],\n    \"message\": \"Required\"\n  }\n]"}}
+{"timestamp":"2025-10-05T18:41:43.087Z","level":"info","message":"User registered successfully","meta":{"userId":"1","email":"test@example.com"}}
+{"timestamp":"2025-10-05T18:41:43.156Z","level":"warn","message":"Registration attempt with existing email","meta":{"email":"existing@example.com"}}
+{"timestamp":"2025-10-05T18:41:43.241Z","level":"info","message":"User logged in successfully","meta":{"email":"test@example.com"}}
+{"timestamp":"2025-10-05T18:41:43.298Z","level":"warn","message":"Login attempt with non-existent email","meta":{"email":"wrong@example.com"}}
+{"timestamp":"2025-10-05T19:33:53.084Z","level":"error","message":"Registration error","meta":{"error":"[\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"email\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"firstName\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"lastName\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"password\"\n    ],\n    \"message\": \"Required\"\n  }\n]"}}
+{"timestamp":"2025-10-05T19:33:53.263Z","level":"info","message":"User registered successfully","meta":{"userId":"1","email":"test@example.com"}}
+{"timestamp":"2025-10-05T19:33:53.325Z","level":"warn","message":"Registration attempt with existing email","meta":{"email":"existing@example.com"}}
+{"timestamp":"2025-10-05T19:33:53.432Z","level":"info","message":"User logged in successfully","meta":{"email":"test@example.com"}}
+{"timestamp":"2025-10-05T19:33:53.502Z","level":"warn","message":"Login attempt with non-existent email","meta":{"email":"wrong@example.com"}}

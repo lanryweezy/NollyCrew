@@ -340,7 +340,7 @@ export default function Projects() {
 
   const canCreateProjects = () => {
     const primaryRole = getPrimaryRole();
-    return primaryRole === "producer" || primaryRole === "director";
+    return primaryRole === "producer";
   };
 
   const handleCreateProject = () => {

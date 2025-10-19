@@ -25,7 +25,8 @@ import {
   Home,
   Briefcase,
   Users,
-  Command
+  Command,
+  BarChart3
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { 
@@ -36,6 +37,8 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import Notifications from "@/components/Notifications";
+import MobileMenu from "@/components/MobileMenu";
 
 export interface NavigationProps {
   isAuthenticated?: boolean;
@@ -90,6 +93,11 @@ export default function Navigation({
     { label: "Profile", icon: User, action: () => setLocation("/profile") },
   ];
 
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [path]);
+
   return (
     <nav className="border-b bg-background/95 backdrop-blur-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4">
@@ -98,66 +106,100 @@ export default function Navigation({
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-2" data-testid="logo">
               <Film className="w-8 h-8 text-primary" />
-              <span className="text-xl font-bold font-serif">NollyCrew</span>
+              <span className="text-xl font-bold font-serif hidden sm:block">NollyCrew</span>
+              <span className="text-xl font-bold font-serif sm:hidden">NC</span>
             </div>
 
             {/* Desktop Navigation */}
             {isAuthenticated && (
-              <div className="hidden md:flex items-center gap-6">
+              <div className="hidden md:flex items-center gap-1 lg:gap-2 xl:gap-4">
                 <Button 
                   variant={path === "/dashboard" ? "secondary" : "ghost"}
                   onClick={() => setLocation("/dashboard")}
                   data-testid="nav-dashboard"
+                  className="text-xs sm:text-sm"
                 >
-                  <Home className="w-4 h-4 mr-2" />
-                  Dashboard
+                  <Home className="w-4 h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Dashboard</span>
                 </Button>
                 <Button 
                   variant={path === "/jobs" ? "secondary" : "ghost"}
                   onClick={() => setLocation("/jobs")}
                   data-testid="nav-jobs"
+                  className="text-xs sm:text-sm"
                 >
-                  <Briefcase className="w-4 h-4 mr-2" />
-                  Jobs
+                  <Briefcase className="w-4 h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Jobs</span>
                 </Button>
                 <Button 
                   variant={path === "/talent" ? "secondary" : "ghost"}
                   onClick={() => setLocation("/talent")}
                   data-testid="nav-talent"
+                  className="text-xs sm:text-sm"
                 >
-                  <Users className="w-4 h-4 mr-2" />
-                  Talent
+                  <Users className="w-4 h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Talent</span>
                 </Button>
                 <Button 
                   variant={path === "/projects" ? "secondary" : "ghost"}
                   onClick={() => setLocation("/projects")}
                   data-testid="nav-projects"
+                  className="text-xs sm:text-sm"
                 >
-                  <Film className="w-4 h-4 mr-2" />
-                  Projects
+                  <Film className="w-4 h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Projects</span>
                 </Button>
                 <Button 
                   variant={path === "/messages" ? "secondary" : "ghost"}
                   onClick={() => setLocation("/messages")}
                   data-testid="nav-messages"
+                  className="text-xs sm:text-sm"
                 >
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Messages
+                  <MessageCircle className="w-4 h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Messages</span>
                 </Button>
                 <Button 
                   variant={path === "/profile" ? "secondary" : "ghost"}
                   onClick={() => setLocation("/profile")}
                   data-testid="nav-profile"
+                  className="text-xs sm:text-sm"
                 >
-                  <User className="w-4 h-4 mr-2" />
-                  Profile
+                  <User className="w-4 h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Profile</span>
+                </Button>
+                <Button 
+                  variant={path === "/calendar" ? "secondary" : "ghost"}
+                  onClick={() => setLocation("/calendar")}
+                  data-testid="nav-calendar"
+                  className="text-xs sm:text-sm"
+                >
+                  <Command className="w-4 h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Calendar</span>
+                </Button>
+                <Button 
+                  variant={path === "/analytics" ? "secondary" : "ghost"}
+                  onClick={() => setLocation("/analytics")}
+                  data-testid="nav-analytics"
+                  className="text-xs sm:text-sm"
+                >
+                  <BarChart3 className="w-4 h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Analytics</span>
+                </Button>
+                <Button 
+                  variant={path === "/collaboration" ? "secondary" : "ghost"}
+                  onClick={() => setLocation("/collaboration")}
+                  data-testid="nav-collaboration"
+                  className="text-xs sm:text-sm"
+                >
+                  <Users className="w-4 h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Collab</span>
                 </Button>
               </div>
             )}
           </div>
 
           {/* Right Side */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             {/* Compact Search */}
             {isAuthenticated && (
               <div className="hidden sm:flex items-center gap-2">
@@ -179,25 +221,32 @@ export default function Navigation({
             {isAuthenticated ? (
               <>
                 {/* Notifications */}
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="relative"
-                  data-testid="button-notifications"
-                >
-                  <Bell className="w-4 h-4" />
-                  {notifications > 0 && (
-                    <Badge className="absolute -top-1 -right-1 w-5 h-5 text-xs p-0 flex items-center justify-center bg-destructive">
-                      {notifications}
-                    </Badge>
-                  )}
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="relative"
+                      data-testid="button-notifications"
+                    >
+                      <Bell className="w-4 h-4" />
+                      {notifications > 0 && (
+                        <Badge className="absolute -top-1 -right-1 w-5 h-5 text-xs p-0 flex items-center justify-center bg-destructive">
+                          {notifications}
+                        </Badge>
+                      )}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="p-0">
+                    <Notifications />
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
                 {/* Messages */}
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="relative"
+                  className="relative hidden sm:flex"
                   data-testid="button-messages"
                 >
                   <MessageCircle className="w-4 h-4" />
@@ -222,7 +271,7 @@ export default function Navigation({
                           {userName.split(' ').map(n => n[0]).join('')}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="hidden sm:block text-left">
+                      <div className="hidden lg:block text-left">
                         <div className="text-sm font-medium">{userName}</div>
                         <Badge 
                           variant="secondary" 
@@ -270,12 +319,14 @@ export default function Navigation({
                   variant="ghost" 
                   onClick={() => setLocation("/login")}
                   data-testid="button-login"
+                  className="text-xs sm:text-sm"
                 >
                   Log In
                 </Button>
                 <Button 
                   onClick={() => setLocation("/register")}
                   data-testid="button-signup"
+                  className="text-xs sm:text-sm"
                 >
                   Sign Up
                 </Button>
@@ -287,98 +338,22 @@ export default function Navigation({
               variant="ghost" 
               size="icon"
               className="md:hidden"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              onClick={() => setIsMobileMenuOpen(true)}
               data-testid="button-mobile-menu"
             >
-              {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+              <Menu className="w-4 h-4" />
             </Button>
           </div>
         </div>
 
         {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden border-t py-4">
-            <div className="flex flex-col gap-2">
-              {isAuthenticated ? (
-                <>
-                  <Button 
-                    variant="ghost" 
-                    className="justify-start" 
-                    onClick={() => setLocation("/dashboard")}
-                    data-testid="mobile-dashboard"
-                  >
-                    <Home className="w-4 h-4 mr-2" />
-                    Dashboard
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    className="justify-start" 
-                    onClick={() => setLocation("/jobs")}
-                    data-testid="mobile-jobs"
-                  >
-                    <Briefcase className="w-4 h-4 mr-2" />
-                    Jobs
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    className="justify-start" 
-                    onClick={() => setLocation("/talent")}
-                    data-testid="mobile-talent"
-                  >
-                    <Users className="w-4 h-4 mr-2" />
-                    Talent
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    className="justify-start" 
-                    onClick={() => setLocation("/projects")}
-                    data-testid="mobile-projects"
-                  >
-                    <Film className="w-4 h-4 mr-2" />
-                    Projects
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    className="justify-start" 
-                    onClick={() => setLocation("/messages")}
-                    data-testid="mobile-messages"
-                  >
-                    <MessageCircle className="w-4 h-4 mr-2" />
-                    Messages
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    className="justify-start" 
-                    onClick={() => setLocation("/profile")}
-                    data-testid="mobile-profile"
-                  >
-                    <User className="w-4 h-4 mr-2" />
-                    Profile
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button 
-                    variant="ghost" 
-                    className="justify-start" 
-                    onClick={() => setLocation("/login")}
-                    data-testid="mobile-login"
-                  >
-                    Log In
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    className="justify-start" 
-                    onClick={() => setLocation("/register")}
-                    data-testid="mobile-signup"
-                  >
-                    Sign Up
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-        )}
+        <MobileMenu 
+          isOpen={isMobileMenuOpen}
+          onClose={() => setIsMobileMenuOpen(false)}
+          isAuthenticated={isAuthenticated}
+          userRole={userRole}
+          userName={userName}
+        />
       </div>
 
       {/* Search Dialog */}
@@ -424,6 +399,18 @@ export default function Navigation({
             <CommandItem onSelect={() => { setLocation("/profile"); setIsSearchOpen(false); }}>
               <User className="mr-2 h-4 w-4" />
               <span>Profile</span>
+            </CommandItem>
+            <CommandItem onSelect={() => { setLocation("/calendar"); setIsSearchOpen(false); }}>
+              <Command className="mr-2 h-4 w-4" />
+              <span>Calendar</span>
+            </CommandItem>
+            <CommandItem onSelect={() => { setLocation("/analytics"); setIsSearchOpen(false); }}>
+              <BarChart3 className="mr-2 h-4 w-4" />
+              <span>Analytics</span>
+            </CommandItem>
+            <CommandItem onSelect={() => { setLocation("/collaboration"); setIsSearchOpen(false); }}>
+              <Users className="mr-2 h-4 w-4" />
+              <span>Collaboration</span>
             </CommandItem>
           </CommandGroup>
         </CommandList>

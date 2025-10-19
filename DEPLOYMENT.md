@@ -93,6 +93,7 @@ Once deployed, you can:
 4. **Port Issues**
    - Render automatically sets the `PORT` environment variable
    - Your app should use `process.env.PORT` (already configured)
+   - Default development port is 5000 to avoid conflicts with other applications
 
 ### Logs and Debugging
 

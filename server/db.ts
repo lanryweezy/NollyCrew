@@ -4,18 +4,13 @@ import * as schema from '../shared/schema';
 
 let db: any;
 
-if (!process.env.DATABASE_URL) {
-  console.warn('DATABASE_URL is not set - database operations will fail');
-  // Create a dummy client for development/testing
-  const dummyClient = {} as any;
-  db = drizzle(dummyClient, { schema });
-} else {
-  const connectionOptions = process.env.DATABASE_URL.includes('localhost') 
-    ? {} 
-    : { ssl: 'require' as any };
-  
-  const client = postgres(process.env.DATABASE_URL, connectionOptions);
-  db = drizzle(client, { schema });
-}
+const databaseUrl = process.env.DATABASE_URL || 'postgresql://nollycrew:nollycrew123@localhost:5433/nollycrew';
+
+const connectionOptions = databaseUrl.includes('localhost') 
+  ? {} 
+  : { ssl: 'require' as any };
+
+const client = postgres(databaseUrl, connectionOptions);
+db = drizzle(client, { schema });
 
 export { db };

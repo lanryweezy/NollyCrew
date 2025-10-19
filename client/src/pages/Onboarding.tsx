@@ -124,7 +124,6 @@ export default function Onboarding() {
           role: roleId as any,
           experience: "entry", // Default experience level
           specialties: [], // Will be filled in profile setup
-          isActive: true
         });
       }
 

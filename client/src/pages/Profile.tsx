@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/api";
 import PageHeader from "@/components/PageHeader";
+import PortfolioGallery from "@/components/PortfolioGallery";
 
 export default function Profile() {
   const [, setLocation] = useLocation();
@@ -139,8 +140,7 @@ export default function Profile() {
       await addRole({
         role: "actor",
         experience: "mid",
-        specialties: ["Drama", "Comedy"],
-        isActive: true
+        specialties: ["Drama", "Comedy"]
       });
       toast({
         title: "Role added!",
@@ -229,7 +229,7 @@ export default function Profile() {
                     {formData.firstName} {formData.lastName}
                   </h1>
                   <p className="text-muted-foreground">
-                    {roles.map(role => role.role).join(", ")}
+                    {(roles || []).map(role => role.role).join(", ")}
                   </p>
                   <div className="flex items-center gap-1 mt-2">
                     <Star className="w-4 h-4 text-yellow-500" />
@@ -242,7 +242,7 @@ export default function Profile() {
               {/* Profile Actions */}
               <div className="flex-1 flex flex-col justify-between">
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {roles.map((role) => (
+                  {(roles || []).map((role) => (
                     <Badge key={role.id} variant="secondary">
                       {role.role}
                     </Badge>
@@ -412,6 +412,27 @@ export default function Profile() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Portfolio Gallery */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Film className="w-5 h-5" />
+                  Portfolio Highlights
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <PortfolioGallery 
+                  items={mockPortfolio.map(item => ({
+                    id: item.id,
+                    type: "image",
+                    title: item.title,
+                    url: item.image,
+                    description: item.description
+                  })).slice(0, 3)}
+                />
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="portfolio" className="space-y-6">
@@ -423,18 +444,15 @@ export default function Profile() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {mockPortfolio.map((item) => (
-                    <Card key={item.id} className="overflow-hidden">
-                      <div className="aspect-video bg-muted"></div>
-                      <CardContent className="pt-4">
-                        <h3 className="font-semibold mb-1">{item.title}</h3>
-                        <p className="text-sm text-muted-foreground mb-2">{item.role} • {item.year}</p>
-                        <p className="text-sm">{item.description}</p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                <PortfolioGallery 
+                  items={mockPortfolio.map(item => ({
+                    id: item.id,
+                    type: "image",
+                    title: item.title,
+                    url: item.image,
+                    description: item.description
+                  }))}
+                />
                 <Button variant="outline" className="w-full mt-4">
                   <Plus className="w-4 h-4 mr-2" />
                   Add Portfolio Item
@@ -508,13 +526,13 @@ export default function Profile() {
               <Button onClick={submitReview}>Submit</Button>
             </div>
             <div className="space-y-3">
-              {reviews.map((r) => (
+              {(reviews || []).map((r) => (
                 <div key={r.id} className="border rounded p-3">
                   <div className="font-medium">Rating: {r.rating}/5</div>
                   {r.comment && <div className="text-sm text-muted-foreground mt-1">{r.comment}</div>}
                 </div>
               ))}
-              {!reviews.length && (
+              {(!reviews || reviews.length === 0) && (
                 <div className="text-sm text-muted-foreground">No reviews yet</div>
               )}
             </div>

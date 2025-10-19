@@ -63,9 +63,12 @@ function StatCard({ title, value, change, changeLabel, icon: Icon, trend = "neut
 }
 
 export default function DashboardStats({ userRole, stats }: DashboardStatsProps) {
+  // Fallback to empty array if stats is undefined
+  const safeStats = stats || [];
+  
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4" data-testid={`dashboard-stats-${userRole}`}>
-      {stats.map((stat, index) => (
+      {safeStats.map((stat, index) => (
         <StatCard
           key={index}
           {...stat}
@@ -76,9 +79,17 @@ export default function DashboardStats({ userRole, stats }: DashboardStatsProps)
 }
 
 // Role-specific stat configurations
-export const getStatsForRole = (role: "actor" | "crew" | "producer", data: any) => {
-  const baseStats = {
+export const getStatsForRole = (role: "actor" | "crew" | "producer"): StatCardProps[] => {
+  const baseStats: Record<string, StatCardProps[]> = {
     actor: [
+      {
+        title: "Profile Views",
+        value: "2,847",
+        change: 12.5,
+        changeLabel: "this month",
+        icon: Eye,
+        trend: "up"
+      },
       {
         title: "Applications Sent",
         value: data?.recentApplications?.length || 0,
@@ -98,6 +109,23 @@ export const getStatsForRole = (role: "actor" | "crew" | "producer", data: any) 
         title: "Average Rating",
         value: "Coming Soon",
         icon: Star,
+        trend: "down"
+      },
+      {
+        title: "Average Rating",
+        value: "4.8",
+        change: 2.1,
+        changeLabel: "improved",
+        icon: Star,
+        trend: "up"
+      },
+      {
+        title: "Messages",
+        value: 48,
+        change: 18.7,
+        changeLabel: "new this week",
+        icon: MessageCircle,
+        trend: "up"
       }
     ],
     crew: [
@@ -120,6 +148,31 @@ export const getStatsForRole = (role: "actor" | "crew" | "producer", data: any) 
         title: "Total Earnings",
         value: "Coming Soon",
         icon: DollarSign,
+        trend: "up"
+      },
+      {
+        title: "Total Earnings",
+        value: "₦2.4M",
+        change: 15.3,
+        changeLabel: "this quarter",
+        icon: DollarSign,
+        trend: "up"
+      },
+      {
+        title: "Client Rating",
+        value: "4.9",
+        change: 3.2,
+        changeLabel: "improved",
+        icon: Star,
+        trend: "up"
+      },
+      {
+        title: "Active Projects",
+        value: 6,
+        change: 0,
+        changeLabel: "ongoing",
+        icon: Users,
+        trend: "neutral"
       }
     ],
     producer: [
@@ -132,19 +185,31 @@ export const getStatsForRole = (role: "actor" | "crew" | "producer", data: any) 
         title: "Unread Messages",
         value: data?.unreadMessagesCount || 0,
         icon: MessageCircle,
+        trend: "up"
       },
       {
         title: "Team Members",
         value: "Coming Soon",
         icon: Users,
+        trend: "up"
       },
       {
         title: "Total Budget",
         value: "Coming Soon",
         icon: DollarSign,
+        trend: "up"
+      },
+      {
+        title: "Completion Rate",
+        value: "94%",
+        change: 2.3,
+        changeLabel: "improved",
+        icon: Star,
+        trend: "up"
       }
     ]
   };
 
-  return baseStats[role];
+  // Return stats for the role, or default to actor stats if role not found
+  return baseStats[role] || baseStats.actor;
 };

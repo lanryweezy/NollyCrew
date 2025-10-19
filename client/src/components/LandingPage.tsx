@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import Hero from "./Hero";
 import Navigation from "./Navigation";
 import ThemeToggle from "./ThemeToggle";
@@ -18,10 +19,16 @@ import {
   ArrowRight,
   CheckCircle,
   Star,
-  Quote
+  Quote,
+  Play
 } from "lucide-react";
+import ResponsiveSection from "@/components/ResponsiveSection";
+import ResponsiveTypography from "@/components/ResponsiveTypography";
+import ResponsiveButton from "@/components/ResponsiveButton";
+import ResponsiveGrid from "@/components/ResponsiveGrid";
 
 export default function LandingPage() {
+  const [, setLocation] = useLocation();
   const [selectedTab, setSelectedTab] = useState<"actors" | "crew" | "producers">("actors");
 
   // Mock data for featured sections
@@ -178,220 +185,264 @@ export default function LandingPage() {
       {/* Hero Section */}
       <Hero />
 
-      {/* Features Section */}
-      <section className="py-24 bg-muted/50">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">
-              Everything You Need for
-              <span className="bg-gradient-to-r from-primary to-yellow-600 bg-clip-text text-transparent">
-                {" "}Film Production
-              </span>
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              From pre-production to distribution, NollyCrew provides all the tools and connections you need to bring your creative vision to life.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <Card key={index} className="text-center hover-elevate transition-all duration-300" data-testid={`feature-${index}`}>
-                <CardHeader>
-                  <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                    <feature.icon className="w-8 h-8 text-primary" />
-                  </div>
-                  <CardTitle className="text-xl">{feature.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">{feature.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+      {/* Demo Button Section */}
+      <ResponsiveSection 
+        padding="small" 
+        background="muted"
+        className="text-center"
+      >
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <ResponsiveButton
+            size="lg"
+            className="px-6 py-3 sm:px-8 sm:py-4 bg-gradient-to-r from-primary to-yellow-600 hover:from-primary/90 hover:to-yellow-700"
+            onClick={() => setLocation('/dashboard')}
+            icon={<Play className="w-4 h-4 sm:w-5 sm:h-5" />}
+            iconPosition="left"
+          >
+            Demo Application
+            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
+          </ResponsiveButton>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            Click to experience NollyCrewHub without login
+          </p>
         </div>
-      </section>
+      </ResponsiveSection>
+
+      {/* Features Section */}
+      <ResponsiveSection 
+        padding="large" 
+        background="muted"
+      >
+        <div className="text-center mb-12 sm:mb-16">
+          <ResponsiveTypography variant="h2" align="center">
+            Everything You Need for
+            <span className="bg-gradient-to-r from-primary to-yellow-600 bg-clip-text text-transparent">
+              {" "}Film Production
+            </span>
+          </ResponsiveTypography>
+          <ResponsiveTypography variant="p" className="text-muted-foreground max-w-3xl mx-auto mt-4">
+            From pre-production to distribution, NollyCrew provides all the tools and connections you need to bring your creative vision to life.
+          </ResponsiveTypography>
+        </div>
+
+        <ResponsiveGrid cols={{ xs: 1, sm: 2, md: 2, lg: 3 }}>
+          {features.map((feature, index) => (
+            <Card key={index} className="text-center hover-elevate transition-all duration-300 h-full" data-testid={`feature-${index}`}>
+              <CardHeader>
+                <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                  <feature.icon className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
+                </div>
+                <CardTitle className="text-lg sm:text-xl">{feature.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm sm:text-base text-muted-foreground">{feature.description}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </ResponsiveGrid>
+      </ResponsiveSection>
 
       {/* Featured Talent & Projects */}
-      <section className="py-24">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Discover Amazing Talent & Projects</h2>
-            <p className="text-xl text-muted-foreground">
-              Connect with verified professionals and exciting opportunities in Nollywood
-            </p>
-          </div>
+      <ResponsiveSection padding="large">
+        <div className="text-center mb-12 sm:mb-16">
+          <ResponsiveTypography variant="h2" align="center">
+            Discover Amazing Talent & Projects
+          </ResponsiveTypography>
+          <ResponsiveTypography variant="p" className="text-muted-foreground mt-4">
+            Connect with verified professionals and exciting opportunities in Nollywood
+          </ResponsiveTypography>
+        </div>
 
-          {/* Tab Navigation */}
-          <div className="flex justify-center mb-12">
-            <div className="inline-flex rounded-lg border p-1 bg-muted">
-              {[
-                { id: "actors", label: "Featured Actors", icon: Users },
-                { id: "crew", label: "Top Crew", icon: Film },
-                { id: "producers", label: "Leading Producers", icon: Briefcase }
-              ].map((tab) => (
-                <Button
-                  key={tab.id}
-                  variant={selectedTab === tab.id ? "default" : "ghost"}
-                  className="flex items-center gap-2"
-                  onClick={() => setSelectedTab(tab.id as any)}
-                  data-testid={`tab-${tab.id}`}
-                >
-                  <tab.icon className="w-4 h-4" />
-                  {tab.label}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          {/* Featured Content */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Featured Profiles */}
-            {featuredProfiles[selectedTab].map((profile) => (
-              <ProfileCard key={profile.id} {...profile} />
+        {/* Tab Navigation */}
+        <div className="flex justify-center mb-8 sm:mb-12">
+          <div className="inline-flex rounded-lg border p-1 bg-muted flex-wrap">
+            {[
+              { id: "actors", label: "Featured Actors", icon: Users },
+              { id: "crew", label: "Top Crew", icon: Film },
+              { id: "producers", label: "Leading Producers", icon: Briefcase }
+            ].map((tab) => (
+              <Button
+                key={tab.id}
+                variant={selectedTab === tab.id ? "default" : "ghost"}
+                className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
+                onClick={() => setSelectedTab(tab.id as any)}
+                data-testid={`tab-${tab.id}`}
+              >
+                <tab.icon className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden xs:inline">{tab.label}</span>
+                <span className="xs:hidden">{tab.id.charAt(0).toUpperCase() + tab.id.slice(1)}</span>
+              </Button>
             ))}
-
-            {/* Featured Job */}
-            <JobCard {...featuredJobs[0]} />
-
-            {/* Featured Project */}
-            <ProjectCard {...featuredProjects[0]} />
-          </div>
-
-          <div className="text-center mt-12">
-            <Button size="lg" data-testid="button-explore-more">
-              Explore More
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
           </div>
         </div>
-      </section>
+
+        {/* Featured Content */}
+        <ResponsiveGrid cols={{ xs: 1, sm: 2, md: 2, lg: 3 }}>
+          {/* Featured Profiles */}
+          {featuredProfiles[selectedTab].map((profile) => (
+            <ProfileCard key={profile.id} {...profile} />
+          ))}
+
+          {/* Featured Job */}
+          <JobCard {...featuredJobs[0]} />
+
+          {/* Featured Project */}
+          <ProjectCard {...featuredProjects[0]} />
+        </ResponsiveGrid>
+
+        <div className="text-center mt-8 sm:mt-12">
+          <ResponsiveButton
+            size="lg"
+            data-testid="button-explore-more"
+            icon={<ArrowRight className="w-4 h-4 ml-2" />}
+            iconPosition="right"
+          >
+            Explore More
+          </ResponsiveButton>
+        </div>
+      </ResponsiveSection>
 
       {/* Testimonials */}
-      <section className="py-24 bg-muted/50">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">What Industry Leaders Say</h2>
-            <p className="text-xl text-muted-foreground">
-              Trusted by Nigeria's top filmmakers and creative professionals
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <Card key={index} className="hover-elevate transition-all duration-300" data-testid={`testimonial-${index}`}>
-                <CardHeader>
-                  <div className="flex items-start gap-3">
-                    <Quote className="w-8 h-8 text-primary flex-shrink-0 mt-1" />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-1 mb-2">
-                        {[...Array(testimonial.rating)].map((_, i) => (
-                          <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        ))}
-                      </div>
-                      <p className="text-muted-foreground italic">
-                        "{testimonial.quote}"
-                      </p>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                      <span className="text-sm font-semibold text-primary">
-                        {testimonial.name.split(' ').map(n => n[0]).join('')}
-                      </span>
-                    </div>
-                    <div>
-                      <div className="font-semibold">{testimonial.name}</div>
-                      <div className="text-sm text-muted-foreground">{testimonial.role}</div>
-                      <div className="text-xs text-muted-foreground">{testimonial.company}</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+      <ResponsiveSection 
+        padding="large" 
+        background="muted"
+      >
+        <div className="text-center mb-12 sm:mb-16">
+          <ResponsiveTypography variant="h2" align="center">
+            What Industry Leaders Say
+          </ResponsiveTypography>
+          <ResponsiveTypography variant="p" className="text-muted-foreground mt-4">
+            Trusted by Nigeria's top filmmakers and creative professionals
+          </ResponsiveTypography>
         </div>
-      </section>
+
+        <ResponsiveGrid cols={{ xs: 1, sm: 2, md: 2, lg: 3 }}>
+          {testimonials.map((testimonial, index) => (
+            <Card key={index} className="hover-elevate transition-all duration-300 h-full" data-testid={`testimonial-${index}`}>
+              <CardHeader>
+                <div className="flex items-start gap-2 sm:gap-3">
+                  <Quote className="w-6 h-6 sm:w-8 sm:h-8 text-primary flex-shrink-0 mt-1" />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-1 mb-2">
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <Star key={i} className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
+                      ))}
+                    </div>
+                    <p className="text-sm sm:text-base text-muted-foreground italic">
+                      "{testimonial.quote}"
+                    </p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                    <span className="text-xs sm:text-sm font-semibold text-primary">
+                      {testimonial.name.split(' ').map(n => n[0]).join('')}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="font-semibold text-sm sm:text-base">{testimonial.name}</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground">{testimonial.role}</div>
+                    <div className="text-xs text-muted-foreground hidden sm:block">{testimonial.company}</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </ResponsiveGrid>
+      </ResponsiveSection>
 
       {/* CTA Section */}
-      <section className="py-24">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+      <ResponsiveSection padding="large">
+        <div className="max-w-4xl mx-auto text-center">
+          <ResponsiveTypography variant="h2" align="center">
             Ready to Transform Your 
             <span className="bg-gradient-to-r from-primary to-yellow-600 bg-clip-text text-transparent">
               {" "}Film Career?
             </span>
-          </h2>
-          <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto">
+          </ResponsiveTypography>
+          <ResponsiveTypography variant="p" className="text-muted-foreground mb-8 sm:mb-12 max-w-2xl mx-auto mt-4">
             Join thousands of Nollywood professionals already using NollyCrew to find opportunities, 
             collaborate on projects, and grow their careers.
-          </p>
+          </ResponsiveTypography>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          <ResponsiveGrid cols={{ xs: 1, sm: 3 }} className="mb-8 sm:mb-12">
             {[
               { step: "1", title: "Create Profile", desc: "Showcase your skills and experience" },
               { step: "2", title: "Get Matched", desc: "AI finds the perfect opportunities for you" },
               { step: "3", title: "Start Creating", desc: "Collaborate on amazing film projects" }
             ].map((step) => (
               <div key={step.step} className="flex flex-col items-center" data-testid={`step-${step.step}`}>
-                <div className="w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xl font-bold mb-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-lg sm:text-xl font-bold mb-3 sm:mb-4">
                   {step.step}
                 </div>
-                <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
-                <p className="text-muted-foreground text-center">{step.desc}</p>
+                <ResponsiveTypography variant="h5" align="center" className="mb-1 sm:mb-2">
+                  {step.title}
+                </ResponsiveTypography>
+                <p className="text-xs sm:text-sm text-muted-foreground text-center">{step.desc}</p>
               </div>
             ))}
-          </div>
+          </ResponsiveGrid>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="px-8 py-4 text-lg" data-testid="button-start-free">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+            <ResponsiveButton
+              size="lg"
+              className="px-6 py-3 sm:px-8 sm:py-4"
+              data-testid="button-start-free"
+              icon={<CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />}
+              iconPosition="right"
+            >
               Start Free Today
-              <CheckCircle className="w-5 h-5 ml-2" />
-            </Button>
-            <Button variant="outline" size="lg" className="px-8 py-4 text-lg" data-testid="button-book-demo">
+            </ResponsiveButton>
+            <ResponsiveButton
+              variant="outline"
+              size="lg"
+              className="px-6 py-3 sm:px-8 sm:py-4"
+              data-testid="button-book-demo"
+            >
               Book a Demo
-            </Button>
+            </ResponsiveButton>
           </div>
 
-          <div className="flex items-center justify-center gap-8 mt-12 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-500" />
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 mt-8 sm:mt-12 text-xs sm:text-sm text-muted-foreground">
+            <div className="flex items-center gap-1 sm:gap-2">
+              <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-green-500" />
               Free to get started
             </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-500" />
+            <div className="flex items-center gap-1 sm:gap-2">
+              <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-green-500" />
               No credit card required
             </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-500" />
+            <div className="flex items-center gap-1 sm:gap-2">
+              <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-green-500" />
               Cancel anytime
             </div>
           </div>
         </div>
-      </section>
+      </ResponsiveSection>
 
       {/* Footer */}
-      <footer className="bg-muted/50 border-t py-16">
+      <footer className="bg-muted/50 border-t py-12 sm:py-16">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="md:col-span-2">
               <div className="flex items-center gap-2 mb-4">
-                <Film className="w-8 h-8 text-primary" />
-                <span className="text-xl font-bold font-serif">NollyCrew</span>
+                <Film className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
+                <span className="text-lg sm:text-xl font-bold font-serif">NollyCrew</span>
               </div>
-              <p className="text-muted-foreground mb-6 max-w-md">
+              <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6 max-w-md">
                 The all-in-one platform connecting actors, crew, and producers in Nigeria's 
                 thriving film industry. From script to screen, we make filmmaking collaboration seamless.
               </p>
               <div className="flex gap-2">
-                <Badge variant="secondary">Made in Nigeria</Badge>
-                <Badge variant="secondary">For Nollywood</Badge>
+                <Badge variant="secondary" className="text-xs">Made in Nigeria</Badge>
+                <Badge variant="secondary" className="text-xs">For Nollywood</Badge>
               </div>
             </div>
 
             <div>
-              <h4 className="font-semibold mb-4">Platform</h4>
+              <h4 className="font-semibold mb-3 sm:mb-4">Platform</h4>
               <div className="space-y-2 text-sm">
                 <div className="text-muted-foreground hover:text-foreground cursor-pointer">Find Jobs</div>
                 <div className="text-muted-foreground hover:text-foreground cursor-pointer">Find Talent</div>
@@ -401,7 +452,7 @@ export default function LandingPage() {
             </div>
 
             <div>
-              <h4 className="font-semibold mb-4">Support</h4>
+              <h4 className="font-semibold mb-3 sm:mb-4">Support</h4>
               <div className="space-y-2 text-sm">
                 <div className="text-muted-foreground hover:text-foreground cursor-pointer">Help Center</div>
                 <div className="text-muted-foreground hover:text-foreground cursor-pointer">Contact Us</div>
@@ -411,11 +462,11 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="border-t mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div className="text-sm text-muted-foreground">
+          <div className="border-t mt-8 sm:mt-12 pt-6 sm:pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="text-xs sm:text-sm text-muted-foreground">
               © 2024 NollyCrew. All rights reserved.
             </div>
-            <div className="text-sm text-muted-foreground">
+            <div className="text-xs sm:text-sm text-muted-foreground">
               Proudly powering the future of Nollywood
             </div>
           </div>

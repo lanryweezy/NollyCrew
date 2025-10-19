@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 
-// Check if we're in a test environment
+// Check if we're in a test or development environment
 const isTestEnv = process.env.NODE_ENV === 'test';
+const isDevEnv = process.env.NODE_ENV === 'development';
 
 // In-memory store for rate limiting
 // In production, use Redis for distributed rate limiting
@@ -9,8 +10,8 @@ const rateLimitStore: Map<string, { count: number; resetTime: number }> = new Ma
 
 // Rate limiting middleware
 export const rateLimiter = (windowMs: number = 900000, maxRequests: number = 100) => {
-  // Skip rate limiting in test environment
-  if (isTestEnv) {
+  // Skip rate limiting in test or development environment
+  if (isTestEnv || isDevEnv) {
     return (req: Request, res: Response, next: NextFunction) => next();
   }
   
