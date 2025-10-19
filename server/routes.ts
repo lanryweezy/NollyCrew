@@ -415,6 +415,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ ok: true });
   });
 
+  // Dashboard route
+  app.get('/api/dashboard', authenticateToken, async (req: any, res) => {
+    try {
+      const dashboardData = await storage.getDashboardData(req.user.id);
+      res.json(dashboardData);
+    } catch (error) {
+      logger.error('Dashboard data error', { error: (error as Error).message, userId: req.user?.id });
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   // Paystack Payment Routes
   const paystack = process.env.PAYSTACK_SECRET_KEY ? paystackapi(process.env.PAYSTACK_SECRET_KEY!) : null;
 

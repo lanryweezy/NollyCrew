@@ -26,7 +26,7 @@ import {
   reviews
 } from "../shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, and, desc, count } from "drizzle-orm";
 
 export interface IStorage {
   // User management
@@ -76,6 +76,9 @@ export interface IStorage {
   // Reviews
   getUserReviews(userId: string): Promise<Review[]>;
   createReview(review: InsertReview): Promise<Review>;
+
+  // Dashboard
+  getDashboardData(userId: string): Promise<any>;
 }
 
 export class DbStorage implements IStorage {
@@ -304,6 +307,45 @@ export class DbStorage implements IStorage {
   async createReview(review: InsertReview): Promise<Review> {
     const result = await db.insert(reviews).values(review).returning();
     return result[0];
+  }
+
+  async getDashboardData(userId: string): Promise<any> {
+    const [
+      recentProjects,
+      recentApplications,
+      unreadMessagesCountResult,
+      userProfile,
+    ] = await Promise.all([
+      db.query.projects.findMany({
+        where: eq(projects.createdById, userId),
+        orderBy: [desc(projects.createdAt)],
+        limit: 3,
+      }),
+      db.select({
+          id: jobApplications.id,
+          jobId: jobApplications.jobId,
+          status: jobApplications.status,
+          appliedAt: jobApplications.appliedAt,
+          jobTitle: jobs.title,
+          coverLetter: jobApplications.coverLetter,
+        })
+        .from(jobApplications)
+        .leftJoin(jobs, eq(jobApplications.jobId, jobs.id))
+        .where(eq(jobApplications.applicantId, userId))
+        .orderBy(desc(jobApplications.appliedAt))
+        .limit(3),
+      db.select({ count: count() })
+        .from(messages)
+        .where(and(eq(messages.recipientId, userId), eq(messages.isRead, false))),
+      this.getUser(userId),
+    ]);
+
+    return {
+      recentProjects,
+      recentApplications,
+      unreadMessagesCount: unreadMessagesCountResult[0]?.count || 0,
+      user: userProfile ? { id: userProfile.id, email: userProfile.email, firstName: userProfile.firstName, lastName: userProfile.lastName } : null,
+    };
   }
 }
 

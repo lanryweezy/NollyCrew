@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { useAuth } from "@/lib/auth";
+import { useAuth, authService } from "@/lib/auth";
+import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
 import ThemeToggle from "@/components/ThemeToggle";
 import DashboardStats, { getStatsForRole } from "@/components/DashboardStats";
@@ -8,19 +9,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { 
   Film, 
   Users, 
   Briefcase, 
   Calendar,
   TrendingUp,
-  Star,
   Clock,
   MapPin,
   ArrowRight,
   Plus,
   Bell,
-  MessageSquare
+  MessageSquare,
+  AlertTriangle
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import ResponsiveGrid from "@/components/ResponsiveGrid";
@@ -28,109 +31,42 @@ import ResponsiveSection from "@/components/ResponsiveSection";
 import ResponsiveButton from "@/components/ResponsiveButton";
 import ResponsiveTypography from "@/components/ResponsiveTypography";
 
+const fetchDashboardData = async () => {
+  const token = authService.getToken();
+  if (!token) {
+    throw new Error("No auth token found");
+  }
+  const response = await fetch("/api/dashboard", {
+    headers: {
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Failed to fetch dashboard data' }));
+    throw new Error(error.error);
+  }
+  return response.json();
+};
+
 export default function Dashboard() {
   const [, setLocation] = useLocation();
   const { user, roles } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
 
-  // Mock data for dashboard
-  const mockStats = {
-    totalJobs: 24,
-    applications: 8,
-    projects: 3,
-    connections: 156
-  };
-
-  const recentJobs = [
-    {
-      id: "1",
-      title: "Lead Actor - Romantic Drama",
-      company: "Trino Studios",
-      location: "Lagos, Nigeria",
-      budget: "₦2M - ₦5M",
-      deadline: "Dec 30, 2024",
-      applicants: 45,
-      isUrgent: true,
-      type: "casting"
-    },
-    {
-      id: "2", 
-      title: "Cinematographer - Action Film",
-      company: "FilmOne Productions",
-      location: "Abuja, Nigeria",
-      budget: "₦1.5M - ₦3M",
-      deadline: "Jan 15, 2025",
-      applicants: 23,
-      isUrgent: false,
-      type: "crew"
-    }
-  ];
-
-  const recentProjects = [
-    {
-      id: "1",
-      title: "Love in Lagos",
-      genre: "Romantic Drama",
-      status: "production",
-      progress: 65,
-      budget: "₦50M",
-      director: "Kemi Adetiba",
-      startDate: "Nov 2024",
-      deadline: "Mar 2025",
-      teamSize: 45
-    },
-    {
-      id: "2",
-      title: "The Set Up 3",
-      genre: "Action Thriller", 
-      status: "pre-production",
-      progress: 25,
-      budget: "₦80M",
-      director: "Niyi Akinmolayan",
-      startDate: "Feb 2025",
-      deadline: "Jun 2025",
-      teamSize: 60
-    }
-  ];
-
-  const notifications = [
-    {
-      id: "1",
-      type: "job_application",
-      title: "New application received",
-      message: "John Doe applied for Lead Actor position",
-      time: "2 hours ago",
-      isRead: false
-    },
-    {
-      id: "2",
-      type: "project_update",
-      title: "Project milestone completed",
-      message: "Love in Lagos - Production phase 65% complete",
-      time: "1 day ago",
-      isRead: true
-    },
-    {
-      id: "3",
-      type: "connection",
-      title: "New connection request",
-      message: "Funke Akindele wants to connect",
-      time: "2 days ago",
-      isRead: false
-    }
-  ];
+  const { data: dashboardData, isLoading, isError, error } = useQuery({
+    queryKey: ["dashboardData"],
+    queryFn: fetchDashboardData,
+  });
 
   const getPrimaryRole = () => {
     if (roles.length === 0) return "actor";
-    return roles[0].role;
+    return roles[0].role as "actor" | "crew" | "producer";
   };
 
   const primaryRole = getPrimaryRole();
   const roleStats = getStatsForRole(primaryRole);
 
   const getRoleBasedContent = () => {
-    const primaryRole = getPrimaryRole();
-    
     switch (primaryRole) {
       case "actor":
         return {
@@ -159,7 +95,7 @@ export default function Dashboard() {
           quickActions: [
             { label: "Post Casting Call", icon: Plus, action: () => setLocation("/jobs") },
             { label: "Manage Projects", icon: Film, action: () => setLocation("/projects") },
-            { label: "Browse Talent", icon: Users, action: () => setLocation("/jobs") }
+            { label: "Browse Talent", icon: Users, action: () => setLocation("/talent") }
           ]
         };
       default:
@@ -177,13 +113,32 @@ export default function Dashboard() {
 
   const roleContent = getRoleBasedContent();
 
+  const stats = getStatsForRole(primaryRole, dashboardData);
+
+  if (isLoading) {
+    return <DashboardSkeleton />;
+  }
+
+  if (isError) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Alert variant="destructive" className="max-w-lg">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>
+            Failed to load dashboard data. {error.message}
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
       <div className="relative">
         <Navigation 
           isAuthenticated={true}
-          userRole={getPrimaryRole()}
+          userRole={primaryRole}
           userName={`${user?.firstName} ${user?.lastName}`}
         />
         <div className="absolute top-4 right-4 z-50">
@@ -230,10 +185,9 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            {/* Tabs for Jobs/Projects */}
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="overview">Recent Jobs</TabsTrigger>
+                <TabsTrigger value="overview">Recent Applications</TabsTrigger>
                 <TabsTrigger value="projects">My Projects</TabsTrigger>
               </TabsList>
               
@@ -287,7 +241,7 @@ export default function Dashboard() {
               </TabsContent>
 
               <TabsContent value="projects" className="space-y-4">
-                {recentProjects.map((project) => (
+                {dashboardData?.recentProjects.map((project: any) => (
                   <Card key={project.id} className="hover:shadow-md transition-shadow">
                     <CardContent className="p-4 sm:p-6">
                       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
@@ -377,7 +331,6 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            {/* Recent Connections */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">

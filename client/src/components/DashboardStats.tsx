@@ -92,10 +92,23 @@ export const getStatsForRole = (role: "actor" | "crew" | "producer"): StatCardPr
       },
       {
         title: "Applications Sent",
-        value: 23,
-        change: -5.2,
-        changeLabel: "vs last month",
+        value: data?.recentApplications?.length || 0,
         icon: Briefcase,
+      },
+      {
+        title: "Unread Messages",
+        value: data?.unreadMessagesCount || 0,
+        icon: MessageCircle,
+      },
+      {
+        title: "Profile Views",
+        value: "Coming Soon",
+        icon: Eye,
+      },
+      {
+        title: "Average Rating",
+        value: "Coming Soon",
+        icon: Star,
         trend: "down"
       },
       {
@@ -117,11 +130,24 @@ export const getStatsForRole = (role: "actor" | "crew" | "producer"): StatCardPr
     ],
     crew: [
       {
-        title: "Job Offers",
-        value: 15,
-        change: 25.0,
-        changeLabel: "this month",
+        title: "Active Projects",
+        value: data?.recentProjects?.length || 0,
         icon: Briefcase,
+      },
+      {
+        title: "Unread Messages",
+        value: data?.unreadMessagesCount || 0,
+        icon: MessageCircle,
+      },
+      {
+        title: "Job Offers",
+        value: "Coming Soon",
+        icon: Briefcase,
+      },
+      {
+        title: "Total Earnings",
+        value: "Coming Soon",
+        icon: DollarSign,
         trend: "up"
       },
       {
@@ -152,25 +178,24 @@ export const getStatsForRole = (role: "actor" | "crew" | "producer"): StatCardPr
     producer: [
       {
         title: "Active Projects",
-        value: 8,
-        change: 14.3,
-        changeLabel: "new this quarter",
+        value: data?.recentProjects?.length || 0,
         icon: Briefcase,
+      },
+      {
+        title: "Unread Messages",
+        value: data?.unreadMessagesCount || 0,
+        icon: MessageCircle,
         trend: "up"
       },
       {
         title: "Team Members",
-        value: 342,
-        change: 8.1,
-        changeLabel: "hired",
+        value: "Coming Soon",
         icon: Users,
         trend: "up"
       },
       {
         title: "Total Budget",
-        value: "₦450M",
-        change: 22.5,
-        changeLabel: "allocated",
+        value: "Coming Soon",
         icon: DollarSign,
         trend: "up"
       },
