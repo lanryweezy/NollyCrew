@@ -1,5 +1,4 @@
 {
-  "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "dist/server",
     "rootDir": ".",
@@ -16,7 +15,8 @@
     "baseUrl": ".",
     "paths": {
       "@shared/*": ["./shared/*"]
-    }
+    },
+    "resolveJsonModule": true
   },
   "include": ["server/**/*", "shared/**/*", "types/**/*.d.ts"],
   "exclude": [
