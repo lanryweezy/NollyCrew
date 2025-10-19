@@ -11,7 +11,7 @@
     "build": "npm run build:client && npm run build:server",
     "build:client": "vite build",
     "build:server": "tsc -p tsconfig.server.json",
-    "start": "cross-env NODE_ENV=production node dist/server/index.js",
+    "start": "cross-env NODE_ENV=production node dist/server/server/index.js",
     "worker": "cross-env NODE_ENV=production WORKER=true node dist/server/worker.js",
     "check": "tsc",
     "test": "vitest",
