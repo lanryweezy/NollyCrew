@@ -1,7 +1,7 @@
 import { WebSocketServer, WebSocket } from 'ws';
-import { verify as jwtVerify } from './utils/jwt';
-import { storage } from './storage';
-import { logger } from './utils/logger';
+import { verify as jwtVerify } from './utils/jwt.js';
+import { storage } from './storage.js';
+import { logger } from './utils/logger.js';
 
 // JWT secret
 const JWT_SECRET = process.env.JWT_SECRET || "your-super-secret-jwt-key";

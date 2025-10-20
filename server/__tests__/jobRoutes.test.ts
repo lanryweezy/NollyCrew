@@ -61,7 +61,9 @@ describe('Job Routes', () => {
         type: 'casting',
         category: 'lead-actor',
         location: 'Lagos',
-        postedById: '123'
+        postedById: '123',
+        currency: 'NGN',
+        isActive: true
       };
 
       // Mock JWT verification
@@ -90,7 +92,9 @@ describe('Job Routes', () => {
         type: 'casting',
         category: 'lead-actor',
         location: 'Lagos',
-        postedById: '123'
+        postedById: '123',
+        currency: 'NGN',
+        isActive: true
       });
     });
   });

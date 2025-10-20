@@ -310,7 +310,7 @@ export default function EnhancedDashboard() {
         />
 
         {/* Stats Overview */}
-        <ResponsiveGrid cols={{ xs: 2, sm: 2, md: 4 }} className="mb-6 sm:mb-8">
+        <ResponsiveGrid data-testid="stats-grid" cols={{ xs: 2, sm: 2, md: 4 }} className="mb-6 sm:mb-8">
           {statsCards.map((stat, index) => (
             <Card key={index} className="hover:shadow-md transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

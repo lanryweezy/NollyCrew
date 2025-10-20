@@ -1,24 +1,24 @@
 {
   "compilerOptions": {
     "outDir": "dist/server",
-    "rootDir": ".",
+    "rootDir": "server",
     "noEmit": false,
     "allowImportingTsExtensions": false,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "module": "ESNext",
+    "module": "NodeNext",
     "target": "ES2022",
-    "moduleResolution": "node",
+    "moduleResolution": "NodeNext",
     "jsx": "preserve",
     "types": ["node"],
     "baseUrl": ".",
     "paths": {
-      "@shared/*": ["./shared/*"]
+      "@shared/*": ["shared/*"]
     },
     "resolveJsonModule": true
   },
-  "include": ["server/**/*", "shared/**/*", "types/**/*.d.ts"],
+  "include": ["server", "shared", "types"],
   "exclude": [
     "node_modules",
     "dist",
