@@ -4,11 +4,12 @@ import {
   generatePerformanceBenchmarks, 
   generateTrendAnalysis 
 } from '../analytics';
+import { vi } from 'vitest';
 
 // Mock storage module
-jest.mock('../storage', () => ({
+vi.mock('../storage', () => ({
   storage: {
-    getProjects: jest.fn().mockResolvedValue([
+    getProjects: vi.fn().mockResolvedValue([
       {
         id: 'project-1',
         title: 'Test Project',

@@ -9,8 +9,14 @@ vi.mock('../lib/auth', () => ({
 }));
 
 // Mock wouter
+const mockSetLocation = vi.fn();
 vi.mock('wouter', () => ({
-  useLocation: () => [null, vi.fn()]
+  useLocation: () => [null, mockSetLocation]
+}));
+
+// Mock Skeleton component
+vi.mock('../components/ui/skeleton', () => ({
+  Skeleton: () => <div data-testid="skeleton" />
 }));
 
 describe('ProtectedRoute', () => {
@@ -41,14 +47,10 @@ describe('ProtectedRoute', () => {
 
     render(<ProtectedRoute>{mockChildren}</ProtectedRoute>);
     
-    expect(screen.getByTestId('skeleton')).toBeInTheDocument();
+    expect(screen.getAllByTestId('skeleton').length).toBeGreaterThan(0);
   });
 
   it('should redirect to login when not authenticated and not loading', async () => {
-    const mockSetLocation = vi.fn();
-    vi.mock('wouter', () => ({
-      useLocation: () => [null, mockSetLocation]
-    }));
     
     (useAuth as any).mockReturnValue({
       isAuthenticated: false,
@@ -64,10 +66,6 @@ describe('ProtectedRoute', () => {
   });
 
   it('should redirect to onboarding when authenticated but no roles', async () => {
-    const mockSetLocation = vi.fn();
-    vi.mock('wouter', () => ({
-      useLocation: () => [null, mockSetLocation]
-    }));
     
     (useAuth as any).mockReturnValue({
       isAuthenticated: true,

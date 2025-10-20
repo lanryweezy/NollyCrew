@@ -13,6 +13,8 @@ vi.mock('../lib/websocket', () => ({
   }),
 }));
 
+window.HTMLElement.prototype.scrollIntoView = vi.fn();
+
 describe('RealTimeChat', () => {
   const mockUsers = [
     { id: '1', name: 'John Doe', isOnline: true },
