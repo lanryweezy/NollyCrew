@@ -1,7 +1,7 @@
 import Queue from 'bull';
-import * as ai from './ai';
-import { storage } from './storage';
-import { logger } from './utils/logger';
+import * as ai from './ai.js';
+import { storage } from './storage.js';
+import { logger } from './utils/logger.js';
 
 // Disable Redis functionality entirely
 const redisAvailable = false;

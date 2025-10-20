@@ -1,4 +1,4 @@
-import { scriptAnalysisQueue, scheduleOptimizationQueue, castingRecommendationQueue, marketingContentQueue } from './queue';
+import { scriptAnalysisQueue, scheduleOptimizationQueue, castingRecommendationQueue, marketingContentQueue } from './queue.js';
 
 // This module initializes Bull processors when launched as a worker process.
 // If the web server imports it, the processors are already registered in queue.ts
