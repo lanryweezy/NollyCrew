@@ -5,7 +5,7 @@ import { registerRoutes } from './routes';
 import { Server } from 'http';
 import { storage } from './storage';
 import bcrypt from 'bcryptjs';
-import * as jwt from 'jsonwebtoken';
+import { sign, verify } from './utils/jwt.js';
 
 // Mock the storage module
 vi.mock('./storage', () => {
@@ -17,12 +17,12 @@ vi.mock('./storage', () => {
 });
 
 // Mock JWT
-vi.mock('jsonwebtoken', () => {
-  return {
-    sign: vi.fn(),
-    verify: vi.fn(),
-  };
-});
+vi.mock('./utils/jwt.js', () => ({
+  sign: vi.fn(),
+  verify: vi.fn(),
+}));
+
+vi.mock('bcryptjs');
 
 describe('Auth Routes', () => {
   let app: express.Express;
@@ -54,7 +54,8 @@ describe('Auth Routes', () => {
 
       (storage.getUserByEmail as any).mockResolvedValue(null);
       (storage.createUser as any).mockResolvedValue({ ...newUser, id: '1', passwordHash: 'hashedpassword' });
-      (jwt.sign as any).mockReturnValue('mockToken');
+      (sign as any).mockReturnValue('mockToken');
+      (bcrypt.hash as any).mockResolvedValue('hashedpassword');
 
       const response = await request(app).post('/api/auth/register').send(newUser);
 
@@ -89,8 +90,8 @@ describe('Auth Routes', () => {
       };
 
       (storage.getUserByEmail as any).mockResolvedValue(user);
-      (bcrypt.compare as any).mockResolvedValue(true); // Mock bcrypt.compare to return true for correct password
-      (jwt.sign as any).mockReturnValue('mockToken');
+      (bcrypt.compare as any).mockImplementation((password, hash) => password === 'password123');
+      (sign as any).mockReturnValue('mockToken');
 
       const response = await request(app).post('/api/auth/login').send({ email: user.email, password: user.password });
 
