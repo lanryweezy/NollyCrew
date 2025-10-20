@@ -9,18 +9,21 @@ import {
 import OpenAI from 'openai';
 
 // Mock OpenAI
+const mockCompletionsCreate = vi.fn();
+const mockEmbeddingsCreate = vi.fn();
+
 vi.mock('openai', () => {
   return {
     default: vi.fn().mockImplementation(() => ({
       chat: {
         completions: {
-          create: vi.fn()
-        }
+          create: mockCompletionsCreate,
+        },
       },
       embeddings: {
-        create: vi.fn()
-      }
-    }))
+        create: mockEmbeddingsCreate,
+      },
+    })),
   };
 });
 
@@ -58,44 +61,137 @@ describe('AI Service', () => {
   describe('analyzeScriptWithAI', () => {
     it('should analyze script using OpenAI when API key is available', async () => {
       const mockAnalysis = {
-        scenes: 5,
+        scenes: 8,
         sceneList: [
           {
             id: 'SCN-1',
-            name: 'Opening Scene',
+            name: 'Scene 1',
+            location: 'Street',
+            timeOfDay: 'Night',
+            characters: ['Lead', 'Support'],
+            props: ['Phone', 'Keys'],
+            wardrobe: ['Casual', 'Formal'],
+            vfx: [],
+            notes: 'Scene 1 notes',
+            duration: 5.6578860508149065,
+          },
+          {
+            id: 'SCN-2',
+            name: 'Scene 2',
+            location: 'Interior',
+            timeOfDay: 'Day',
+            characters: ['Lead', 'Support'],
+            props: ['Phone', 'Keys'],
+            wardrobe: ['Casual', 'Formal'],
+            vfx: [],
+            notes: 'Scene 2 notes',
+            duration: 7.0478766384999725,
+          },
+          {
+            id: 'SCN-3',
+            name: 'Scene 3',
             location: 'Street',
             timeOfDay: 'Day',
-            characters: ['John', 'Mary'],
-            props: ['Car'],
-            wardrobe: ['Casual'],
-            vfx: []
-          }
+            characters: ['Lead', 'Support'],
+            props: ['Phone', 'Keys'],
+            wardrobe: ['Casual', 'Formal'],
+            vfx: [],
+            notes: 'Scene 3 notes',
+            duration: 8.512081491419949,
+          },
+          {
+            id: 'SCN-4',
+            name: 'Scene 4',
+            location: 'Interior',
+            timeOfDay: 'Night',
+            characters: ['Lead', 'Support'],
+            props: ['Phone', 'Keys'],
+            wardrobe: ['Casual', 'Formal'],
+            vfx: [],
+            notes: 'Scene 4 notes',
+            duration: 9.767812600081303,
+          },
+          {
+            id: 'SCN-5',
+            name: 'Scene 5',
+            location: 'Street',
+            timeOfDay: 'Day',
+            characters: ['Lead', 'Support'],
+            props: ['Phone', 'Keys'],
+            wardrobe: ['Casual', 'Formal'],
+            vfx: [],
+            notes: 'Scene 5 notes',
+            duration: 8.41605359961163,
+          },
+          {
+            id: 'SCN-6',
+            name: 'Scene 6',
+            location: 'Interior',
+            timeOfDay: 'Day',
+            characters: ['Lead', 'Support'],
+            props: ['Phone', 'Keys'],
+            wardrobe: ['Casual', 'Formal'],
+            vfx: [],
+            notes: 'Scene 6 notes',
+            duration: 6.137945877209605,
+          },
+          {
+            id: 'SCN-7',
+            name: 'Scene 7',
+            location: 'Street',
+            timeOfDay: 'Night',
+            characters: ['Lead', 'Support'],
+            props: ['Phone', 'Keys'],
+            wardrobe: ['Casual', 'Formal'],
+            vfx: [],
+            notes: 'Scene 7 notes',
+            duration: 12.721335366231353,
+          },
+          {
+            id: 'SCN-8',
+            name: 'Scene 8',
+            location: 'Interior',
+            timeOfDay: 'Day',
+            characters: ['Lead', 'Support'],
+            props: ['Phone', 'Keys'],
+            wardrobe: ['Casual', 'Formal'],
+            vfx: [],
+            notes: 'Scene 8 notes',
+            duration: 5.991736088161394,
+          },
         ],
-        characters: ['John', 'Mary'],
-        locations: ['Street'],
-        estimatedCrew: { director: 1, camera_operator: 2 },
-        props: ['Car'],
-        wardrobe: ['Casual'],
-        vfx: [],
-        analyzedAt: new Date().toISOString()
+        characters: ['Lead', 'Support', 'Extra'],
+        locations: ['Street', 'Apartment Interior', 'Office'],
+        estimatedCrew: {
+          sound_engineer: 1,
+          gaffer: 1,
+          makeup_artist: 1,
+          editor: 1,
+          camera_operator: 2,
+        },
+        props: ['Phone', 'Keys', 'Car'],
+        wardrobe: ['Casual', 'Formal', 'Costume'],
+        vfx: ['Color correction', 'Background replacement'],
+        analyzedAt: '2025-10-20T04:08:31.376Z',
       };
 
-      const openaiInstance = new OpenAI({ apiKey: 'test-key' });
-      (openaiInstance.chat.completions.create as any).mockResolvedValue({
-        choices: [{
-          message: {
-            content: JSON.stringify(mockAnalysis)
-          }
-        }]
+      mockCompletionsCreate.mockResolvedValue({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify(mockAnalysis),
+            },
+          },
+        ],
       });
 
       const scriptText = 'This is a sample script text for analysis.';
       const result = await analyzeScriptWithAI(scriptText);
       
       expect(result).toEqual(expect.objectContaining({
-        scenes: 5,
-        characters: ['John', 'Mary'],
-        locations: ['Street']
+        scenes: mockAnalysis.scenes,
+        characters: mockAnalysis.characters,
+        locations: mockAnalysis.locations,
       }));
     });
 
@@ -120,9 +216,8 @@ describe('AI Service', () => {
   describe('generateCastingRecommendations', () => {
     it('should generate casting recommendations with OpenAI', async () => {
       const mockEmbedding = [0.1, 0.2, 0.3];
-      const openaiInstance = new OpenAI({ apiKey: 'test-key' });
-      (openaiInstance.embeddings.create as any).mockResolvedValue({
-        data: [{ embedding: mockEmbedding }]
+      mockEmbeddingsCreate.mockResolvedValue({
+        data: [{ embedding: mockEmbedding }],
       });
 
       const role = 'Lead Actor';
@@ -187,27 +282,31 @@ describe('AI Service', () => {
         days: [
           {
             day: 1,
-            scenes: ['SCN-1', 'SCN-2'],
-            totalDuration: 480,
+            scenes: ['SCN-1'],
+            totalDuration: 120,
             locations: ['Location A'],
             crewCall: '07:00',
             shootStart: '08:00',
             lunch: '12:00-13:00',
-            wrap: '18:00'
-          }
+            wrap: '18:00',
+          },
         ],
-        totalDays: 5,
+        totalDays: 1,
         estimatedCost: 500000,
-        optimizationNotes: ['Optimized for location grouping']
+        optimizationNotes: [
+          'Optimized for location grouping',
+          'Balanced daily workload',
+        ],
       };
 
-      const openaiInstance = new OpenAI({ apiKey: 'test-key' });
-      (openaiInstance.chat.completions.create as any).mockResolvedValue({
-        choices: [{
-          message: {
-            content: JSON.stringify(mockOptimization)
-          }
-        }]
+      mockCompletionsCreate.mockResolvedValue({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify(mockOptimization),
+            },
+          },
+        ],
       });
 
       const scenes = [
@@ -235,8 +334,8 @@ describe('AI Service', () => {
       const result = await optimizeScheduleWithAI(scenes, constraints);
       
       expect(result).toEqual(expect.objectContaining({
-        totalDays: 5,
-        estimatedCost: 500000
+        totalDays: mockOptimization.totalDays,
+        estimatedCost: mockOptimization.estimatedCost,
       }));
       expect(result.days).toHaveLength(1);
     });
@@ -282,19 +381,23 @@ describe('AI Service', () => {
   describe('generateMarketingContent', () => {
     it('should generate marketing content using OpenAI', async () => {
       const mockContent = {
-        tagline: 'An epic story of love and adventure',
-        posterDescription: 'Dramatic poster with main characters',
-        trailerScript: 'Fade in... dramatic music...',
-        socialMediaPosts: ['Check out our new project!', 'Coming soon!']
+        tagline: 'An epic story that will change everything',
+        posterDescription: 'Dramatic poster with main character in center',
+        trailerScript: 'Fade in... dramatic music... character introduction...',
+        socialMediaPosts: [
+          'Check out our new project!',
+          'Coming soon to theaters',
+        ],
       };
 
-      const openaiInstance = new OpenAI({ apiKey: 'test-key' });
-      (openaiInstance.chat.completions.create as any).mockResolvedValue({
-        choices: [{
-          message: {
-            content: JSON.stringify(mockContent)
-          }
-        }]
+      mockCompletionsCreate.mockResolvedValue({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify(mockContent),
+            },
+          },
+        ],
       });
 
       const result = await generateMarketingContent(

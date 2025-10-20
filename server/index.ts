@@ -7,10 +7,10 @@ import { registerRoutes } from "./routes.js";
 // import './worker'; // no-op import when running web, worker will early-exit if env flag not set
 import path, { dirname } from "path";
 import { fileURLToPath } from 'url';
-import { logger } from './utils/logger';
-import { errorHandler } from './middleware/errorHandler';
-import { securityMiddleware } from './middleware/security';
-import { initializeWebSocketServer } from './websocket';
+import { logger } from './utils/logger.js';
+import { errorHandler } from './middleware/errorHandler.js';
+import { securityMiddleware } from './middleware/security.js';
+import { initializeWebSocketServer } from './websocket.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

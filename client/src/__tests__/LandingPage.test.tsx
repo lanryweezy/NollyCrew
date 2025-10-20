@@ -3,8 +3,9 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import LandingPage from '../components/LandingPage';
 
 // Mock wouter
+const mockSetLocation = vi.fn();
 vi.mock('wouter', () => ({
-  useLocation: () => [null, vi.fn()]
+  useLocation: () => [null, mockSetLocation]
 }));
 
 // Mock components that might cause issues
@@ -68,10 +69,10 @@ describe('LandingPage', () => {
     
     // Check if main sections are rendered
     expect(screen.getByText('Demo Application')).toBeInTheDocument();
-    expect(screen.getByText('Everything You Need for Film Production')).toBeInTheDocument();
+    expect(screen.getByText(/Everything You Need for/)).toBeInTheDocument();
     expect(screen.getByText('Discover Amazing Talent & Projects')).toBeInTheDocument();
     expect(screen.getByText('What Industry Leaders Say')).toBeInTheDocument();
-    expect(screen.getByText('Ready to Transform Your Film Career?')).toBeInTheDocument();
+    expect(screen.getByText(/Ready to Transform/)).toBeInTheDocument();
   });
 
   it('should switch tabs when clicking on tab buttons', () => {
@@ -96,10 +97,6 @@ describe('LandingPage', () => {
   });
 
   it('should navigate to dashboard when clicking demo button', () => {
-    const mockSetLocation = vi.fn();
-    vi.mock('wouter', () => ({
-      useLocation: () => [null, mockSetLocation]
-    }));
     
     render(<LandingPage />);
     

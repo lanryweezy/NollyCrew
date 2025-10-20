@@ -10,12 +10,14 @@ interface ResponsiveGridProps {
     lg?: number;
     xl?: number;
   };
+  [key: string]: any;
 }
 
 export default function ResponsiveGrid({ 
   children, 
   className = "",
-  cols = { xs: 1, sm: 1, md: 2, lg: 3, xl: 4 }
+  cols = { xs: 1, sm: 1, md: 2, lg: 3, xl: 4 },
+  ...props
 }: ResponsiveGridProps) {
   const getGridClass = () => {
     const classes = [];
@@ -30,7 +32,7 @@ export default function ResponsiveGrid({
   };
 
   return (
-    <div className={`grid gap-4 sm:gap-6 ${getGridClass()} ${className}`}>
+    <div className={`grid gap-4 sm:gap-6 ${getGridClass()} ${className}`} {...props}>
       {children}
     </div>
   );
