@@ -95,6 +95,7 @@ describe('AITools', () => {
     // Check if Casting tab content is shown
     expect(await screen.findByText('Casting Recommendations')).toBeInTheDocument();
     expect(await screen.findByPlaceholderText('e.g., Lead Actor, Cinematographer')).toBeInTheDocument();
+    expect(await screen.findByLabelText('Role')).toBeInTheDocument();
     expect(await screen.findByLabelText('Requirements')).toBeInTheDocument();
   });
 
