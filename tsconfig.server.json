@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "outDir": "dist/server",
-    "rootDir": "server",
+    "rootDir": ".",
     "noEmit": false,
     "allowImportingTsExtensions": false,
     "allowSyntheticDefaultImports": true,
@@ -9,7 +9,7 @@
     "skipLibCheck": true,
     "module": "NodeNext",
     "target": "ES2022",
-    "moduleResolution": "NodeNext",
+    "moduleResolution": "node",
     "jsx": "preserve",
     "types": ["node"],
     "baseUrl": ".",
