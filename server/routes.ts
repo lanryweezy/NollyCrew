@@ -4,9 +4,9 @@ dotenv.config();
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import bcrypt from "bcryptjs";
-import { sign as jwtSign, verify as jwtVerify } from "./utils/jwt";
-import { storage } from "./storage";
-import { insertUserSchema, insertUserRoleSchema, insertJobSchema, insertProjectSchema, insertJobApplicationSchema, insertWaitlistSchema, insertMessageSchema, insertReviewSchema } from "../shared/schema";
+import { sign as jwtSign, verify as jwtVerify } from "./utils/jwt.js";
+import { storage } from "./storage.js";
+import { insertUserSchema, insertUserRoleSchema, insertJobSchema, insertProjectSchema, insertJobApplicationSchema, insertWaitlistSchema, insertMessageSchema, insertReviewSchema } from "../shared/schema.js";
 import { z } from "zod";
 import paystackapi from 'paystack-api';
 // AWS SDK imports - conditional based on environment
@@ -22,7 +22,7 @@ if (process.env.AWS_ACCESS_KEY_ID) {
     console.warn('AWS SDK not available');
   }
 }
-import * as ai from './ai';
+import * as ai from './ai.js';
 import pdf from 'pdf-parse';
 import multer from 'multer';
 import { 
@@ -31,17 +31,17 @@ import {
   castingRecommendationQueue, 
   marketingContentQueue,
   getJobStatus 
-} from './queue';
+} from './queue.js';
 import { 
   getCallSheetTemplates, 
   getCallSheetTemplate, 
   generateCallSheetHTML,
   CallSheetData 
-} from './callSheetTemplates';
-import { rateLimiter, authRateLimiter, apiRateLimiter } from './middleware/rateLimiter';
-import { validateRequest, isValidEmail, isValidPassword } from './middleware/validation';
-import { logger } from './utils/logger';
-import { HealthChecker } from './utils/monitoring';
+} from './callSheetTemplates.js';
+import { rateLimiter, authRateLimiter, apiRateLimiter } from './middleware/rateLimiter.js';
+import { validateRequest, isValidEmail, isValidPassword } from './middleware/validation.js';
+import { logger } from './utils/logger.js';
+import { HealthChecker } from './utils/monitoring.js';
 
 // JWT secrets
 const JWT_SECRET = process.env.JWT_SECRET || "your-super-secret-jwt-key";
@@ -1171,7 +1171,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Analytics routes
-  const { predictProjectSuccess, generateFinancialReport, generatePerformanceBenchmarks, generateTrendAnalysis } = await import('./analytics');
+  const { predictProjectSuccess, generateFinancialReport, generatePerformanceBenchmarks, generateTrendAnalysis } = await import('./analytics.js');
 
   // Predictive Analytics - Project Success Prediction
   app.get('/api/analytics/predict/project-success', authenticateToken, async (req: any, res) => {

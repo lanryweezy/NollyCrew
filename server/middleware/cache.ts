@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { createClient } from 'redis';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/logger.js';
 
 // Redis client for caching
 let redisClient: ReturnType<typeof createClient> | null = null;
