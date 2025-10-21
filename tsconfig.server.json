@@ -7,7 +7,7 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "module": "NodeNext",
+    "module": "ES2022",
     "target": "ES2022",
     "moduleResolution": "node",
     "jsx": "preserve",
