@@ -23,7 +23,14 @@ if (process.env.AWS_ACCESS_KEY_ID) {
   }
 }
 import * as ai from './ai.js';
-import pdf from 'pdf-parse';
+let pdf: any;
+async function loadPdfParse() {
+  if (!pdf) {
+    const mod = await import('pdf-parse');
+    pdf = mod.default || mod;
+  }
+  return pdf;
+}
 import multer from 'multer';
 import { 
   scriptAnalysisQueue, 
@@ -745,7 +752,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (req.file) {
         // Extract text from PDF
         try {
-          const data = await pdf(req.file.buffer);
+          const data = await (await loadPdfParse())(req.file.buffer);
           finalScriptText = data.text;
         } catch (error) {
           console.error('PDF extraction error:', error);
@@ -760,7 +767,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (contentType && contentType.includes('application/pdf')) {
             const arrayBuffer = await response.arrayBuffer();
             const buffer = Buffer.from(arrayBuffer);
-            const data = await pdf(buffer);
+            const data = await (await loadPdfParse())(buffer);
             finalScriptText = data.text;
           } else {
             finalScriptText = await response.text();
@@ -779,7 +786,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (contentType && contentType.includes('application/pdf')) {
             const arrayBuffer = await response.arrayBuffer();
             const buffer = Buffer.from(arrayBuffer);
-            const data = await pdf(buffer);
+            const data = await (await loadPdfParse())(buffer);
             finalScriptText = data.text;
           } else {
             finalScriptText = await response.text();
