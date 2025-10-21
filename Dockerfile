@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install all dependencies (dev deps needed for Vite/Rollup build)
-RUN npm ci && npm cache clean --force
+RUN npm install --no-audit --no-fund && npm cache clean --force
 
 # Copy source code
 COPY . .
@@ -30,7 +30,7 @@ RUN apk add --no-cache curl
 COPY package*.json ./
 
 # Install production dependencies only
-RUN npm ci --only=production && npm cache clean --force
+RUN npm install --omit=dev --no-audit --no-fund && npm cache clean --force
 
 # Copy built files from builder stage
 COPY --from=builder /app/dist ./dist
