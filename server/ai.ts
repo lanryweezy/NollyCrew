@@ -1,10 +1,22 @@
 import OpenAI from 'openai';
-import pdf from 'pdf-parse';
+
 
 // Initialize OpenAI client
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 }) : null;
+
+type PdfParseModule = typeof import('pdf-parse');
+
+let pdfParse: PdfParseModule['default'] | null = null;
+
+async function loadPdfParse(): Promise<PdfParseModule['default']> {
+  if (!pdfParse) {
+    const mod: PdfParseModule = await import('pdf-parse');
+    pdfParse = mod.default ?? (mod as unknown as PdfParseModule['default']);
+  }
+  return pdfParse as PdfParseModule['default'];
+}
 
 export interface ScriptAnalysis {
   scenes: number;
@@ -66,7 +78,8 @@ export interface ScheduleOptimization {
 // Extract text from PDF
 export async function extractTextFromPDF(buffer: Buffer): Promise<string> {
   try {
-    const data = await pdf(buffer);
+    const parsePdf = await loadPdfParse();
+    const data = await parsePdf(buffer);
     return data.text;
   } catch (error) {
     console.error('PDF parsing error:', error);

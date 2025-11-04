@@ -27,8 +27,10 @@ services:
       - key: GOOGLE_CLIENT_SECRET
         sync: false
       - key: PAYSTACK_SECRET_KEY
+        value: "dummy_secret_key"
       - key: PAYSTACK_PUBLIC_KEY
+        value: "dummy_public_key"
       - key: CORS_ORIGIN
-        value: "https://your-frontend-url.com"
+        value: "https://nollycrewhub.onrender.com"
     healthCheckPath: /api/health
     autoDeploy: true
