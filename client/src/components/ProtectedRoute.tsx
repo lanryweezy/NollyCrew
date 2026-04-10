@@ -17,23 +17,18 @@ export default function ProtectedRoute({
   const [, setLocation] = useLocation();
   const { isAuthenticated, loading, roles } = useAuth();
 
-  // DEMO MODE: Bypass authentication for demonstration
-  const isDemoMode = process.env.NODE_ENV === 'development' || process.env.DEMO_MODE === 'true';
-  
   useEffect(() => {
-    if (!isDemoMode) {
-      if (!loading && !isAuthenticated) {
-        setLocation(redirectTo);
-        return;
-      }
-      // basic onboarding guardrail: if authenticated but has no roles, send to onboarding
-      if (!loading && isAuthenticated && (!roles || roles.length === 0)) {
-        setLocation('/onboarding');
-      }
+    if (!loading && !isAuthenticated) {
+      setLocation(redirectTo);
+      return;
     }
-  }, [isAuthenticated, loading, roles, setLocation, redirectTo, isDemoMode]);
+    // basic onboarding guardrail: if authenticated but has no roles, send to onboarding
+    if (!loading && isAuthenticated && (!roles || roles.length === 0)) {
+      setLocation('/onboarding');
+    }
+  }, [isAuthenticated, loading, roles, setLocation, redirectTo]);
 
-  if (!isDemoMode && loading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-muted/30">
         <Card className="w-full max-w-md">
@@ -53,7 +48,7 @@ export default function ProtectedRoute({
     );
   }
 
-  if (!isDemoMode && !isAuthenticated) {
+  if (!isAuthenticated) {
     return null;
   }
 
