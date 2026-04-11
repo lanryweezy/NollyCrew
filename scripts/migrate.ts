@@ -8,8 +8,8 @@ dotenv.config();
 
 async function runMigrations() {
   if (!process.env.DATABASE_URL) {
-    logger.error('DATABASE_URL is not set');
-    process.exit(1);
+    logger.info('DATABASE_URL is not set, skipping migrations (using MemStorage)');
+    process.exit(0);
   }
 
   logger.info('Starting database migration...');
