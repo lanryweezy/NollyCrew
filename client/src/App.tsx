@@ -21,10 +21,6 @@ import Messages from "@/pages/Messages";
 import Auditions from "@/pages/Auditions";
 import TalentProfile from "@/pages/TalentProfile";
 import TestProxy from "./test-proxy";
-import Calendar from "@/pages/Calendar";
-import Analytics from "@/pages/Analytics";
-import Collaboration from "@/pages/Collaboration";
-import EnhancedAnalytics from "@/pages/EnhancedAnalytics";
 import { ResponsiveToastProvider } from "@/components/ResponsiveToast";
 
 function Router() {
@@ -82,26 +78,6 @@ function Router() {
       <Route path="/profile">
         <ProtectedRoute>
           <Profile />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/calendar">
-        <ProtectedRoute>
-          <Calendar />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/analytics">
-        <ProtectedRoute>
-          <Analytics />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/collaboration">
-        <ProtectedRoute>
-          <Collaboration />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/analytics/enhanced">
-        <ProtectedRoute>
-          <EnhancedAnalytics />
         </ProtectedRoute>
       </Route>
       

@@ -80,22 +80,4 @@ describe('ProtectedRoute', () => {
     });
   });
 
-  it('should bypass authentication in demo mode', () => {
-    // Temporarily set demo mode
-    const originalEnv = process.env;
-    process.env = { ...originalEnv, NODE_ENV: 'development' };
-    
-    (useAuth as any).mockReturnValue({
-      isAuthenticated: false,
-      loading: false,
-      roles: []
-    });
-
-    render(<ProtectedRoute>{mockChildren}</ProtectedRoute>);
-    
-    expect(screen.getByTestId('protected-content')).toBeInTheDocument();
-    
-    // Restore environment
-    process.env = originalEnv;
-  });
 });

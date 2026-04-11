@@ -142,9 +142,9 @@ export default function AITools() {
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="script-analysis">Script Analysis</TabsTrigger>
-                <TabsTrigger value="casting">Casting</TabsTrigger>
-                <TabsTrigger value="scheduling">Scheduling</TabsTrigger>
-                <TabsTrigger value="marketing">Marketing</TabsTrigger>
+                <TabsTrigger value="casting-recommendations">Casting</TabsTrigger>
+                <TabsTrigger value="schedule-optimization">Scheduling</TabsTrigger>
+                <TabsTrigger value="marketing-content">Marketing</TabsTrigger>
               </TabsList>
 
               <TabsContent value="script-analysis" className="space-y-6">
@@ -247,7 +247,7 @@ export default function AITools() {
                 </Card>
               </TabsContent>
 
-              <TabsContent value="casting" className="space-y-6">
+              <TabsContent value="casting-recommendations" className="space-y-6">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -307,7 +307,7 @@ export default function AITools() {
                 </Card>
               </TabsContent>
 
-              <TabsContent value="scheduling" className="space-y-6">
+              <TabsContent value="schedule-optimization" className="space-y-6">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -367,7 +367,7 @@ export default function AITools() {
                 </Card>
               </TabsContent>
 
-              <TabsContent value="marketing" className="space-y-6">
+              <TabsContent value="marketing-content" className="space-y-6">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">

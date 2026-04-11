@@ -40,7 +40,8 @@ export default function CollaborativeEditor({
     joinProject, 
     leaveProject,
     sendCursorPosition,
-    sendTypingIndicator
+    sendTypingIndicator,
+    updateDocument
   } = useWebSocket();
 
   // Join project on mount

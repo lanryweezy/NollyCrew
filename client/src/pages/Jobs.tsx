@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
@@ -165,7 +166,12 @@ export default function Jobs() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="min-h-screen bg-background"
+    >
       {/* Navigation */}
       <div className="relative">
         <Navigation 
@@ -268,20 +274,40 @@ export default function Jobs() {
             </div>
 
             {/* Job Listings */}
-            {loadingList ? (
-              <ListSkeleton rows={6} />
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {filteredJobs.map((job) => (
-                  <JobCard
-                    key={job.id}
-                    {...job}
-                    onApply={() => handleApply(job.id)}
-                    onBookmark={() => handleBookmark(job.id)}
-                  />
-                ))}
-              </div>
-            )}
+            <AnimatePresence mode="popLayout">
+              {loadingList ? (
+                <motion.div
+                  key="skeleton"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <ListSkeleton rows={6} />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="results"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+                >
+                  {filteredJobs.map((job, index) => (
+                    <motion.div
+                      key={job.id}
+                      initial={{ y: 20, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <JobCard
+                        {...job}
+                        onApply={() => handleApply(job.id)}
+                        onBookmark={() => handleBookmark(job.id)}
+                      />
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {filteredJobs.length === 0 && (
               <Card>
@@ -334,6 +360,6 @@ export default function Jobs() {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </motion.div>
   );
 }
