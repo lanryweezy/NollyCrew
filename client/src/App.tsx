@@ -20,6 +20,12 @@ import TalentSearch from "@/pages/TalentSearch";
 import Messages from "@/pages/Messages";
 import Auditions from "@/pages/Auditions";
 import TalentProfile from "@/pages/TalentProfile";
+import AITools from "@/pages/AITools";
+import Analytics from "@/pages/Analytics";
+import Calendar from "@/pages/Calendar";
+import Collaboration from "@/pages/Collaboration";
+import EnhancedAnalytics from "@/pages/EnhancedAnalytics";
+import EnhancedCollaboration from "@/pages/EnhancedCollaboration";
 import TestProxy from "./test-proxy";
 import { ResponsiveToastProvider } from "@/components/ResponsiveToast";
 
@@ -78,6 +84,36 @@ function Router() {
       <Route path="/profile">
         <ProtectedRoute>
           <Profile />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/ai-tools">
+        <ProtectedRoute>
+          <AITools />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/analytics">
+        <ProtectedRoute>
+          <Analytics />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/calendar">
+        <ProtectedRoute>
+          <Calendar />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/collaboration">
+        <ProtectedRoute>
+          <Collaboration />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/enhanced-analytics">
+        <ProtectedRoute>
+          <EnhancedAnalytics />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/enhanced-collaboration">
+        <ProtectedRoute>
+          <EnhancedCollaboration />
         </ProtectedRoute>
       </Route>
       
