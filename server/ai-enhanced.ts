@@ -315,9 +315,17 @@ export async function generateEnhancedCastingRecommendations(
     
     const recommendations: EnhancedCastingRecommendation[] = [];
     
-    for (const candidate of candidates) {
-      const candidateText = `${candidate.name} - ${candidate.bio} - Skills: ${candidate.skills.join(', ')} - Experience: ${candidate.experience}`;
-      const candidateEmbedding = await getEmbedding(candidateText);
+    // Parallelize embedding requests for all candidates
+    const candidateEmbeddings = await Promise.all(
+      candidates.map(candidate => {
+        const candidateText = `${candidate.name} - ${candidate.bio} - Skills: ${candidate.skills.join(', ')} - Experience: ${candidate.experience}`;
+        return getEmbedding(candidateText);
+      })
+    );
+
+    for (let i = 0; i < candidates.length; i++) {
+      const candidate = candidates[i];
+      const candidateEmbedding = candidateEmbeddings[i];
       
       // Calculate cosine similarity
       const similarity = cosineSimilarity(roleEmbedding, candidateEmbedding);
