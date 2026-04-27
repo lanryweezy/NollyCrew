@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Camera, Users, Briefcase, Star, ArrowRight } from "lucide-react";
-import heroImage from "@assets/generated_images/Nollywood_film_set_hero_02428654.png";
+const heroImage = "https://images.unsplash.com/photo-1594909122845-11baa439b7bf?q=80&w=2070&auto=format&fit=crop";
 
 export interface HeroProps {}
 
