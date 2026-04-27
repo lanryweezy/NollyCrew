@@ -12,16 +12,27 @@ vi.mock('wouter', () => ({
 vi.mock('../lib/auth', () => ({
   useAuth: () => ({
     user: {
+      id: 'user-1',
+      email: 'demo@example.com',
       firstName: 'Demo',
-      lastName: 'User'
+      lastName: 'User',
+      isVerified: true
     },
     roles: [
       {
         id: 'role-1',
+        userId: 'user-1',
         role: 'actor',
         isActive: true
       }
-    ]
+    ],
+    loading: false,
+    isAuthenticated: true,
+    login: vi.fn(),
+    register: vi.fn(),
+    logout: vi.fn(),
+    addRole: vi.fn(),
+    hasRole: vi.fn((role) => role === 'actor')
   }),
 }));
 
@@ -168,17 +179,28 @@ describe('EnhancedDashboard', () => {
     const auth = await import('../lib/auth');
     vi.spyOn(auth, 'useAuth').mockReturnValue({
       user: {
+        id: 'user-2',
+        email: 'producer@example.com',
         firstName: 'Demo',
-        lastName: 'Producer'
+        lastName: 'Producer',
+        isVerified: true
       },
       roles: [
         {
-          id: 'role-1',
+          id: 'role-2',
+          userId: 'user-2',
           role: 'producer',
           isActive: true
         }
-      ]
-    });
+      ],
+      loading: false,
+      isAuthenticated: true,
+      login: vi.fn(),
+      register: vi.fn(),
+      logout: vi.fn(),
+      addRole: vi.fn(),
+      hasRole: vi.fn((role) => role === 'producer')
+    } as any);
     
     render(<EnhancedDashboard />);
     

@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth";
@@ -185,7 +186,12 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="min-h-screen bg-background"
+    >
       {/* Navigation */}
       <div className="relative">
         <Navigation 
@@ -425,7 +431,7 @@ export default function Profile() {
                 <PortfolioGallery 
                   items={mockPortfolio.map(item => ({
                     id: item.id,
-                    type: "image",
+                    type: "image" as const,
                     title: item.title,
                     url: item.image,
                     description: item.description
@@ -539,6 +545,6 @@ export default function Profile() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </motion.div>
   );
 }

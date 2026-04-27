@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth, authService } from "@/lib/auth";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
@@ -64,7 +65,6 @@ export default function Dashboard() {
   };
 
   const primaryRole = getPrimaryRole();
-  const roleStats = getStatsForRole(primaryRole);
 
   const getRoleBasedContent = () => {
     switch (primaryRole) {
@@ -113,10 +113,38 @@ export default function Dashboard() {
 
   const roleContent = getRoleBasedContent();
 
-  const stats = getStatsForRole(primaryRole, dashboardData);
+  const roleStats = getStatsForRole(primaryRole, dashboardData);
 
   if (isLoading) {
-    return <DashboardSkeleton />;
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="relative">
+          <Navigation
+            isAuthenticated={true}
+            userRole={primaryRole}
+            userName={`${user?.firstName} ${user?.lastName}`}
+          />
+        </div>
+        <ResponsiveSection padding="medium">
+          <div className="space-y-8">
+            <Skeleton className="h-12 w-1/3" />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-8">
+                <Skeleton className="h-64 w-full" />
+                <Skeleton className="h-96 w-full" />
+              </div>
+              <div className="space-y-8">
+                <Skeleton className="h-96 w-full" />
+                <Skeleton className="h-64 w-full" />
+              </div>
+            </div>
+          </div>
+        </ResponsiveSection>
+      </div>
+    );
   }
 
   if (isError) {
@@ -134,7 +162,12 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="min-h-screen bg-background"
+    >
       <div className="relative">
         <Navigation 
           isAuthenticated={true}
@@ -159,7 +192,12 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6 sm:space-y-8">
+          <motion.div
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="lg:col-span-2 space-y-6 sm:space-y-8"
+          >
             {/* Quick Actions */}
             <Card>
               <CardHeader>
@@ -191,114 +229,121 @@ export default function Dashboard() {
                 <TabsTrigger value="projects">My Projects</TabsTrigger>
               </TabsList>
               
-              <TabsContent value="overview" className="space-y-4">
-                {recentJobs.map((job) => (
-                  <Card key={job.id} className="hover:shadow-md transition-shadow">
-                    <CardContent className="p-4 sm:p-6">
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex flex-wrap items-center gap-2 mb-2">
-                            <ResponsiveTypography variant="h4">
-                              {job.title}
-                            </ResponsiveTypography>
-                            {job.isUrgent && (
-                              <Badge variant="destructive" className="text-xs">Urgent</Badge>
-                            )}
-                          </div>
-                          <p className="text-muted-foreground text-sm mb-2">{job.company}</p>
-                          <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground mb-2">
-                            <div className="flex items-center gap-1">
-                              <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
-                              {job.location}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-                              {job.deadline}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Users className="w-3 h-3 sm:w-4 sm:h-4" />
-                              {job.applicants} applicants
-                            </div>
-                          </div>
-                          <p className="text-primary font-medium text-sm sm:text-base mt-2">{job.budget}</p>
-                        </div>
-                        <ResponsiveButton variant="outline" size="sm" className="w-full sm:w-auto">
-                          View Details
-                        </ResponsiveButton>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-                <ResponsiveButton 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => setLocation("/jobs")}
-                  icon={<ArrowRight className="w-4 h-4 ml-2" />}
-                  iconPosition="right"
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeTab}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="mt-4"
                 >
-                  View All Jobs
-                </ResponsiveButton>
-              </TabsContent>
+                  <TabsContent value="overview" className="space-y-4 mt-0">
+                    {(dashboardData?.recentApplications || []).map((job: any) => (
+                      <Card key={job.id} className="hover:shadow-md transition-shadow">
+                        <CardContent className="p-4 sm:p-6">
+                          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <div className="flex flex-wrap items-center gap-2 mb-2">
+                                <ResponsiveTypography variant="h4">
+                                  {job.jobTitle}
+                                </ResponsiveTypography>
+                                {job.isUrgent && (
+                                  <Badge variant="destructive" className="text-xs">Urgent</Badge>
+                                )}
+                              </div>
+                              <p className="text-muted-foreground text-sm mb-2">{job.status}</p>
+                              <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground mb-2">
+                                <div className="flex items-center gap-1">
+                                  <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+                                  Applied: {new Date(job.appliedAt).toLocaleDateString()}
+                                </div>
+                              </div>
+                            </div>
+                            <ResponsiveButton variant="outline" size="sm" className="w-full sm:w-auto">
+                              View Details
+                            </ResponsiveButton>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                    <ResponsiveButton
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => setLocation("/jobs")}
+                      icon={<ArrowRight className="w-4 h-4 ml-2" />}
+                      iconPosition="right"
+                    >
+                      View All Jobs
+                    </ResponsiveButton>
+                  </TabsContent>
 
-              <TabsContent value="projects" className="space-y-4">
-                {dashboardData?.recentProjects.map((project: any) => (
-                  <Card key={project.id} className="hover:shadow-md transition-shadow">
-                    <CardContent className="p-4 sm:p-6">
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex flex-wrap items-center gap-2 mb-2">
-                            <ResponsiveTypography variant="h4">
-                              {project.title}
-                            </ResponsiveTypography>
-                            <Badge variant="secondary" className="text-xs">{project.genre}</Badge>
+                  <TabsContent value="projects" className="space-y-4 mt-0">
+                    {(dashboardData?.recentProjects || []).map((project: any) => (
+                      <Card key={project.id} className="hover:shadow-md transition-shadow">
+                        <CardContent className="p-4 sm:p-6">
+                          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <div className="flex flex-wrap items-center gap-2 mb-2">
+                                <ResponsiveTypography variant="h4">
+                                  {project.title}
+                                </ResponsiveTypography>
+                                <Badge variant="secondary" className="text-xs">{project.genre}</Badge>
+                              </div>
+                              <p className="text-muted-foreground text-sm mb-2">Director: {project.director}</p>
+                              <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground mb-3">
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
+                                  {project.startDate} - {project.deadline}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Users className="w-3 h-3 sm:w-4 sm:h-4" />
+                                  {project.teamSize} team members
+                                </div>
+                              </div>
+                              <div className="space-y-2 mb-3">
+                                <div className="flex justify-between text-xs sm:text-sm">
+                                  <span>Progress</span>
+                                  <span>{project.progress}%</span>
+                                </div>
+                                <div className="w-full bg-muted rounded-full h-2">
+                                  <div
+                                    className="bg-primary h-2 rounded-full transition-all"
+                                    style={{ width: `${project.progress}%` }}
+                                  />
+                                </div>
+                              </div>
+                              <p className="text-primary font-medium text-sm sm:text-base">Budget: {project.budget}</p>
+                            </div>
+                            <ResponsiveButton variant="outline" size="sm" className="w-full sm:w-auto">
+                              Manage
+                            </ResponsiveButton>
                           </div>
-                          <p className="text-muted-foreground text-sm mb-2">Director: {project.director}</p>
-                          <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground mb-3">
-                            <div className="flex items-center gap-1">
-                              <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
-                              {project.startDate} - {project.deadline}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Users className="w-3 h-3 sm:w-4 sm:h-4" />
-                              {project.teamSize} team members
-                            </div>
-                          </div>
-                          <div className="space-y-2 mb-3">
-                            <div className="flex justify-between text-xs sm:text-sm">
-                              <span>Progress</span>
-                              <span>{project.progress}%</span>
-                            </div>
-                            <div className="w-full bg-muted rounded-full h-2">
-                              <div 
-                                className="bg-primary h-2 rounded-full transition-all"
-                                style={{ width: `${project.progress}%` }}
-                              />
-                            </div>
-                          </div>
-                          <p className="text-primary font-medium text-sm sm:text-base">Budget: {project.budget}</p>
-                        </div>
-                        <ResponsiveButton variant="outline" size="sm" className="w-full sm:w-auto">
-                          Manage
-                        </ResponsiveButton>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-                <ResponsiveButton 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => setLocation("/projects")}
-                  icon={<ArrowRight className="w-4 h-4 ml-2" />}
-                  iconPosition="right"
-                >
-                  View All Projects
-                </ResponsiveButton>
-              </TabsContent>
+                        </CardContent>
+                      </Card>
+                    ))}
+                    <ResponsiveButton
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => setLocation("/projects")}
+                      icon={<ArrowRight className="w-4 h-4 ml-2" />}
+                      iconPosition="right"
+                    >
+                      View All Projects
+                    </ResponsiveButton>
+                  </TabsContent>
+                </motion.div>
+              </AnimatePresence>
             </Tabs>
-          </div>
+          </motion.div>
 
           {/* Sidebar */}
-          <div className="space-y-6 sm:space-y-8">
+          <motion.div
+            initial={{ x: 20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="space-y-6 sm:space-y-8"
+          >
             {/* Notifications */}
             <Card>
               <CardHeader>
@@ -308,7 +353,7 @@ export default function Dashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {notifications.map((notification) => (
+                {(dashboardData?.notifications || []).map((notification: any) => (
                   <div 
                     key={notification.id} 
                     className={`p-3 sm:p-4 rounded-lg border ${
@@ -362,9 +407,9 @@ export default function Dashboard() {
                 </ResponsiveButton>
               </CardContent>
             </Card>
-          </div>
+          </motion.div>
         </div>
       </ResponsiveSection>
-    </div>
+    </motion.div>
   );
 }

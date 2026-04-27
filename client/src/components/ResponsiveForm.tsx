@@ -13,8 +13,8 @@ export default function ResponsiveForm({
   className = ""
 }: ResponsiveFormProps) {
   return (
-    <Form onSubmit={onSubmit} className={`space-y-4 sm:space-y-6 ${className}`}>
+    <form onSubmit={onSubmit} className={`space-y-4 sm:space-y-6 ${className}`}>
       {children}
-    </Form>
+    </form>
   );
 }

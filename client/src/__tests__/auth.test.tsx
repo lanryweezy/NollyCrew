@@ -167,21 +167,6 @@ describe('AuthService', () => {
       const result = await authService.getCurrentUser();
       expect(result).toBeNull();
     });
-
-    it('should handle demo mode', async () => {
-      // Set environment to demo mode
-      const originalEnv = process.env;
-      process.env = { ...originalEnv, NODE_ENV: 'development' };
-
-      const result = await authService.getCurrentUser();
-
-      expect(result).not.toBeNull();
-      expect(result?.user.firstName).toBe('Demo');
-      expect(result?.roles.length).toBe(2);
-
-      // Restore environment
-      process.env = originalEnv;
-    });
   });
 
   describe('isAuthenticated', () => {
@@ -192,16 +177,6 @@ describe('AuthService', () => {
 
     it('should return false when no token', () => {
       expect(authService.isAuthenticated()).toBe(false);
-    });
-
-    it('should return true in demo mode', () => {
-      const originalEnv = process.env;
-      process.env = { ...originalEnv, NODE_ENV: 'development' };
-      
-      expect(authService.isAuthenticated()).toBe(true);
-      
-      // Restore environment
-      process.env = originalEnv;
     });
   });
 

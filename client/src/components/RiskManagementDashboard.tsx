@@ -312,7 +312,6 @@ export default function RiskManagementDashboard({
                         <Progress 
                           value={riskScore} 
                           className="h-2"
-                          indicatorClassName={riskLevel.color.replace('text-', 'bg-')}
                         />
                       </div>
                     </div>

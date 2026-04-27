@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '@/lib/api';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -92,7 +93,12 @@ export default function TalentSearch() {
   };
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="p-6 max-w-5xl mx-auto"
+    >
       <PageHeader 
         title="Talent Search"
         subtitle="Find the perfect cast and crew for your projects"
@@ -117,40 +123,61 @@ export default function TalentSearch() {
             <Button variant="outline" onClick={runCastingAI} disabled={aiLoading}>{aiLoading ? 'Ranking...' : 'Casting AI'}</Button>
           </div>
 
-          {loading ? (
-            <ListSkeleton rows={4} />
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {results.map((r) => (
-              <Card key={r.id} className="border cursor-pointer" onClick={() => window.location.href = `/talent/${r.userId || r.user_id || r.id}` }>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-semibold capitalize">{r.role}</div>
-                      {r.specialties?.length ? (
-                        <div className="text-sm text-muted-foreground">{r.specialties.join(', ')}</div>
-                      ) : null}
-                      {r.skills?.length ? (
-                        <div className="text-sm text-muted-foreground">Skills: {r.skills.join(', ')}</div>
-                      ) : null}
-                      {r.hourlyRate ? (
-                        <div className="text-sm">Rate: ₦{r.hourlyRate}</div>
-                      ) : null}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
-                        {r.isActive ? 'Active' : 'Inactive'}
+          <AnimatePresence mode="wait">
+            {loading ? (
+              <motion.div
+                key="skeleton"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <ListSkeleton rows={4} />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="results"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="grid grid-cols-1 md:grid-cols-2 gap-4"
+              >
+                {results.map((r, index) => (
+                <motion.div
+                  key={r.id}
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <Card className="border cursor-pointer hover:shadow-md transition-shadow" onClick={() => window.location.href = `/talent/${r.userId || r.user_id || r.id}` }>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-semibold capitalize">{r.role}</div>
+                          {r.specialties?.length ? (
+                            <div className="text-sm text-muted-foreground">{r.specialties.join(', ')}</div>
+                          ) : null}
+                          {r.skills?.length ? (
+                            <div className="text-sm text-muted-foreground">Skills: {r.skills.join(', ')}</div>
+                          ) : null}
+                          {r.hourlyRate ? (
+                            <div className="text-sm">Rate: ₦{r.hourlyRate}</div>
+                          ) : null}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+                            {r.isActive ? 'Active' : 'Inactive'}
+                          </div>
+                          {selectedProjectId && (
+                            <Button size="sm" onClick={(e) => { e.stopPropagation(); hireToProject(r); }}>Hire</Button>
+                          )}
+                        </div>
                       </div>
-                      {selectedProjectId && (
-                        <Button size="sm" onClick={() => hireToProject(r)}>Hire</Button>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-            </div>
-          )}
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {recommendations.length > 0 && (
             <div className="mt-6">
@@ -223,7 +250,7 @@ export default function TalentSearch() {
           )}
         </CardContent>
       </Card>
-    </div>
+    </motion.div>
   );
 }
 
