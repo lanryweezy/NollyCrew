@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import debounce from "lodash.debounce";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -54,10 +55,18 @@ export default function SearchFilters({
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(showAdvanced);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
 
+  // Optimization: Debounce the onFiltersChange callback to prevent excessive re-renders
+  // and potential API calls when users are typing rapidly in search or location fields.
+  // Impact: Reduces the frequency of state updates and potential downstream processing
+  // (like network requests or expensive filtering) by waiting for a 300ms pause in typing.
+  const debouncedOnFiltersChange = useMemo(
+    () => debounce((newFilters: FilterState) => onFiltersChange(newFilters), 300),
+    [onFiltersChange]
+  );
+
   const updateFilters = (key: keyof FilterState, value: any) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
-    onFiltersChange(newFilters);
 
     // Update active filters for display
     const active = Object.entries(newFilters)
@@ -69,6 +78,13 @@ export default function SearchFilters({
       })
       .map(([k]) => k);
     setActiveFilters(active);
+
+    if (key === 'search' || key === 'location') {
+      debouncedOnFiltersChange(newFilters);
+    } else {
+      debouncedOnFiltersChange.cancel();
+      onFiltersChange(newFilters);
+    }
   };
 
   const clearFilter = (key: keyof FilterState) => {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
@@ -322,15 +322,23 @@ export default function Projects() {
 
   // Using mock data as API data is not yet implemented
   const list = mockProjects;
-  const filteredProjects = list.filter(project => {
-    const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         project.genre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         project.director.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = selectedStatus === "all" || project.status === selectedStatus;
-    
-    return matchesSearch && matchesStatus;
-  });
+
+  // Optimization: Memoize the filtered projects list to prevent O(N) recalculation
+  // on every render, improving performance when users interact with non-filter UI elements
+  // like tabs, modals, or loading states.
+  // Impact: Eliminates unnecessary array traversals, maintaining snappy UI updates
+  // even as the project list grows.
+  const filteredProjects = useMemo(() => {
+    return list.filter(project => {
+      const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           project.genre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           project.director.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesStatus = selectedStatus === "all" || project.status === selectedStatus;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [list, searchTerm, selectedStatus]);
 
   const getPrimaryRole = () => {
     if (roles.length === 0) return "actor";
