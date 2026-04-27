@@ -474,7 +474,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/profile', authenticateToken, async (req: any, res) => {
     try {
-      const updates = req.body;
+      // SENTINEL SECURITY FIX: Prevent mass assignment by validating inputs
+      // Omit sensitive fields like isVerified and passwordHash from updates
+      const updates = insertUserSchema.partial().omit({ isVerified: true, passwordHash: true } as any).parse(req.body);
       const updatedUser = await storage.updateUser(req.user.id, updates);
       if (!updatedUser) {
         return res.status(404).json({ error: 'User not found' });
@@ -482,6 +484,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { passwordHash: _, ...userWithoutPassword } = updatedUser;
       res.json({ user: userWithoutPassword });
     } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: 'Invalid input data', details: error.errors });
+      }
       logger.error('Update profile error', { error: (error as Error).message, userId: req.user?.id });
       res.status(500).json({ error: 'Internal server error' });
     }
@@ -596,7 +601,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/projects/:id', authenticateToken, async (req: any, res) => {
     try {
       const { id } = req.params;
-      const updates = req.body;
+
+      // SENTINEL SECURITY FIX: Prevent mass assignment by validating inputs
+      // Omit sensitive fields like createdById to prevent transferring ownership
+      const updates = insertProjectSchema.partial().omit({ createdById: true } as any).parse(req.body);
+
       const project = await storage.getProject(id);
       if (!project) {
         return res.status(404).json({ error: 'Project not found' });
@@ -611,6 +620,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(updatedProject);
     } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: 'Invalid input data', details: error.errors });
+      }
       logger.error('Update project error', { error: (error as Error).message, userId: req.user?.id, projectId: req.params.id });
       res.status(500).json({ error: 'Internal server error' });
     }
