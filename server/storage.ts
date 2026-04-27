@@ -1,4 +1,5 @@
 
+import crypto from "node:crypto";
 import { 
   type User, 
   type InsertUser, 
@@ -721,6 +722,373 @@ export class MemStorage implements IStorage {
       notifications: [],
       recentActivity: [],
       connections: [],
+      user: userProfile ? { id: userProfile.id, email: userProfile.email, firstName: userProfile.firstName, lastName: userProfile.lastName } : null,
+    };
+  }
+}
+
+export class MemStorage implements IStorage {
+  private users = new Map<string, User>();
+  private userRoles = new Map<string, UserRole>();
+  private projects = new Map<string, Project>();
+  private projectMembers = new Map<string, ProjectMember>();
+  private jobs = new Map<string, Job>();
+  private jobApplications = new Map<string, JobApplication>();
+  private messages = new Map<string, Message>();
+  private reviews = new Map<string, Review>();
+
+  async getUser(id: string): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(u => u.email === email);
+  }
+
+  async createUser(user: Omit<InsertUser, 'password'> & { passwordHash: string }): Promise<User> {
+    const id = crypto.randomUUID();
+    const u = user as any;
+    const newUser: User = {
+      id,
+      email: u.email,
+      passwordHash: u.passwordHash,
+      firstName: u.firstName,
+      lastName: u.lastName,
+      isVerified: false,
+      avatar: u.avatar || null,
+      bio: u.bio || null,
+      location: u.location || null,
+      phone: u.phone || null,
+      website: u.website || null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.users.set(id, newUser);
+    return newUser;
+  }
+
+  async updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    const updatedUser = { ...user, ...updates, updatedAt: new Date() };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+
+  async getUserRoles(userId: string): Promise<UserRole[]> {
+    return Array.from(this.userRoles.values()).filter(r => r.userId === userId);
+  }
+
+  async createUserRole(role: InsertUserRole): Promise<UserRole> {
+    const id = crypto.randomUUID();
+    const r = role as any;
+    const newRole: UserRole = {
+      id,
+      userId: r.userId,
+      role: r.role,
+      isActive: r.isActive ?? true,
+      experience: r.experience || null,
+      hourlyRate: r.hourlyRate || null,
+      availability: r.availability || 'available',
+      portfolio: r.portfolio || null,
+      skills: r.skills || null,
+      languages: r.languages || null,
+      awards: r.awards || null,
+      credits: r.credits || null,
+      specialties: r.specialties || null,
+      createdAt: new Date()
+    };
+    this.userRoles.set(id, newRole);
+    return newRole;
+  }
+
+  async updateUserRole(id: string, updates: Partial<InsertUserRole>): Promise<UserRole | undefined> {
+    const role = this.userRoles.get(id);
+    if (!role) return undefined;
+    const updatedRole = { ...role, ...updates };
+    this.userRoles.set(id, updatedRole);
+    return updatedRole;
+  }
+
+  async deleteUserRole(id: string): Promise<boolean> {
+    return this.userRoles.delete(id);
+  }
+
+  async getProject(id: string): Promise<Project | undefined> {
+    return this.projects.get(id);
+  }
+
+  async getProjects(filters?: { status?: string; createdById?: string; limit?: number }): Promise<Project[]> {
+    let result = Array.from(this.projects.values());
+    if (filters?.status) result = result.filter(p => p.status === filters.status);
+    if (filters?.createdById) result = result.filter(p => p.createdById === filters.createdById);
+    if (filters?.limit) result = result.slice(0, filters.limit);
+    return result;
+  }
+
+  async createProject(project: InsertProject): Promise<Project> {
+    const id = crypto.randomUUID();
+    const p = project as any;
+    const newProject: Project = {
+      id,
+      title: p.title,
+      description: p.description,
+      genre: p.genre,
+      type: p.type,
+      createdById: p.createdById,
+      status: p.status || 'pre-production',
+      budget: p.budget || null,
+      currency: p.currency || 'NGN',
+      startDate: p.startDate ? new Date(p.startDate) : null,
+      endDate: p.endDate ? new Date(p.endDate) : null,
+      location: p.location || null,
+      poster: p.poster || null,
+      trailer: p.trailer || null,
+      script: p.script || null,
+      scriptBreakdown: p.scriptBreakdown || null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.projects.set(id, newProject);
+    return newProject;
+  }
+
+  async updateProject(id: string, updates: Partial<InsertProject>): Promise<Project | undefined> {
+    const project = this.projects.get(id);
+    if (!project) return undefined;
+    const updatedProject = { ...project, ...updates, updatedAt: new Date() };
+    this.projects.set(id, updatedProject);
+    return updatedProject;
+  }
+
+  async deleteProject(id: string): Promise<boolean> {
+    return this.projects.delete(id);
+  }
+
+  async getProjectMember(id: string): Promise<ProjectMember | undefined> {
+    return this.projectMembers.get(id);
+  }
+
+  async getProjectMembers(projectId: string): Promise<ProjectMember[]> {
+    return Array.from(this.projectMembers.values()).filter(m => m.projectId === projectId);
+  }
+
+  async createProjectMember(member: InsertProjectMember): Promise<ProjectMember> {
+    const id = crypto.randomUUID();
+    const m = member as any;
+    const newMember: ProjectMember = {
+      id,
+      userId: m.userId,
+      role: m.role,
+      projectId: m.projectId,
+      character: m.character || null,
+      department: m.department || null,
+      isLead: m.isLead ?? false,
+      joinedAt: new Date()
+    };
+    this.projectMembers.set(id, newMember);
+    return newMember;
+  }
+
+  async updateProjectMember(id: string, updates: Partial<InsertProjectMember>): Promise<ProjectMember | undefined> {
+    const member = this.projectMembers.get(id);
+    if (!member) return undefined;
+    const updatedMember = { ...member, ...updates };
+    this.projectMembers.set(id, updatedMember);
+    return updatedMember;
+  }
+
+  async deleteProjectMember(id: string): Promise<boolean> {
+    return this.projectMembers.delete(id);
+  }
+
+  async getJob(id: string): Promise<Job | undefined> {
+    return this.jobs.get(id);
+  }
+
+  async getJobs(filters?: { type?: string; location?: string; isActive?: boolean; limit?: number }): Promise<Job[]> {
+    let result = Array.from(this.jobs.values());
+    if (filters?.type) result = result.filter(j => j.type === filters.type);
+    if (filters?.location) result = result.filter(j => j.location.toLowerCase().includes(filters.location!.toLowerCase()));
+    if (filters?.isActive !== undefined) result = result.filter(j => j.isActive === filters.isActive);
+    if (filters?.limit) result = result.slice(0, filters.limit);
+    return result;
+  }
+
+  async createJob(job: InsertJob): Promise<Job> {
+    const id = crypto.randomUUID();
+    const j = job as any;
+    const newJob: Job = {
+      id,
+      title: j.title,
+      description: j.description,
+      type: j.type,
+      category: j.category,
+      postedById: j.postedById,
+      location: j.location,
+      projectId: j.projectId || null,
+      budget: j.budget || null,
+      currency: j.currency || 'NGN',
+      paymentType: j.paymentType || null,
+      duration: j.duration || null,
+      requirements: j.requirements || null,
+      skills: j.skills || null,
+      experience: j.experience || null,
+      deadline: j.deadline ? new Date(j.deadline) : null,
+      isUrgent: j.isUrgent ?? false,
+      isActive: j.isActive ?? true,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.jobs.set(id, newJob);
+    return newJob;
+  }
+
+  async updateJob(id: string, updates: Partial<InsertJob>): Promise<Job | undefined> {
+    const job = this.jobs.get(id);
+    if (!job) return undefined;
+    const updatedJob = { ...job, ...updates, updatedAt: new Date() };
+    this.jobs.set(id, updatedJob);
+    return updatedJob;
+  }
+
+  async deleteJob(id: string): Promise<boolean> {
+    return this.jobs.delete(id);
+  }
+
+  async getJobApplication(id: string): Promise<JobApplication | undefined> {
+    return this.jobApplications.get(id);
+  }
+
+  async getJobApplications(filters?: { jobId?: string; applicantId?: string; status?: string }): Promise<JobApplication[]> {
+    let result = Array.from(this.jobApplications.values());
+    if (filters?.jobId) result = result.filter(a => a.jobId === filters.jobId);
+    if (filters?.applicantId) result = result.filter(a => a.applicantId === filters.applicantId);
+    if (filters?.status) result = result.filter(a => a.status === filters.status);
+    return result;
+  }
+
+  async createJobApplication(application: InsertJobApplication): Promise<JobApplication> {
+    const id = crypto.randomUUID();
+    const a = application as any;
+    const newApp: JobApplication = {
+      id,
+      jobId: a.jobId,
+      applicantId: a.applicantId,
+      coverLetter: a.coverLetter || null,
+      portfolio: a.portfolio || null,
+      proposedRate: a.proposedRate || null,
+      status: a.status || 'pending',
+      appliedAt: new Date(),
+      reviewedAt: null,
+      reviewNotes: null
+    };
+    this.jobApplications.set(id, newApp);
+    return newApp;
+  }
+
+  async updateJobApplication(id: string, updates: Partial<InsertJobApplication>): Promise<JobApplication | undefined> {
+    const app = this.jobApplications.get(id);
+    if (!app) return undefined;
+    const updatedApp = { ...app, ...updates };
+    this.jobApplications.set(id, updatedApp);
+    return updatedApp;
+  }
+
+  async getMessages(userId: string, otherUserId?: string): Promise<Message[]> {
+    let result = Array.from(this.messages.values()).filter(m => m.senderId === userId || m.recipientId === userId);
+    if (otherUserId) {
+      result = result.filter(m => m.senderId === otherUserId || m.recipientId === otherUserId);
+    }
+    return result.sort((a, b) => a.sentAt.getTime() - b.sentAt.getTime());
+  }
+
+  async createMessage(message: InsertMessage): Promise<Message> {
+    const id = crypto.randomUUID();
+    const m = message as any;
+    const newMessage: Message = {
+      id,
+      senderId: m.senderId,
+      recipientId: m.recipientId,
+      content: m.content,
+      subject: m.subject || null,
+      isRead: false,
+      threadId: m.threadId || null,
+      attachments: m.attachments || null,
+      sentAt: new Date()
+    };
+    this.messages.set(id, newMessage);
+    return newMessage;
+  }
+
+  async markMessageAsRead(id: string): Promise<boolean> {
+    const msg = this.messages.get(id);
+    if (!msg) return false;
+    this.messages.set(id, { ...msg, isRead: true });
+    return true;
+  }
+
+  async getUserReviews(userId: string): Promise<Review[]> {
+    return Array.from(this.reviews.values()).filter(r => r.revieweeId === userId);
+  }
+
+  async createReview(review: InsertReview): Promise<Review> {
+    const id = crypto.randomUUID();
+    const r = review as any;
+    const newReview: Review = {
+      id,
+      reviewerId: r.reviewerId,
+      revieweeId: r.revieweeId,
+      rating: r.rating,
+      projectId: r.projectId || null,
+      comment: r.comment || null,
+      isPublic: r.isPublic ?? true,
+      createdAt: new Date()
+    };
+    this.reviews.set(id, newReview);
+    return newReview;
+  }
+
+  async searchTalent(filters: { role?: string; location?: string; skills?: string[]; limit?: number }): Promise<UserRole[]> {
+    let roles = Array.from(this.userRoles.values()).filter(r => r.isActive);
+    if (filters.role) roles = roles.filter(r => r.role === filters.role);
+
+    if (filters.location) {
+      roles = roles.filter(r => {
+        const user = this.users.get(r.userId);
+        return user?.location?.toLowerCase().includes(filters.location!.toLowerCase());
+      });
+    }
+
+    if (filters.skills && filters.skills.length > 0) {
+      roles = roles.filter(r => (r.skills || []).some(s => filters.skills!.some(k => s.toLowerCase().includes(k.toLowerCase()))));
+    }
+
+    if (filters.limit) roles = roles.slice(0, filters.limit);
+    return roles;
+  }
+
+  async getDashboardData(userId: string): Promise<any> {
+    const recentProjects = (await this.getProjects({ createdById: userId, limit: 3 }))
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+    const recentApplications = (await this.getJobApplications({ applicantId: userId }))
+      .sort((a, b) => b.appliedAt.getTime() - a.appliedAt.getTime())
+      .slice(0, 3)
+      .map(app => ({
+        ...app,
+        jobTitle: this.jobs.get(app.jobId)?.title || 'Unknown Job'
+      }));
+
+    const unreadMessagesCount = Array.from(this.messages.values())
+      .filter(m => m.recipientId === userId && !m.isRead).length;
+
+    const userProfile = await this.getUser(userId);
+
+    return {
+      recentProjects,
+      recentApplications,
+      unreadMessagesCount,
       user: userProfile ? { id: userProfile.id, email: userProfile.email, firstName: userProfile.firstName, lastName: userProfile.lastName } : null,
     };
   }

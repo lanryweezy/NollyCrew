@@ -33,6 +33,57 @@ import {
 import PageHeader from "@/components/PageHeader";
 import ListSkeleton from "@/components/ListSkeleton";
 
+const mockProjects = [
+  {
+    id: "1",
+    title: "Love in Lagos",
+    genre: "Romantic Drama",
+    status: "production" as const,
+    progress: 65,
+    budget: "₦50M",
+    director: "Kemi Adetiba",
+    startDate: "Nov 2024",
+    deadline: "Mar 2025",
+    teamSize: 45,
+    description: "A heartwarming story about finding love in the bustling city of Lagos.",
+    isOwner: true,
+    location: "Lagos, Nigeria",
+    type: "feature"
+  },
+  {
+    id: "2",
+    title: "The Set Up 3",
+    genre: "Action Thriller",
+    status: "pre-production" as const,
+    progress: 25,
+    budget: "₦80M",
+    director: "Niyi Akinmolayan",
+    startDate: "Feb 2025",
+    deadline: "Jun 2025",
+    teamSize: 60,
+    description: "The third installment of the popular action thriller series.",
+    isOwner: true,
+    location: "Abuja, Nigeria",
+    type: "feature"
+  },
+  {
+    id: "3",
+    title: "Nigerian Dreams",
+    genre: "Documentary",
+    status: "post-production" as const,
+    progress: 85,
+    budget: "₦15M",
+    director: "Tunde Kelani",
+    startDate: "Aug 2024",
+    deadline: "Dec 2024",
+    teamSize: 25,
+    description: "A documentary exploring the dreams and aspirations of young Nigerians.",
+    isOwner: false,
+    location: "Lagos, Nigeria",
+    type: "documentary"
+  }
+];
+
 export default function Projects() {
   const [, setLocation] = useLocation();
   const { user, roles } = useAuth();
@@ -269,60 +320,8 @@ export default function Projects() {
     }
   };
 
-  // API projects state + fallback mock
-  const [projectsData, setProjectsData] = useState<any[]>([]);
-  const mockProjects = [
-    {
-      id: "1",
-      title: "Love in Lagos",
-      genre: "Romantic Drama",
-      status: "production" as const,
-      progress: 65,
-      budget: "₦50M",
-      director: "Kemi Adetiba",
-      startDate: "Nov 2024",
-      deadline: "Mar 2025",
-      teamSize: 45,
-      description: "A heartwarming story about finding love in the bustling city of Lagos.",
-      isOwner: true,
-      location: "Lagos, Nigeria",
-      type: "feature"
-    },
-    {
-      id: "2",
-      title: "The Set Up 3",
-      genre: "Action Thriller",
-      status: "pre-production" as const,
-      progress: 25,
-      budget: "₦80M",
-      director: "Niyi Akinmolayan",
-      startDate: "Feb 2025",
-      deadline: "Jun 2025",
-      teamSize: 60,
-      description: "The third installment of the popular action thriller series.",
-      isOwner: true,
-      location: "Abuja, Nigeria",
-      type: "feature"
-    },
-    {
-      id: "3",
-      title: "Nigerian Dreams",
-      genre: "Documentary",
-      status: "post-production" as const,
-      progress: 85,
-      budget: "₦15M",
-      director: "Tunde Kelani",
-      startDate: "Aug 2024",
-      deadline: "Dec 2024",
-      teamSize: 25,
-      description: "A documentary exploring the dreams and aspirations of young Nigerians.",
-      isOwner: false,
-      location: "Lagos, Nigeria",
-      type: "documentary"
-    }
-  ];
-
-  const list = projectsData.length ? projectsData : mockProjects;
+  // Using mock data as API data is not yet implemented
+  const list = mockProjects;
   const filteredProjects = list.filter(project => {
     const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          project.genre.toLowerCase().includes(searchTerm.toLowerCase()) ||
