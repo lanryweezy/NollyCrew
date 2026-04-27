@@ -49,7 +49,9 @@ export default function ResponsiveCarousel({
               size="icon"
               className="w-3 h-3 rounded-full p-0"
               aria-label={`Go to slide ${index + 1}`}
-            />
+            >
+              <span className="sr-only">Slide {index + 1}</span>
+            </ResponsiveButton>
           ))}
         </div>
       )}

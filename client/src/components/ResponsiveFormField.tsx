@@ -1,10 +1,10 @@
 import { ReactNode } from "react";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { FieldValues, UseFormReturn } from "react-hook-form";
+import { FieldValues, UseFormReturn, Path } from "react-hook-form";
 
 interface ResponsiveFormFieldProps<T extends FieldValues> {
   form: UseFormReturn<T>;
-  name: string;
+  name: Path<T>;
   label: string;
   children: ReactNode;
   className?: string;

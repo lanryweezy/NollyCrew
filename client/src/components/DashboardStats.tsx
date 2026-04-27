@@ -79,7 +79,7 @@ export default function DashboardStats({ userRole, stats }: DashboardStatsProps)
 }
 
 // Role-specific stat configurations
-export const getStatsForRole = (role: "actor" | "crew" | "producer"): StatCardProps[] => {
+export const getStatsForRole = (role: "actor" | "crew" | "producer", data?: any): StatCardProps[] => {
   const baseStats: Record<string, StatCardProps[]> = {
     actor: [
       {

@@ -27,8 +27,8 @@ export default function ResponsiveAccordion({
 }: ResponsiveAccordionProps) {
   return (
     <Accordion 
-      type={type} 
-      defaultValue={defaultValue}
+      type={type as any}
+      defaultValue={defaultValue as any}
       className={className}
     >
       {items.map((item) => (

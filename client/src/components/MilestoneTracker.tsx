@@ -101,7 +101,7 @@ export default function MilestoneTracker({
   // Toggle milestone completion
   const toggleMilestoneCompletion = (milestone: Milestone) => {
     if (onMilestoneUpdate) {
-      const updatedMilestone = {
+      const updatedMilestone: Milestone = {
         ...milestone,
         status: milestone.status === 'completed' ? 'in-progress' : 'completed',
         completedDate: milestone.status === 'completed' ? undefined : new Date(),

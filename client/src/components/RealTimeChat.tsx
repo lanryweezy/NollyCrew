@@ -35,7 +35,7 @@ export default function RealTimeChat({ projectId, channelId, users }: RealTimeCh
   const [newMessage, setNewMessage] = useState("");
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { sendMessage, addListener, removeListener, joinProject, leaveProject } = useWebSocket();
+  const { sendMessage, addListener, removeListener, joinProject, leaveProject, sendChatMessage } = useWebSocket();
 
   // Join project on mount
   useEffect(() => {
@@ -84,7 +84,7 @@ export default function RealTimeChat({ projectId, channelId, users }: RealTimeCh
   }, [messages]);
 
   const handleSendMessage = () => {
-    if (newMessage.trim() && sendMessage) {
+    if (newMessage.trim() && typeof sendMessage === 'function') {
       sendChatMessage(projectId, newMessage.trim(), channelId);
       setNewMessage("");
     }

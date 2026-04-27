@@ -167,8 +167,6 @@ describe('AuthService', () => {
       const result = await authService.getCurrentUser();
       expect(result).toBeNull();
     });
-
-    });
   });
 
   describe('isAuthenticated', () => {
@@ -180,7 +178,6 @@ describe('AuthService', () => {
     it('should return false when no token', () => {
       expect(authService.isAuthenticated()).toBe(false);
     });
-
   });
 
   describe('logout', () => {

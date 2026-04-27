@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { motion, AnimatePresence } from "framer-motion";
 import Hero from "./Hero";
 import Navigation from "./Navigation";
 import ThemeToggle from "./ThemeToggle";
@@ -173,7 +174,12 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="min-h-screen bg-background"
+    >
       {/* Navigation */}
       <div className="relative">
         <Navigation isAuthenticated={false} />
@@ -213,7 +219,13 @@ export default function LandingPage() {
         padding="large" 
         background="muted"
       >
-        <div className="text-center mb-12 sm:mb-16">
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          whileInView={{ y: 0, opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-12 sm:mb-16"
+        >
           <ResponsiveTypography variant="h2" align="center">
             Everything You Need for
             <span className="bg-gradient-to-r from-primary to-yellow-600 bg-clip-text text-transparent">
@@ -223,21 +235,32 @@ export default function LandingPage() {
           <ResponsiveTypography variant="p" className="text-muted-foreground max-w-3xl mx-auto mt-4">
             From pre-production to distribution, NollyCrew provides all the tools and connections you need to bring your creative vision to life.
           </ResponsiveTypography>
-        </div>
+        </motion.div>
 
         <ResponsiveGrid cols={{ xs: 1, sm: 2, md: 2, lg: 3 }}>
           {features.map((feature, index) => (
-            <Card key={index} className="text-center hover-elevate transition-all duration-300 h-full" data-testid={`feature-${index}`}>
-              <CardHeader>
-                <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                  <feature.icon className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
-                </div>
-                <CardTitle className="text-lg sm:text-xl">{feature.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm sm:text-base text-muted-foreground">{feature.description}</p>
-              </CardContent>
-            </Card>
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: index * 0.1 }}
+            >
+              <Card className="text-center hover-elevate transition-all duration-300 h-full" data-testid={`feature-${index}`}>
+                <CardHeader>
+                  <motion.div
+                    whileHover={{ rotate: 10, scale: 1.1 }}
+                    className="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4"
+                  >
+                    <feature.icon className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
+                  </motion.div>
+                  <CardTitle className="text-lg sm:text-xl">{feature.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm sm:text-base text-muted-foreground">{feature.description}</p>
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
         </ResponsiveGrid>
       </ResponsiveSection>
@@ -277,18 +300,28 @@ export default function LandingPage() {
         </div>
 
         {/* Featured Content */}
-        <ResponsiveGrid cols={{ xs: 1, sm: 2, md: 2, lg: 3 }}>
-          {/* Featured Profiles */}
-          {featuredProfiles[selectedTab].map((profile) => (
-            <ProfileCard key={profile.id} {...profile} />
-          ))}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={selectedTab}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            <ResponsiveGrid cols={{ xs: 1, sm: 2, md: 2, lg: 3 }}>
+              {/* Featured Profiles */}
+              {featuredProfiles[selectedTab].map((profile) => (
+                <ProfileCard key={profile.id} {...profile} />
+              ))}
 
-          {/* Featured Job */}
-          <JobCard {...featuredJobs[0]} />
+              {/* Featured Job */}
+              <JobCard {...featuredJobs[0]} />
 
-          {/* Featured Project */}
-          <ProjectCard {...featuredProjects[0]} />
-        </ResponsiveGrid>
+              {/* Featured Project */}
+              <ProjectCard {...featuredProjects[0]} />
+            </ResponsiveGrid>
+          </motion.div>
+        </AnimatePresence>
 
         <div className="text-center mt-8 sm:mt-12">
           <ResponsiveButton
@@ -472,6 +505,6 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
-    </div>
+    </motion.div>
   );
 }

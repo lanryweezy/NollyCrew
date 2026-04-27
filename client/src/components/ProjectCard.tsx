@@ -109,7 +109,7 @@ export default function ProjectCard({
               </div>
             </div>
           </div>
-          <Button variant="ghost" size="icon" data-testid={`button-options-${id}`}>
+          <Button variant="ghost" size="icon" data-testid={`button-options-${id}`} aria-label="Project options">
             <MoreVertical className="w-4 h-4" />
           </Button>
         </div>
