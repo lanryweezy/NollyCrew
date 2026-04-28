@@ -208,6 +208,7 @@ export default function Navigation({
                   size="icon"
                   onClick={() => setIsSearchOpen(true)}
                   data-testid="button-search"
+                  aria-label="Search"
                   className="relative"
                 >
                   <Search className="w-4 h-4" />
@@ -228,6 +229,7 @@ export default function Navigation({
                       size="icon" 
                       className="relative"
                       data-testid="button-notifications"
+                      aria-label="Notifications"
                     >
                       <Bell className="w-4 h-4" />
                       {notifications > 0 && (
@@ -248,6 +250,7 @@ export default function Navigation({
                   size="icon" 
                   className="relative hidden sm:flex"
                   data-testid="button-messages"
+                  aria-label="Messages"
                 >
                   <MessageCircle className="w-4 h-4" />
                   {messages > 0 && (
@@ -340,6 +343,7 @@ export default function Navigation({
               className="md:hidden"
               onClick={() => setIsMobileMenuOpen(true)}
               data-testid="button-mobile-menu"
+              aria-label="Toggle mobile menu"
             >
               <Menu className="w-4 h-4" />
             </Button>
