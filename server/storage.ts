@@ -376,7 +376,7 @@ export class MemStorage implements IStorage {
   }
 
   async createUser(user: Omit<InsertUser, 'password'> & { passwordHash: string }): Promise<User> {
-    const id = crypto.randomUUID();
+    const id = Math.random().toString(36).substring(2, 11);
     const u = user as any;
     const newUser: User = {
       id,
@@ -410,7 +410,7 @@ export class MemStorage implements IStorage {
   }
 
   async createUserRole(role: InsertUserRole): Promise<UserRole> {
-    const id = crypto.randomUUID();
+    const id = Math.random().toString(36).substring(2, 11);
     const r = role as any;
     const newRole: UserRole = {
       id,
@@ -457,7 +457,7 @@ export class MemStorage implements IStorage {
   }
 
   async createProject(project: InsertProject): Promise<Project> {
-    const id = crypto.randomUUID();
+    const id = Math.random().toString(36).substring(2, 11);
     const p = project as any;
     const newProject: Project = {
       id,
@@ -504,7 +504,7 @@ export class MemStorage implements IStorage {
   }
 
   async createProjectMember(member: InsertProjectMember): Promise<ProjectMember> {
-    const id = crypto.randomUUID();
+    const id = Math.random().toString(36).substring(2, 11);
     const m = member as any;
     const newMember: ProjectMember = {
       id,
@@ -546,7 +546,7 @@ export class MemStorage implements IStorage {
   }
 
   async createJob(job: InsertJob): Promise<Job> {
-    const id = crypto.randomUUID();
+    const id = Math.random().toString(36).substring(2, 11);
     const j = job as any;
     const newJob: Job = {
       id,
@@ -599,7 +599,7 @@ export class MemStorage implements IStorage {
   }
 
   async createJobApplication(application: InsertJobApplication): Promise<JobApplication> {
-    const id = crypto.randomUUID();
+    const id = Math.random().toString(36).substring(2, 11);
     const a = application as any;
     const newApp: JobApplication = {
       id,
@@ -634,7 +634,7 @@ export class MemStorage implements IStorage {
   }
 
   async createMessage(message: InsertMessage): Promise<Message> {
-    const id = crypto.randomUUID();
+    const id = Math.random().toString(36).substring(2, 11);
     const m = message as any;
     const newMessage: Message = {
       id,
@@ -663,7 +663,7 @@ export class MemStorage implements IStorage {
   }
 
   async createReview(review: InsertReview): Promise<Review> {
-    const id = crypto.randomUUID();
+    const id = Math.random().toString(36).substring(2, 11);
     const r = review as any;
     const newReview: Review = {
       id,
@@ -719,15 +719,17 @@ export class MemStorage implements IStorage {
       recentProjects,
       recentApplications,
       unreadMessagesCount,
+      notifications: [],
+      recentActivity: [],
+      connections: [],
       user: userProfile ? { id: userProfile.id, email: userProfile.email, firstName: userProfile.firstName, lastName: userProfile.lastName } : null,
     };
   }
 }
 
-// Logic to choose storage based on environment
-// Defaults to MemStorage if DATABASE_URL is not provided or if STORAGE_PROVIDER is explicitly set to 'mem'
 const databaseUrl = process.env.DATABASE_URL;
 const storageProvider = process.env.STORAGE_PROVIDER;
+
 let storage: IStorage;
 
 if (storageProvider === 'mem' || !databaseUrl) {
