@@ -329,16 +329,24 @@ export default function Projects() {
   // Impact: Eliminates unnecessary array traversals, maintaining snappy UI updates
   // even as the project list grows.
   const filteredProjects = useMemo(() => {
+    const term = searchTerm.toLowerCase();
     return list.filter(project => {
-      const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           project.genre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           project.director.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = project.title.toLowerCase().includes(term) ||
+                           project.genre.toLowerCase().includes(term) ||
+                           project.director.toLowerCase().includes(term);
 
       const matchesStatus = selectedStatus === "all" || project.status === selectedStatus;
 
       return matchesSearch && matchesStatus;
     });
   }, [list, searchTerm, selectedStatus]);
+
+  // Optimization: Memoize the 'my projects' filtered list to avoid O(N) recalculation
+  // on every render when filtering the already filtered projects array.
+  // Impact: Eliminates multiple redundant array traversals in the component rendering.
+  const myProjects = useMemo(() => {
+    return filteredProjects.filter(p => p.isOwner);
+  }, [filteredProjects]);
 
   const getPrimaryRole = () => {
     if (roles.length === 0) return "actor";
@@ -540,7 +548,7 @@ export default function Projects() {
             {/* Results Summary */}
             <div className="flex items-center justify-between">
               <p className="text-muted-foreground">
-                {filteredProjects.filter(p => p.isOwner).length} project{filteredProjects.filter(p => p.isOwner).length !== 1 ? 's' : ''} found
+                {myProjects.length} project{myProjects.length !== 1 ? 's' : ''} found
               </p>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">Sort by:</span>
@@ -563,7 +571,7 @@ export default function Projects() {
               <ListSkeleton rows={4} />
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {filteredProjects.filter(p => p.isOwner).map((project) => (
+                {myProjects.map((project) => (
                 <Card key={project.id} className="hover:shadow-md transition-shadow">
                   <CardHeader>
                     <div className="flex items-start justify-between">
@@ -738,7 +746,7 @@ export default function Projects() {
               </div>
             )}
 
-            {filteredProjects.filter(p => p.isOwner).length === 0 && (
+            {myProjects.length === 0 && (
               <Card>
                 <CardContent className="pt-6 text-center">
                   <Film className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
