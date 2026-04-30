@@ -895,7 +895,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI: casting recommendations (async)
-  app.post('/api/ai/casting', async (req, res) => {
+  app.post('/api/ai/casting', authenticateToken, async (req: any, res) => {
     try {
       const { role, requirements, location, skills, limit } = req.body as any;
       // @ts-ignore
@@ -1149,7 +1149,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/users/:userId/reviews', async (req: any, res) => {
+  app.get('/api/users/:userId/reviews', authenticateToken, async (req: any, res) => {
     try {
       const { userId } = req.params;
       const reviews = await storage.getUserReviews(userId);
