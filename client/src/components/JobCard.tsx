@@ -102,6 +102,7 @@ export default function JobCard({
             onClick={onBookmark}
             className={isBookmarked ? "text-yellow-500" : ""}
             data-testid={`button-bookmark-${id}`}
+            aria-label={isBookmarked ? "Remove bookmark" : "Bookmark job"}
           >
             <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
           </Button>
@@ -188,6 +189,7 @@ export default function JobCard({
           size="icon"
           onClick={onShare}
           data-testid={`button-share-${id}`}
+          aria-label="Share job"
         >
           <Share2 className="w-4 h-4" />
         </Button>
