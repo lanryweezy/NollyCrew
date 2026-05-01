@@ -3,11 +3,11 @@ import { storage } from '../storage.js';
 
 export const requirePermission = (permission: string, projectIdParam?: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.isAuthenticated || !req.isAuthenticated()) {
+    if (!req.user) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const userId = (req.user as any).id;
+    const userId = req.user.id;
 
     // If projectId is provided, check project-level permissions
     if (projectIdParam) {

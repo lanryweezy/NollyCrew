@@ -4,8 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Briefcase, Film, TrendingUp } from "lucide-react";
 import Navigation from "@/components/Navigation";
 
+interface PlatformStats {
+  totalEscrowVolume: number;
+  totalUsers: number;
+  totalProjects: number;
+  totalJobs: number;
+  activeUsersToday: number;
+}
+
 export default function BossDashboard() {
-  const { data: stats, isLoading } = useQuery({
+  const { data: stats, isLoading } = useQuery<PlatformStats>({
     queryKey: ["/api/admin/stats"],
     queryFn: () => apiFetch("/api/admin/stats"),
   });

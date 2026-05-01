@@ -10,7 +10,7 @@ export const logAction = async (req: Request, options: {
   newData?: any;
 }) => {
   try {
-    const userId = (req.user as any)?.id;
+    const userId = req.user?.id;
     const ipAddress = req.ip;
     const userAgent = req.headers['user-agent'];
 

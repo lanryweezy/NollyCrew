@@ -433,6 +433,22 @@ export const insertKycVerificationSchema = createInsertSchema(kycVerifications).
   createdAt: true,
 } as any);
 
+export const insertDailyProgressReportSchema = createInsertSchema(dailyProgressReports).omit({
+  id: true,
+  createdAt: true,
+} as any);
+
+export const insertSupportTicketSchema = createInsertSchema(supportTickets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+} as any);
+
+export const insertReferralSchema = createInsertSchema(referrals).omit({
+  id: true,
+  createdAt: true,
+} as any);
+
 // Waitlist insert schema
 export const insertWaitlistSchema = createInsertSchema(waitlist).omit({
   id: true,
@@ -474,3 +490,9 @@ export type EscrowTransaction = typeof escrowTransactions.$inferSelect;
 export type InsertEscrowTransaction = z.infer<typeof insertEscrowTransactionSchema>;
 export type KycVerification = typeof kycVerifications.$inferSelect;
 export type InsertKycVerification = z.infer<typeof insertKycVerificationSchema>;
+export type DailyProgressReport = typeof dailyProgressReports.$inferSelect;
+export type InsertDailyProgressReport = z.infer<typeof insertDailyProgressReportSchema>;
+export type SupportTicket = typeof supportTickets.$inferSelect;
+export type InsertSupportTicket = z.infer<typeof insertSupportTicketSchema>;
+export type Referral = typeof referrals.$inferSelect;
+export type InsertReferral = z.infer<typeof insertReferralSchema>;

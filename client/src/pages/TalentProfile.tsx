@@ -53,18 +53,20 @@ export default function TalentProfile() {
 
   if (!profile) {
     return (
-      <AppLayout>
+      <div className="min-h-screen bg-background">
+        <Navigation />
         <div className="flex h-[50vh] items-center justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
-      </AppLayout>
+      </div>
     );
   }
 
   const { user, roles } = profile;
   
   return (
-    <AppLayout>
+    <div className="min-h-screen bg-background">
+      <Navigation />
       <div className="container mx-auto p-6 max-w-5xl space-y-8">
         
         {/* Header Profile Section */}
@@ -189,7 +191,7 @@ export default function TalentProfile() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="flex items-center text-muted-foreground"><CalendarIcon className="h-4 w-4 mr-2" /> Availability</span>
-                  <Badge variant="success" className="bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 border-0">Available</Badge>
+                  <Badge variant="default" className="bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 border-0">Available</Badge>
                 </div>
                 {user.website && (
                   <div className="pt-4 border-t">
@@ -203,6 +205,6 @@ export default function TalentProfile() {
           </div>
         </div>
       </div>
-    </AppLayout>
+    </div>
   );
 }

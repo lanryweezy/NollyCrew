@@ -89,7 +89,7 @@ export default function FilePreview({ url, filename }: FilePreviewProps) {
           error={
             <div className="flex h-[400px] flex-col items-center justify-center text-destructive">
               <p>Failed to load PDF.</p>
-              <Button variant="link" onClick={() => window.open(url, "_blank")}>
+              <Button variant="ghost" className="text-primary hover:underline" onClick={() => window.open(url, "_blank")}>
                 Open URL directly
               </Button>
             </div>

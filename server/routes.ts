@@ -6,7 +6,6 @@ import { createServer, type Server } from "http";
 import bcrypt from "bcryptjs";
 import { sign as jwtSign, verify as jwtVerify } from "./utils/jwt.js";
 import { storage } from "./storage.js";
-import { logger } from "./utils/logger.js";
 import { logAction } from "./utils/audit.js";
 import { requirePermission } from "./middleware/rbac.js";
 import { 
@@ -60,6 +59,7 @@ import { rateLimiter, authRateLimiter, apiRateLimiter } from './middleware/rateL
 import { validateRequest, isValidEmail, isValidPassword } from './middleware/validation.js';
 import { logger } from './utils/logger.js';
 import { HealthChecker } from './utils/monitoring.js';
+import { exportToCSV } from './utils/export.js';
 
 // JWT secrets
 const JWT_SECRET = process.env.JWT_SECRET || "your-super-secret-jwt-key";

@@ -189,7 +189,7 @@ export class DbStorage implements IStorage {
 
   async deleteUserRole(id: string): Promise<boolean> {
     const result = await db.delete(userRoles).where(eq(userRoles.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   async getProject(id: string): Promise<Project | undefined> {
@@ -221,7 +221,7 @@ export class DbStorage implements IStorage {
 
   async deleteProject(id: string): Promise<boolean> {
     const result = await db.delete(projects).where(eq(projects.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   async getProjectMember(id: string): Promise<ProjectMember | undefined> {
@@ -244,7 +244,7 @@ export class DbStorage implements IStorage {
 
   async deleteProjectMember(id: string): Promise<boolean> {
     const result = await db.delete(projectMembers).where(eq(projectMembers.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   async getJob(id: string): Promise<Job | undefined> {
@@ -287,7 +287,7 @@ export class DbStorage implements IStorage {
 
   async deleteJob(id: string): Promise<boolean> {
     const result = await db.delete(jobs).where(eq(jobs.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   async getJobApplication(id: string): Promise<JobApplication | undefined> {
@@ -364,7 +364,7 @@ export class DbStorage implements IStorage {
 
   async markMessageAsRead(id: string): Promise<boolean> {
     const result = await db.update(messages).set({ isRead: true } as any).where(eq(messages.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   async getUserReviews(userId: string): Promise<Review[]> {
@@ -440,7 +440,7 @@ export class DbStorage implements IStorage {
 
   async deleteApiKey(id: string): Promise<boolean> {
     const result = await db.delete(apiKeys).where(eq(apiKeys.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   async getEscrowTransactions(filters?: { senderId?: string; recipientId?: string; projectId?: string; status?: string; limit?: number }): Promise<EscrowTransaction[]> {
