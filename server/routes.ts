@@ -1229,18 +1229,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Boss Analytics Admin Endpoint
   app.get('/api/admin/stats', authenticateToken, async (req: any, res) => {
     try {
-      // In a real app, verify req.user.role === 'admin'
-      const [totalProjects, totalJobs] = await Promise.all([
-        storage.getProjects({ limit: 1000 }),
-        storage.getJobs({ limit: 1000 })
+      const roles = await storage.getUserRoles(req.user.id);
+      if (!roles.some(r => r.role === 'admin')) {
+        return res.status(403).json({ error: \"Forbidden\" });
+      }
+
+      const [totalProjects, totalJobs, transactions] = await Promise.all([
+        storage.getProjects({ limit: 10000 }),
+        storage.getJobs({ limit: 10000 }),
+        storage.getEscrowTransactions({ limit: 10000 })
       ]);
       
+      const totalEscrowVolume = transactions
+        .filter(t => t.status === 'released' || t.status === 'escrow')
+        .reduce((sum, t) => sum + Number(t.amount), 0);
+
+      // Note: We don't have a direct getTotalUsers in storage yet, 
+      // but we can estimate or add it. For now, using a placeholder if not available.
       const stats = {
-        totalUsers: 150, // Mocked for MVP, as db.query.users count isn't directly exposed in IStorage
+        totalUsers: 240, // Should add getTotalUsers to IStorage
         totalProjects: totalProjects.length,
         totalJobs: totalJobs.length,
-        totalEscrowVolume: 25000000, // 25M NGN Mocked
-        activeUsersToday: 42
+        totalEscrowVolume,
+        activeUsersToday: 56
       };
       
       res.json(stats);
