@@ -180,10 +180,20 @@ export default function Dashboard() {
       </div>
 
       <ResponsiveSection padding="medium">
-        <PageHeader 
-          title={roleContent.title}
-          subtitle={roleContent.subtitle}
-        />
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="mb-8"
+        >
+          <h1 className="text-4xl md:text-5xl font-bold font-serif mb-3 tracking-tight text-foreground">
+            Welcome back, <span className="bg-gradient-to-r from-primary to-nollywood-crimson bg-clip-text text-transparent">{user?.firstName}</span>
+          </h1>
+          <p className="text-muted-foreground text-lg flex items-center gap-2">
+            <Film className="w-5 h-5 text-primary" />
+            {roleContent.subtitle}
+          </p>
+        </motion.div>
 
         {/* Stats Overview */}
         <ResponsiveGrid cols={{ xs: 2, sm: 2, md: 4 }} className="mb-6 sm:mb-8">
@@ -207,7 +217,7 @@ export default function Dashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveGrid cols={{ xs: 1, sm: 3 }}>
+                <ResponsiveGrid cols={{ xs: 1, sm: 3 }} gap="medium">
                   {roleContent.quickActions.map((action, index) => (
                     <Button
                       key={index}
