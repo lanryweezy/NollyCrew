@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
 import Navigation from "@/components/Navigation";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -347,14 +347,27 @@ export default function EnhancedCollaboration() {
     }
   };
 
-  const filteredDocuments = documents.filter(doc => 
-    doc.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Optimization: Memoize the filtered documents list to prevent O(N) recalculation
+  // on every render, improving performance when users interact with other UI elements
+  // like tabs or dialogs.
+  // Impact: Eliminates unnecessary array traversals on non-search related renders.
+  const filteredDocuments = useMemo(() => {
+    const term = searchQuery.toLowerCase();
+    return documents.filter(doc =>
+      doc.name.toLowerCase().includes(term)
+    );
+  }, [documents, searchQuery]);
 
-  const filteredTasks = tasks.filter(task => 
-    task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    task.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Optimization: Memoize the filtered tasks list to prevent O(N) recalculation
+  // on every render.
+  // Impact: Eliminates unnecessary array traversals on non-search related renders.
+  const filteredTasks = useMemo(() => {
+    const term = searchQuery.toLowerCase();
+    return tasks.filter(task =>
+      task.title.toLowerCase().includes(term) ||
+      task.description.toLowerCase().includes(term)
+    );
+  }, [tasks, searchQuery]);
 
   return (
     <div className="min-h-screen bg-background">
