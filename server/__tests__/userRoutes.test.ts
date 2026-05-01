@@ -3,30 +3,32 @@ import request from 'supertest';
 import express, { type Express } from 'express';
 import { registerRoutes } from '../routes';
 import { storage } from '../storage';
-import * as jwt from 'jsonwebtoken';
 
 // Mock storage functions
 vi.mock('../storage');
 
 describe('User Routes', () => {
   let app: Express;
+  const mockUser = {
+    id: '123',
+    email: 'test@example.com',
+    firstName: 'Test',
+    lastName: 'User'
+  };
 
   beforeEach(async () => {
     vi.clearAllMocks();
     app = express();
     app.use(express.json());
     await registerRoutes(app);
+    
+    // Default mock for authentication middleware to pass
+    (storage.getUserByEmail as any).mockResolvedValue(mockUser);
+    (storage.getUser as any).mockResolvedValue(mockUser);
   });
 
   describe('GET /api/auth/me', () => {
     it('should return user data when authenticated', async () => {
-      const mockUser = {
-        id: '123',
-        email: 'test@example.com',
-        firstName: 'Test',
-        lastName: 'User'
-      };
-
       const mockRoles = [
         {
           id: '456',
@@ -36,9 +38,6 @@ describe('User Routes', () => {
         }
       ];
 
-      // Mock JWT verification
-      (jwt.verify as any).mockReturnValue({ userId: '123' });
-      (storage.getUser as any).mockResolvedValue(mockUser);
       (storage.getUserRoles as any).mockResolvedValue(mockRoles);
 
       const response = await request(app)
@@ -62,9 +61,6 @@ describe('User Routes', () => {
         isActive: true
       };
 
-      // Mock JWT verification
-      (jwt.verify as any).mockReturnValue({ userId: '123' });
-      (storage.getUser as any).mockResolvedValue({ id: '123' });
       (storage.getUserRoles as any).mockResolvedValue([]);
       (storage.createUserRole as any).mockResolvedValue(mockRole);
 
@@ -83,9 +79,6 @@ describe('User Routes', () => {
     });
 
     it('should return error if user already has this role', async () => {
-      // Mock JWT verification
-      (jwt.verify as any).mockReturnValue({ userId: '123' });
-      (storage.getUser as any).mockResolvedValue({ id: '123' });
       (storage.getUserRoles as any).mockResolvedValue([
         {
           id: '456',

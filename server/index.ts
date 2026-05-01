@@ -11,8 +11,8 @@ import { logger } from './utils/logger.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { securityMiddleware } from './middleware/security.js';
 import { initializeWebSocketServer } from './websocket.js';
-import { createRouteHandler } from \"uploadthing/express\";
-import { ourFileRouter } from \"./uploadthing/router.js\";
+import { createRouteHandler } from "uploadthing/express";
+import { ourFileRouter } from "./uploadthing/router.js";
 import { storage } from './storage.js';
 import fs from 'fs/promises';
 

@@ -5,17 +5,17 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import bcrypt from "bcryptjs";
 import { sign as jwtSign, verify as jwtVerify } from "./utils/jwt.js";
-import { storage } from \"./storage.js\";
-import { logger } from \"./utils/logger.js\";
-import { logAction } from \"./utils/audit.js\";
-import { requirePermission } from \"./middleware/rbac.js\";
+import { storage } from "./storage.js";
+import { logger } from "./utils/logger.js";
+import { logAction } from "./utils/audit.js";
+import { requirePermission } from "./middleware/rbac.js";
 import { 
   initializeTransaction, 
   verifyTransaction, 
   calculateWHT, 
   calculateServiceFee 
-} from \"./utils/paystack.js\";
-import crypto from \"node:crypto\";
+} from "./utils/paystack.js";
+import crypto from "node:crypto";
 import { insertUserSchema, insertUserRoleSchema, insertJobSchema, insertProjectSchema, insertJobApplicationSchema, insertWaitlistSchema, insertMessageSchema, insertReviewSchema } from "../shared/schema.js";
 import { z } from "zod";
 import paystackapi from 'paystack-api';
@@ -1231,7 +1231,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const roles = await storage.getUserRoles(req.user.id);
       if (!roles.some(r => r.role === 'admin')) {
-        return res.status(403).json({ error: \"Forbidden\" });
+        return res.status(403).json({ error: "Forbidden" });
       }
 
       const [totalProjects, totalJobs, transactions] = await Promise.all([
@@ -1336,31 +1336,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // --- Pillar 4: Scalability, Business & Operations ---
 
       // Audit Logs (Task 61)
-      app.get(\"/api/admin/audit-logs\", authenticateToken, async (req: any, res) => {
+      app.get("/api/admin/audit-logs", authenticateToken, async (req: any, res) => {
       // Check if user is admin
       const roles = await storage.getUserRoles(req.user.id);
       if (!roles.some(r => r.role === 'admin')) {
-      return res.status(403).json({ error: \"Forbidden: Admin access required\" });
+      return res.status(403).json({ error: "Forbidden: Admin access required" });
       }
       const logs = await storage.getAuditLogs(req.query as any);
       res.json(logs);
       });
 
       // Subscriptions (Task 59)
-      app.get(\"/api/subscriptions/plans\", async (req, res) => {
+      app.get("/api/subscriptions/plans", async (req, res) => {
       const plans = await storage.getSubscriptionPlans();
       res.json(plans);
       });
 
-      app.get(\"/api/subscriptions/me\", authenticateToken, async (req: any, res) => {
+      app.get("/api/subscriptions/me", authenticateToken, async (req: any, res) => {
       const sub = await storage.getUserSubscription(req.user.id);
       res.json(sub);
       });
 
-      app.post(\"/api/subscriptions/initialize\", authenticateToken, async (req: any, res) => {
+      app.post("/api/subscriptions/initialize", authenticateToken, async (req: any, res) => {
       const { planId } = req.body;
       const plan = await storage.getSubscriptionPlan(planId);
-      if (!plan) return res.status(404).json({ error: \"Plan not found\" });
+      if (!plan) return res.status(404).json({ error: "Plan not found" });
 
       const amountKobo = Math.round(Number(plan.price) * 100);
       const result = await initializeTransaction({
@@ -1372,12 +1372,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // API Keys (Task 71)
-      app.get(\"/api/api-keys\", authenticateToken, async (req: any, res) => {
+      app.get("/api/api-keys", authenticateToken, async (req: any, res) => {
       const keys = await storage.getApiKeys(req.user.id);
       res.json(keys.map(k => ({ id: k.id, name: k.name, lastUsedAt: k.lastUsedAt, createdAt: k.createdAt })));
       });
 
-      app.post(\"/api/api-keys\", authenticateToken, async (req: any, res) => {
+      app.post("/api/api-keys", authenticateToken, async (req: any, res) => {
       const { name } = req.body;
       const rawKey = `nc_${crypto.randomBytes(24).toString('hex')}`;
       const keyHash = crypto.createHash('sha256').update(rawKey).digest('hex');
@@ -1392,10 +1392,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ ...apiKey, key: rawKey }); // Only return raw key once
       });
 
-      app.delete(\"/api/api-keys/:id\", authenticateToken, async (req: any, res) => {
+      app.delete("/api/api-keys/:id", authenticateToken, async (req: any, res) => {
       const key = await storage.getApiKey(req.params.id);
       if (!key || key.userId !== req.user.id) {
-      return res.status(404).json({ error: \"API key not found\" });
+      return res.status(404).json({ error: "API key not found" });
       }
       await storage.deleteApiKey(req.params.id);
       await logAction(req, { action: 'DELETE', entityType: 'api_keys', entityId: req.params.id });
@@ -1403,7 +1403,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Escrow (Task 56)
-      app.post(\"/api/escrow/initialize\", authenticateToken, async (req: any, res) => {
+      app.post("/api/escrow/initialize", authenticateToken, async (req: any, res) => {
       const { jobId, recipientId, amount, projectId } = req.body;
 
       const amountKobo = Math.round(Number(amount) * 100);
@@ -1419,7 +1419,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(result);
       });
 
-      app.get(\"/api/escrow/transactions\", authenticateToken, async (req: any, res) => {
+      app.get("/api/escrow/transactions", authenticateToken, async (req: any, res) => {
       const transactions = await storage.getEscrowTransactions({ 
       senderId: req.user.id,
       recipientId: req.user.id,
@@ -1429,12 +1429,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // KYC (Task 58)
-      app.get(\"/api/kyc/status\", authenticateToken, async (req: any, res) => {
+      app.get("/api/kyc/status", authenticateToken, async (req: any, res) => {
       const verifications = await storage.getKycVerifications(req.user.id);
       res.json(verifications[0] || { status: 'not_started' });
       });
 
-      app.post(\"/api/kyc/verify\", authenticateToken, async (req: any, res) => {
+      app.post("/api/kyc/verify", authenticateToken, async (req: any, res) => {
       const { type, idNumber } = req.body;
 
       // Placeholder for actual SmileIdentity/Dojah integration
@@ -1451,7 +1451,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Paystack Webhook (Task 56, 59)
-      app.post(\"/api/webhooks/paystack\", async (req, res) => {
+      app.post("/api/webhooks/paystack", async (req, res) => {
       const hash = crypto.createHmac('sha512', process.env.PAYSTACK_SECRET_KEY!).update(JSON.stringify(req.body)).digest('hex');
       if (hash !== req.headers['x-paystack-signature']) {
         return res.status(401).send('Invalid signature');
@@ -1500,11 +1500,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Data Export (Task 62)
-  app.get(\"/api/projects/:projectId/export\", authenticateToken, async (req: any, res) => {
+  app.get("/api/projects/:projectId/export", authenticateToken, async (req: any, res) => {
     const { projectId } = req.params;
     const project = await storage.getProject(projectId);
     if (!project || project.createdById !== req.user.id) {
-      return res.status(403).json({ error: \"Access denied\" });
+      return res.status(403).json({ error: "Access denied" });
     }
 
     const members = await storage.getProjectMembers(projectId);
@@ -1523,10 +1523,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.send(csv);
   });
 
-  app.get(\"/api/admin/export/audit-logs\", authenticateToken, async (req: any, res) => {
+  app.get("/api/admin/export/audit-logs", authenticateToken, async (req: any, res) => {
     const roles = await storage.getUserRoles(req.user.id);
     if (!roles.some(r => r.role === 'admin')) {
-      return res.status(403).json({ error: \"Forbidden\" });
+      return res.status(403).json({ error: "Forbidden" });
     }
     
     const logs = await storage.getAuditLogs({ limit: 10000 });
@@ -1537,24 +1537,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
 
     // Daily Progress Reports (Task 90)
-    app.get(\"/api/projects/:projectId/dprs\", authenticateToken, async (req: any, res) => {
+    app.get("/api/projects/:projectId/dprs", authenticateToken, async (req: any, res) => {
     const { projectId } = req.params;
     // Check membership
     const members = await storage.getProjectMembers(projectId);
     if (!members.some(m => m.userId === req.user.id)) {
-      return res.status(403).json({ error: \"Not a member of this project\" });
+      return res.status(403).json({ error: "Not a member of this project" });
     }
     const dprs = await storage.getDPRs(projectId);
     res.json(dprs);
     });
 
-    app.post(\"/api/projects/:projectId/dprs\", authenticateToken, async (req: any, res) => {
+    app.post("/api/projects/:projectId/dprs", authenticateToken, async (req: any, res) => {
     const { projectId } = req.params;
     // Require 'producer', 'director', or 'edit_schedule' permission (reuse for simplicity)
     const members = await storage.getProjectMembers(projectId);
     const member = members.find(m => m.userId === req.user.id);
     if (!member || !(['producer', 'director'].includes(member.role) || (member.permissions as string[])?.includes('edit_schedule'))) {
-      return res.status(403).json({ error: \"Insufficient permissions to create DPR\" });
+      return res.status(403).json({ error: "Insufficient permissions to create DPR" });
     }
 
     const dpr = await storage.createDPR({
@@ -1568,7 +1568,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
 
     // Support Tickets / Dispute Resolution (Task 66, 77)
-    app.get(\"/api/support/tickets\", authenticateToken, async (req: any, res) => {
+    app.get("/api/support/tickets", authenticateToken, async (req: any, res) => {
     const roles = await storage.getUserRoles(req.user.id);
     const isAdmin = roles.some(r => r.role === 'admin');
 
@@ -1577,7 +1577,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(tickets);
     });
 
-    app.post(\"/api/support/tickets\", authenticateToken, async (req: any, res) => {
+    app.post("/api/support/tickets", authenticateToken, async (req: any, res) => {
     const ticket = await storage.createSupportTicket({
       ...req.body,
       userId: req.user.id,
@@ -1587,24 +1587,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(201).json(ticket);
     });
 
-    app.patch(\"/api/support/tickets/:id\", authenticateToken, async (req: any, res) => {
+    app.patch("/api/support/tickets/:id", authenticateToken, async (req: any, res) => {
     const roles = await storage.getUserRoles(req.user.id);
     const isAdmin = roles.some(r => r.role === 'admin');
 
     const ticket = await storage.updateSupportTicket(req.params.id, req.body);
-    if (!ticket) return res.status(404).json({ error: \"Ticket not found\" });
+    if (!ticket) return res.status(404).json({ error: "Ticket not found" });
 
     await logAction(req, { action: 'UPDATE', entityType: 'support_tickets', entityId: ticket.id, newData: req.body });
     res.json(ticket);
     });
 
     // Referrals (Task 70)
-    app.get(\"/api/referrals\", authenticateToken, async (req: any, res) => {
+    app.get("/api/referrals", authenticateToken, async (req: any, res) => {
     const referrals = await storage.getReferrals(req.user.id);
     res.json(referrals);
     });
 
-    app.post(\"/api/referrals\", authenticateToken, async (req: any, res) => {
+    app.post("/api/referrals", authenticateToken, async (req: any, res) => {
     const referral = await storage.createReferral({
       referrerId: req.user.id,
       referredEmail: req.body.referredEmail,

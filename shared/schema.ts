@@ -291,62 +291,62 @@ export const kycVerifications = pgTable("kyc_verifications", {
   idNumberMasked: text("id_number_masked"),
   notes: text("notes"),
   verifiedAt: timestamp("verified_at"),
-  createdAt: timestamp(\"created_at\").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 }, (table) => {
   return {
-    userIdIdx: index(\"kyc_verifications_user_id_idx\").on(table.userId),
+    userIdIdx: index("kyc_verifications_user_id_idx").on(table.userId),
   };
 });
 
 // Daily Progress Reports (Task 90)
-export const dailyProgressReports = pgTable(\"daily_progress_reports\", {
-  id: varchar(\"id\").primaryKey().default(sql`gen_random_uuid()`),
-  projectId: varchar(\"project_id\").notNull().references(() => projects.id, { onDelete: \"cascade\" }),
-  reportDate: timestamp(\"report_date\").notNull(),
-  scenesPlanned: jsonb(\"scenes_planned\"),
-  scenesShot: jsonb(\"scenes_shot\"),
-  crewPresent: jsonb(\"crew_present\"),
-  highlights: text(\"highlights\"),
-  challenges: text(\"challenges\"),
-  createdAt: timestamp(\"created_at\").notNull().defaultNow(),
+export const dailyProgressReports = pgTable("daily_progress_reports", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  reportDate: timestamp("report_date").notNull(),
+  scenesPlanned: jsonb("scenes_planned"),
+  scenesShot: jsonb("scenes_shot"),
+  crewPresent: jsonb("crew_present"),
+  highlights: text("highlights"),
+  challenges: text("challenges"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 }, (table) => {
   return {
-    projectIdIdx: index(\"dpr_project_id_idx\").on(table.projectId),
+    projectIdIdx: index("dpr_project_id_idx").on(table.projectId),
   };
 });
 
 // Support Tickets / Dispute Resolution (Task 66)
-export const supportTickets = pgTable(\"support_tickets\", {
-  id: varchar(\"id\").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar(\"user_id\").notNull().references(() => users.id),
-  projectId: varchar(\"project_id\").references(() => projects.id),
-  subject: text(\"subject\").notNull(),
-  description: text(\"description\").notNull(),
-  type: text(\"type\").notNull(), // 'dispute', 'bug', 'feature_request', 'other'
-  status: text(\"status\").notNull().default(\"open\"), // 'open', 'in_progress', 'resolved', 'closed'
-  priority: text(\"priority\").notNull().default(\"medium\"), // 'low', 'medium', 'high', 'critical'
-  metadata: jsonb(\"metadata\"),
-  createdAt: timestamp(\"created_at\").notNull().defaultNow(),
-  updatedAt: timestamp(\"updated_at\").notNull().defaultNow(),
+export const supportTickets = pgTable("support_tickets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  projectId: varchar("project_id").references(() => projects.id),
+  subject: text("subject").notNull(),
+  description: text("description").notNull(),
+  type: text("type").notNull(), // 'dispute', 'bug', 'feature_request', 'other'
+  status: text("status").notNull().default("open"), // 'open', 'in_progress', 'resolved', 'closed'
+  priority: text("priority").notNull().default("medium"), // 'low', 'medium', 'high', 'critical'
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 }, (table) => {
   return {
-    userIdIdx: index(\"support_tickets_user_id_idx\").on(table.userId),
-    statusIdx: index(\"support_tickets_status_idx\").on(table.status),
+    userIdIdx: index("support_tickets_user_id_idx").on(table.userId),
+    statusIdx: index("support_tickets_status_idx").on(table.status),
     };
     });
 
     // Referral Program (Task 70)
-    export const referrals = pgTable(\"referrals\", {
-    id: varchar(\"id\").primaryKey().default(sql`gen_random_uuid()`),
-    referrerId: varchar(\"referrer_id\").notNull().references(() => users.id),
-    referredEmail: text(\"referred_email\").notNull(),
-    status: text(\"status\").notNull().default(\"pending\"), // 'pending', 'joined', 'rewarded'
-    rewardStatus: text(\"reward_status\").notNull().default(\"none\"), // 'none', 'applied'
-    createdAt: timestamp(\"created_at\").notNull().defaultNow(),
+    export const referrals = pgTable("referrals", {
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    referrerId: varchar("referrer_id").notNull().references(() => users.id),
+    referredEmail: text("referred_email").notNull(),
+    status: text("status").notNull().default("pending"), // 'pending', 'joined', 'rewarded'
+    rewardStatus: text("reward_status").notNull().default("none"), // 'none', 'applied'
+    createdAt: timestamp("created_at").notNull().defaultNow(),
     }, (table) => {
     return {
-      referrerIdIdx: index(\"referrals_referrer_id_idx\").on(table.referrerId),
-      emailIdx: index(\"referrals_email_idx\").on(table.referredEmail),
+      referrerIdIdx: index("referrals_referrer_id_idx").on(table.referrerId),
+      emailIdx: index("referrals_email_idx").on(table.referredEmail),
     };
     });
 

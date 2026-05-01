@@ -31,6 +31,8 @@ import ResponsiveTypography from "@/components/ResponsiveTypography";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import { api } from "@/lib/api";
+
 export default function AITools() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("script-analysis");
@@ -44,9 +46,6 @@ export default function AITools() {
   const [legalForm, setLegalForm] = useState({ talentName: '', roleName: '', projectName: '', rate: '' });
   const [isGeneratingLegal, setIsGeneratingLegal] = useState(false);
   const [legalResult, setLegalResult] = useState<string | null>(null);
-  
-  // API Import
-  const { api } = require('@/lib/api');
 
   const handleScriptAnalysis = () => {
     setIsAnalyzing(true);

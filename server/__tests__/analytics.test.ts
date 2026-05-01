@@ -4,35 +4,7 @@ import {
   generatePerformanceBenchmarks, 
   generateTrendAnalysis 
 } from '../analytics';
-import { vi } from 'vitest';
-
-// Mock storage module
-vi.mock('../storage', () => ({
-  storage: {
-    getProjects: vi.fn().mockResolvedValue([
-      {
-        id: 'project-1',
-        title: 'Test Project',
-        description: 'A test project',
-        genre: 'Drama',
-        type: 'feature',
-        status: 'completed',
-        budget: '1000000',
-        currency: 'NGN',
-        startDate: new Date('2023-01-01'),
-        endDate: new Date('2023-06-01'),
-        location: 'Lagos',
-        poster: null,
-        trailer: null,
-        script: null,
-        scriptBreakdown: null,
-        createdById: 'user-1',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }
-    ])
-  }
-}));
+import { describe, it, expect } from 'vitest';
 
 describe('Analytics Service', () => {
   describe('predictProjectSuccess', () => {
