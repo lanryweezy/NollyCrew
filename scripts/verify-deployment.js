@@ -71,8 +71,8 @@ async function verifyDeployment() {
     
     const requiredFiles = [
       'dist/public/index.html',
-      'dist/server/index.js',
-      'dist/server/utils/logger.js'
+      'dist/server/server/index.js',
+      'dist/server/server/utils/logger.js'
     ];
     
     for (const file of requiredFiles) {
@@ -85,7 +85,7 @@ async function verifyDeployment() {
     
     // Step 6: Test startup (briefly)
     console.log('\n🚀 Testing application startup...');
-    const startTest = spawn('node', ['dist/server/index.js'], {
+    const startTest = spawn('node', ['dist/server/server/index.js'], {
       env: {
         ...process.env,
         NODE_ENV: 'production',

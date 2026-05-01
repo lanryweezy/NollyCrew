@@ -27,7 +27,7 @@ import {
   Camera
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
-import ListSkeleton from "@/components/ListSkeleton";
+import { ProjectSkeleton as ListSkeleton } from "@/components/ListSkeleton";
 
 export default function Jobs() {
   const [, setLocation] = useLocation();

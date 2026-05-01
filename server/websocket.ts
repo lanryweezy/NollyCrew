@@ -167,6 +167,27 @@ async function handleMessage(connectionId: string, message: WebSocketMessage) {
         projectId: message.projectId
       }, connection.userId); // Exclude sender
       break;
+
+    // WebRTC Signaling (Task 67)
+    case 'webrtc_offer':
+    case 'webrtc_answer':
+    case 'webrtc_ice_candidate':
+      if (message.payload.targetUserId) {
+        const success = sendToUser(message.payload.targetUserId, {
+          type: message.type,
+          payload: {
+            ...message.payload,
+            fromUserId: connection.userId
+          }
+        });
+        if (!success) {
+          connection.ws.send(JSON.stringify({
+            type: 'error',
+            payload: { message: `Target user ${message.payload.targetUserId} not connected` }
+          }));
+        }
+      }
+      break;
       
     default:
       logger.warn(`Unknown message type: ${message.type}`);

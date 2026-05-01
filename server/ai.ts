@@ -30,6 +30,8 @@ export interface ScriptAnalysis {
     props: string[];
     wardrobe: string[];
     vfx: string[];
+    cameraShots?: string[];
+    directorNotes?: string;
     notes?: string;
   }>;
   characters: string[];
@@ -38,6 +40,7 @@ export interface ScriptAnalysis {
   props: string[];
   wardrobe: string[];
   vfx: string[];
+  cameraShots?: string[];
   analyzedAt: string;
 }
 
@@ -111,6 +114,8 @@ Analyze this film script and extract detailed information. Return a JSON object 
       "props": ["Prop1", "Prop2"],
       "wardrobe": ["Wardrobe1", "Wardrobe2"],
       "vfx": ["VFX1", "VFX2"],
+      "cameraShots": ["Establishing Shot", "Close-up on Character1", "Over-the-shoulder"],
+      "directorNotes": "Emotional climax, keep pacing tight",
       "notes": "Additional notes"
     }
   ],
@@ -126,19 +131,20 @@ Analyze this film script and extract detailed information. Return a JSON object 
   },
   "props": ["All props needed"],
   "wardrobe": ["All wardrobe items"],
-  "vfx": ["All VFX requirements"]
+  "vfx": ["All VFX requirements"],
+  "cameraShots": ["All suggested camera shots"]
 }
 
 Script text:
-${scriptText.substring(0, 8000)} // Limit to avoid token limits
+${scriptText.substring(0, 15000)} // Analyze first 15k chars for deep context
 `;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o",
       messages: [
         {
           role: "system",
-          content: "You are a professional film script analyst. Extract detailed production information from scripts. Always return valid JSON."
+          content: "You are a professional Nollywood Virtual Director. Extract detailed production information, suggest creative camera shots, and provide directorial notes. Always return valid JSON."
         },
         {
           role: "user",

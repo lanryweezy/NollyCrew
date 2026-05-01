@@ -192,6 +192,7 @@ export default function MilestoneTracker({
                           size="icon"
                           onClick={() => toggleMilestoneCompletion(milestone)}
                           className="mt-1"
+                          aria-label={`Mark milestone ${milestone.title} as ${milestone.status === 'completed' ? 'incomplete' : 'completed'}`}
                         >
                           {getStatusIcon(updatedStatus)}
                         </Button>
@@ -207,6 +208,7 @@ export default function MilestoneTracker({
                           variant="ghost" 
                           size="icon"
                           onClick={() => handleEditMilestone(milestone)}
+                          aria-label={`Edit milestone ${milestone.title}`}
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
@@ -214,6 +216,7 @@ export default function MilestoneTracker({
                           variant="ghost" 
                           size="icon"
                           onClick={() => onMilestoneDelete && onMilestoneDelete(milestone.id)}
+                          aria-label={`Delete milestone ${milestone.title}`}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
