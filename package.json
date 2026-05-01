@@ -11,6 +11,7 @@
     "build": "npm run build:client && npm run build:server",
     "build:client": "vite build",
     "build:server": "tsc -p tsconfig.server.json",
+    "vercel-build": "npm run build",
     "start": "cross-env NODE_ENV=production node dist/server/server/index.js",
     "worker": "cross-env NODE_ENV=production WORKER=true node dist/server/server/worker.js",
     "check": "tsc",
