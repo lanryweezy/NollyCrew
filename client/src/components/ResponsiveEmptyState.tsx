@@ -1,49 +1,36 @@
 import { ReactNode } from "react";
-import ResponsiveButton from "@/components/ResponsiveButton";
-import ResponsiveTypography from "@/components/ResponsiveTypography";
+import { FolderOpen } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface ResponsiveEmptyStateProps {
+  icon?: ReactNode;
   title: string;
   description: string;
-  icon?: ReactNode;
   action?: {
     label: string;
     onClick: () => void;
   };
-  className?: string;
 }
 
-export default function ResponsiveEmptyState({ 
+export default function ResponsiveEmptyState({
+  icon = <FolderOpen className="h-12 w-12 text-muted-foreground/50" />,
   title,
   description,
-  icon,
-  action,
-  className = ""
+  action
 }: ResponsiveEmptyStateProps) {
   return (
-    <div className={`flex flex-col items-center justify-center py-12 sm:py-16 text-center ${className}`}>
-      {icon && (
-        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-muted rounded-full flex items-center justify-center mb-6">
-          {icon}
-        </div>
-      )}
-      
-      <ResponsiveTypography variant="h3" align="center" className="mb-3">
-        {title}
-      </ResponsiveTypography>
-      
-      <ResponsiveTypography 
-        variant="p" 
-        className="text-muted-foreground max-w-md mb-8"
-        align="center"
-      >
+    <div className="flex min-h-[400px] flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 text-center animate-in fade-in zoom-in duration-300">
+      <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted">
+        {icon}
+      </div>
+      <h3 className="mb-2 text-xl font-semibold tracking-tight">{title}</h3>
+      <p className="mb-6 max-w-sm text-sm text-muted-foreground">
         {description}
-      </ResponsiveTypography>
-      
+      </p>
       {action && (
-        <ResponsiveButton onClick={action.onClick}>
+        <Button onClick={action.onClick}>
           {action.label}
-        </ResponsiveButton>
+        </Button>
       )}
     </div>
   );

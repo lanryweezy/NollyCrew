@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/command";
 import Notifications from "@/components/Notifications";
 import MobileMenu from "@/components/MobileMenu";
+import { useHotkeys } from "@/hooks/useHotkeys";
 
 export interface NavigationProps {
   isAuthenticated?: boolean;
@@ -70,20 +71,13 @@ export default function Navigation({
   };
 
   // Keyboard shortcut for search
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === '/' && !isSearchOpen && isAuthenticated) {
-        e.preventDefault();
-        setIsSearchOpen(true);
-      }
-      if (e.key === 'Escape' && isSearchOpen) {
-        setIsSearchOpen(false);
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isSearchOpen, isAuthenticated]);
+  useHotkeys("mod+k", () => {
+    if (isAuthenticated) setIsSearchOpen(true);
+  });
+  
+  useHotkeys("/", () => {
+    if (isAuthenticated && !isSearchOpen) setIsSearchOpen(true);
+  });
 
   const quickActions = [
     { label: "Browse Jobs", icon: Briefcase, action: () => setLocation("/jobs") },

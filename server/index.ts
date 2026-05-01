@@ -11,6 +11,8 @@ import { logger } from './utils/logger.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { securityMiddleware } from './middleware/security.js';
 import { initializeWebSocketServer } from './websocket.js';
+import { createRouteHandler } from "uploadthing/express";
+import { ourFileRouter } from "./uploadthing/router.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -98,6 +100,17 @@ app.use((req, res, next) => {
   }
 
   const server = await registerRoutes(app);
+
+  app.use(
+    "/api/uploadthing",
+    createRouteHandler({
+      router: ourFileRouter,
+      config: {
+        // Log information about the upload
+        callbackUrl: process.env.UPLOADTHING_CALLBACK_URL,
+      },
+    })
+  );
 
   // Initialize WebSocket server
   const wsServer = initializeWebSocketServer(server);
