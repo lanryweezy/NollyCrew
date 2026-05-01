@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/lib/auth";
@@ -27,7 +27,7 @@ import {
   Camera
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
-import ListSkeleton from "@/components/ListSkeleton";
+import { ProjectSkeleton as ListSkeleton } from "@/components/ListSkeleton";
 
 export default function Jobs() {
   const [, setLocation] = useLocation();
@@ -128,7 +128,9 @@ export default function Jobs() {
     });
   }, [searchTerm, selectedType, selectedLocation]); // mockJobs is static here
 
-  const handleApply = async (jobId: string) => {
+  // Optimization: useCallback prevents recreating these functions on every render.
+  // This is crucial for React.memo on JobCard to actually work.
+  const handleApply = useCallback(async (jobId: string) => {
     try {
       // Mock application submission
       toast({
@@ -142,14 +144,14 @@ export default function Jobs() {
         variant: "destructive"
       });
     }
-  };
+  }, [toast]);
 
-  const handleBookmark = (jobId: string) => {
+  const handleBookmark = useCallback((jobId: string) => {
     toast({
       title: "Job bookmarked",
       description: "This job has been saved to your bookmarks.",
     });
-  };
+  }, [toast]);
 
   const getPrimaryRole = () => {
     if (roles.length === 0) return "actor";
@@ -306,8 +308,8 @@ export default function Jobs() {
                     >
                       <JobCard
                         {...job}
-                        onApply={() => handleApply(job.id)}
-                        onBookmark={() => handleBookmark(job.id)}
+                        onApply={handleApply}
+                        onBookmark={handleBookmark}
                       />
                     </motion.div>
                   ))}

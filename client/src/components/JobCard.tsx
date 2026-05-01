@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,12 +29,14 @@ export interface JobCardProps {
   applicants: number;
   isUrgent?: boolean;
   isBookmarked?: boolean;
-  onApply?: () => void;
-  onBookmark?: () => void;
-  onShare?: () => void;
+  onApply?: (id: string) => void;
+  onBookmark?: (id: string) => void;
+  onShare?: (id: string) => void;
 }
 
-export default function JobCard({
+// Optimization: React.memo prevents unnecessary re-renders of list items when
+// unrelated parent state (like search filters) changes.
+const JobCard = React.memo(function JobCard({
   id,
   title,
   type,
@@ -49,9 +51,9 @@ export default function JobCard({
   applicants,
   isUrgent = false,
   isBookmarked = false,
-  onApply = () => console.log(`Apply to ${title}`),
-  onBookmark = () => console.log(`Bookmark ${title}`),
-  onShare = () => console.log(`Share ${title}`)
+  onApply = (id) => console.log(`Apply to ${title} with id ${id}`),
+  onBookmark = (id) => console.log(`Bookmark ${title} with id ${id}`),
+  onShare = (id) => console.log(`Share ${title} with id ${id}`)
 }: JobCardProps) {
   const [showFullDescription, setShowFullDescription] = useState(false);
 
@@ -99,7 +101,7 @@ export default function JobCard({
           <Button
             variant="ghost"
             size="icon"
-            onClick={onBookmark}
+            onClick={() => onBookmark(id)}
             className={isBookmarked ? "text-yellow-500" : ""}
             data-testid={`button-bookmark-${id}`}
             aria-label={isBookmarked ? "Remove bookmark" : "Bookmark job"}
@@ -179,7 +181,7 @@ export default function JobCard({
       <CardFooter className="flex gap-2 pt-4">
         <Button 
           className="flex-1"
-          onClick={onApply}
+          onClick={() => onApply(id)}
           data-testid={`button-apply-${id}`}
         >
           Apply Now
@@ -187,7 +189,7 @@ export default function JobCard({
         <Button 
           variant="outline" 
           size="icon"
-          onClick={onShare}
+          onClick={() => onShare(id)}
           data-testid={`button-share-${id}`}
           aria-label="Share job"
         >
@@ -196,4 +198,6 @@ export default function JobCard({
       </CardFooter>
     </Card>
   );
-}
+});
+
+export default JobCard;

@@ -11,6 +11,10 @@ import { logger } from './utils/logger.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { securityMiddleware } from './middleware/security.js';
 import { initializeWebSocketServer } from './websocket.js';
+import { createRouteHandler } from \"uploadthing/express\";
+import { ourFileRouter } from \"./uploadthing/router.js\";
+import { storage } from './storage.js';
+import fs from 'fs/promises';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -99,6 +103,17 @@ app.use((req, res, next) => {
 
   const server = await registerRoutes(app);
 
+  app.use(
+    "/api/uploadthing",
+    createRouteHandler({
+      router: ourFileRouter,
+      config: {
+        // Log information about the upload
+        callbackUrl: process.env.UPLOADTHING_CALLBACK_URL,
+      },
+    })
+  );
+
   // Initialize WebSocket server
   const wsServer = initializeWebSocketServer(server);
 
@@ -107,8 +122,62 @@ app.use((req, res, next) => {
 
   // Serve static files and client app
   app.use(express.static(path.join(__dirname, '../public')));
-  app.get('*', (_req, res) => {
-    res.sendFile(path.join(__dirname, '../public', 'index.html'));
+  
+  app.get('*', async (req, res) => {
+    const indexPath = path.join(__dirname, '../public', 'index.html');
+    
+    try {
+      let html = await fs.readFile(indexPath, 'utf-8');
+      
+      // Default metadata
+      let title = 'NollyCrew - All-in-One Nollywood Platform';
+      let description = 'Connect actors, crew, and producers in the Nollywood industry. AI-powered script breakdown, casting calls, and project management.';
+      let ogImage = 'https://nollycrew.com/og-image.png';
+
+      // Dynamic metadata for Talent Profiles
+      if (req.path.startsWith('/talent/')) {
+        const userId = req.path.split('/')[2];
+        if (userId) {
+          const user = await storage.getUser(userId);
+          const roles = await storage.getUserRoles(userId);
+          if (user) {
+            const roleNames = roles.map(r => r.role).join(', ');
+            title = `${user.firstName} ${user.lastName} - ${roleNames} | NollyCrew`;
+            description = user.bio || `${user.firstName} is a ${roleNames} on NollyCrew. Check out their portfolio and credits.`;
+            if (user.avatar) ogImage = user.avatar;
+          }
+        }
+      } 
+      // Dynamic metadata for Jobs
+      else if (req.path.startsWith('/jobs/')) {
+        const jobId = req.path.split('/')[2];
+        if (jobId) {
+          const job = await storage.getJob(jobId);
+          if (job) {
+            title = `${job.title} - Job Opportunity | NollyCrew`;
+            description = `New ${job.type} job in ${job.location}: ${job.description.substring(0, 150)}...`;
+          }
+        }
+      }
+
+      // Inject into HTML
+      html = html.replace(/<title>.*?<\/title>/, `<title>${title}</title>`);
+      html = html.replace(/<meta name="description" content=".*?>/, `<meta name="description" content="${description}">`);
+      html = html.replace(/<meta property="og:title" content=".*?>/, `<meta property="og:title" content="${title}">`);
+      html = html.replace(/<meta property="og:description" content=".*?>/, `<meta property="og:description" content="${description}">`);
+      
+      // If og:image doesn't exist, add it after og:description
+      if (html.includes('property="og:image"')) {
+        html = html.replace(/<meta property="og:image" content=".*?>/, `<meta property="og:image" content="${ogImage}">`);
+      } else {
+        html = html.replace(/<meta property="og:description" content=".*?>/, `<meta property="og:description" content="${description}">\n    <meta property="og:image" content="${ogImage}">`);
+      }
+
+      res.send(html);
+    } catch (error) {
+      logger.error('Error serving index.html:', error);
+      res.sendFile(indexPath);
+    }
   });
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
