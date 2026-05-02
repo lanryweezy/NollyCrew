@@ -30,6 +30,7 @@ export const users = pgTable("users", {
 }, (table) => {
   return {
     emailIdx: index("users_email_idx").on(table.email),
+    isVerifiedIdx: index("users_is_verified_idx").on(table.isVerified),
   };
 });
 
@@ -130,6 +131,7 @@ export const jobs = pgTable("jobs", {
     postedByIdx: index("jobs_posted_by_idx").on(table.postedById),
     projectIdIdx: index("jobs_project_id_idx").on(table.projectId),
     typeIdx: index("jobs_type_idx").on(table.type),
+    categoryIdx: index("jobs_category_idx").on(table.category),
     isActiveIdx: index("jobs_is_active_idx").on(table.isActive),
   };
 });
@@ -240,6 +242,7 @@ export const subscriptions = pgTable("subscriptions", {
 }, (table) => {
   return {
     userIdIdx: index("subscriptions_user_id_idx").on(table.userId),
+    statusIdx: index("subscriptions_status_idx").on(table.status),
   };
 });
 
@@ -295,6 +298,7 @@ export const kycVerifications = pgTable("kyc_verifications", {
 }, (table) => {
   return {
     userIdIdx: index("kyc_verifications_user_id_idx").on(table.userId),
+    statusIdx: index("kyc_verifications_status_idx").on(table.status),
   };
 });
 
