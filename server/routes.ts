@@ -15,7 +15,7 @@ import {
   calculateServiceFee 
 } from "./utils/paystack.js";
 import crypto from "node:crypto";
-import { insertUserSchema, insertUserRoleSchema, insertJobSchema, insertProjectSchema, insertJobApplicationSchema, insertWaitlistSchema, insertMessageSchema, insertReviewSchema } from "../shared/schema.js";
+import { insertUserSchema, insertUserRoleSchema, insertJobSchema, insertProjectSchema, insertJobApplicationSchema, insertWaitlistSchema, insertMessageSchema, insertReviewSchema, insertSupportTicketSchema } from "../shared/schema.js";
 import { z } from "zod";
 import paystackapi from 'paystack-api';
 // AWS SDK imports - conditional based on environment
@@ -1591,10 +1591,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const roles = await storage.getUserRoles(req.user.id);
     const isAdmin = roles.some(r => r.role === 'admin');
 
-    const ticket = await storage.updateSupportTicket(req.params.id, req.body);
+    const existingTicket = await storage.getSupportTicket(req.params.id);
+    if (!existingTicket) return res.status(404).json({ error: "Ticket not found" });
+
+    if (!isAdmin && existingTicket.userId !== req.user.id) {
+      return res.status(403).json({ error: "Forbidden: You do not have permission to modify this ticket" });
+    }
+
+    let updates = req.body;
+    if (!isAdmin) {
+      // Prevent non-admins from changing the ticket owner or escalating priority
+      updates = insertSupportTicketSchema.partial().omit({ userId: true, priority: true } as any).parse(req.body);
+    }
+
+    const ticket = await storage.updateSupportTicket(req.params.id, updates);
     if (!ticket) return res.status(404).json({ error: "Ticket not found" });
 
-    await logAction(req, { action: 'UPDATE', entityType: 'support_tickets', entityId: ticket.id, newData: req.body });
+    await logAction(req, { action: 'UPDATE', entityType: 'support_tickets', entityId: ticket.id, newData: updates });
     res.json(ticket);
     });
 
