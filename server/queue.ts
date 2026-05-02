@@ -8,8 +8,8 @@ const redisHost = process.env.REDIS_HOST || 'localhost';
 const redisPort = parseInt(process.env.REDIS_PORT || '6379', 10);
 const redisPassword = process.env.REDIS_PASSWORD;
 
-const queueConfig = redisUrl ? redisUrl : {
-  redis: {
+const queueConfig = {
+  redis: redisUrl ? redisUrl : {
     host: redisHost,
     port: redisPort,
     password: redisPassword
@@ -19,11 +19,11 @@ const queueConfig = redisUrl ? redisUrl : {
 const redisAvailable = !!(redisUrl || redisHost);
 
 // Create queues
-export const scriptAnalysisQueue = redisAvailable ? new Queue('script-analysis', queueConfig) : null;
-export const scheduleOptimizationQueue = redisAvailable ? new Queue('schedule-optimization', queueConfig) : null;
-export const castingRecommendationQueue = redisAvailable ? new Queue('casting-recommendation', queueConfig) : null;
-export const marketingContentQueue = redisAvailable ? new Queue('marketing-content', queueConfig) : null;
-export const castingMatchQueue = redisAvailable ? new Queue('casting-match', queueConfig) : null;
+export const scriptAnalysisQueue = redisAvailable ? new Queue('script-analysis', (redisUrl || queueConfig) as any) : null;
+export const scheduleOptimizationQueue = redisAvailable ? new Queue('schedule-optimization', (redisUrl || queueConfig) as any) : null;
+export const castingRecommendationQueue = redisAvailable ? new Queue('casting-recommendation', (redisUrl || queueConfig) as any) : null;
+export const marketingContentQueue = redisAvailable ? new Queue('marketing-content', (redisUrl || queueConfig) as any) : null;
+export const castingMatchQueue = redisAvailable ? new Queue('casting-match', (redisUrl || queueConfig) as any) : null;
 
 // Process Casting Match Queue (Automated Engine)
 if (castingMatchQueue) {
@@ -40,14 +40,14 @@ if (castingMatchQueue) {
         const recommendations = await ai.generateCastingRecommendations(
           jobItem.title,
           jobItem.description,
-          talentUsers.map(u => ({
+          talentUsers.map((u: any) => ({
             id: u.id,
-            name: `${u.firstName} ${u.lastName}`,
+            name: `${u.firstName || ''} ${u.lastName || ''}`,
             bio: u.bio || '',
-            skills: [], // Should fetch roles and skills
-            experience: 'mid',
+            skills: u.skills || [],
+            experience: u.experience || 'mid',
             location: u.location || '',
-            availability: 'available',
+            availability: u.availability || 'available',
             budget: Number(jobItem.budget) || 0
           }))
         );
@@ -109,7 +109,7 @@ export const getJobStatus = async (jobId: string): Promise<JobStatus | null> => 
         result: job.returnvalue,
         error: job.failedReason,
         createdAt: new Date(job.timestamp),
-        completedAt: job.finishedOn ? new Date(job.finishedAt) : undefined
+        completedAt: job.finishedOn ? new Date(job.finishedOn) : undefined
       };
     }
   }

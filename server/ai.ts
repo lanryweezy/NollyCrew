@@ -521,6 +521,8 @@ function generateMockAnalysis(scriptText: string): ScriptAnalysis {
     props: ['Phone', 'Keys'],
     wardrobe: ['Casual', 'Formal'],
     vfx: [],
+    cameraShots: ['Establishing Shot', 'Close-up'],
+    directorNotes: 'Dramatic pacing',
     notes: `Scene ${i+1} notes`
   }));
   
@@ -533,6 +535,7 @@ function generateMockAnalysis(scriptText: string): ScriptAnalysis {
     props: ['Phone', 'Keys', 'Car'],
     wardrobe: ['Casual', 'Formal', 'Costume'],
     vfx: ['Color correction', 'Background replacement'],
+    cameraShots: ['Establishing Shot', 'Close-up'],
     analyzedAt: new Date().toISOString()
   };
 }

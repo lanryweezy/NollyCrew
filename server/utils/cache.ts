@@ -1,4 +1,4 @@
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 import { logger } from './logger.js';
 
 const redisUrl = process.env.REDIS_URL;
@@ -14,11 +14,11 @@ const memoryCache = new Map<string, { value: any; expires: number }>();
 
 if (redisUrl || redisHost) {
   try {
-    redis = redisUrl ? new Redis(redisUrl) : new Redis({
+    const config = redisUrl || {
       host: redisHost,
       port: redisPort,
       password: redisPassword,
-      retryStrategy: (times) => {
+      retryStrategy: (times: number) => {
         if (times > 3) {
           logger.warn('Redis connection failed, falling back to in-memory cache');
           isRedisAvailable = false;
@@ -26,7 +26,9 @@ if (redisUrl || redisHost) {
         }
         return Math.min(times * 100, 3000);
       }
-    });
+    };
+    
+    redis = typeof config === 'string' ? new Redis(config) : new Redis(config as any);
 
     redis.on('connect', () => {
       logger.info('Connected to Redis');
