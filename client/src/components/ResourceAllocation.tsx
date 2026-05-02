@@ -175,6 +175,7 @@ export default function ResourceAllocation({
                         variant="ghost" 
                         size="icon"
                         onClick={() => handleEditResource(resource)}
+                        aria-label={`Edit resource ${resource.name}`}
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
@@ -182,6 +183,7 @@ export default function ResourceAllocation({
                         variant="ghost" 
                         size="icon"
                         onClick={() => onResourceDelete && onResourceDelete(resource.id)}
+                        aria-label={`Delete resource ${resource.name}`}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
