@@ -139,6 +139,7 @@ export interface IStorage {
 
   // Support Tickets
   getSupportTickets(filters?: { userId?: string; status?: string; type?: string; limit?: number }): Promise<SupportTicket[]>;
+  getSupportTicket(id: string): Promise<SupportTicket | undefined>;
   createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket>;
   updateSupportTicket(id: string, updates: Partial<InsertSupportTicket>): Promise<SupportTicket | undefined>;
 
@@ -508,6 +509,12 @@ export class DbStorage implements IStorage {
       ),
       orderBy: [desc(supportTickets.createdAt)],
       limit: limit || 100,
+    });
+  }
+
+  async getSupportTicket(id: string): Promise<SupportTicket | undefined> {
+    return db.query.supportTickets.findFirst({
+      where: eq(supportTickets.id, id),
     });
   }
 
@@ -1135,6 +1142,10 @@ export class MemStorage implements IStorage {
     result = result.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     if (filters?.limit) result = result.slice(0, filters.limit);
     return result;
+  }
+
+  async getSupportTicket(id: string): Promise<SupportTicket | undefined> {
+    return this.supportTickets.get(id);
   }
 
   async createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket> {
