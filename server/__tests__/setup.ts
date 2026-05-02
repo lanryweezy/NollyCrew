@@ -36,38 +36,47 @@ vi.mock('../db', () => {
 
 // Mock storage
 vi.mock('../storage', () => {
+  const mockUser = {
+    id: '1',
+    email: 'test@example.com',
+    firstName: 'Test',
+    lastName: 'User',
+    passwordHash: 'clerk-managed',
+    isVerified: true,
+  };
+
   return {
     storage: {
-      getUser: vi.fn(),
-      getUserByEmail: vi.fn(),
-      createUser: vi.fn(),
-      updateUser: vi.fn(),
-      getUserRoles: vi.fn(),
-      createUserRole: vi.fn(),
-      updateUserRole: vi.fn(),
-      deleteRole: vi.fn(),
-      getProject: vi.fn(),
-      getProjects: vi.fn(),
-      createProject: vi.fn(),
-      updateProject: vi.fn(),
-      deleteProject: vi.fn(),
-      getJob: vi.fn(),
-      getJobs: vi.fn(),
-      createJob: vi.fn(),
-      updateJob: vi.fn(),
-      deleteJob: vi.fn(),
-      getJobApplication: vi.fn(),
-      getJobApplications: vi.fn(),
-      createJobApplication: vi.fn(),
-      updateJobApplication: vi.fn(),
-      getMessages: vi.fn(),
-      createMessage: vi.fn(),
-      markMessageAsRead: vi.fn(),
-      getUserReviews: vi.fn(),
-      createReview: vi.fn(),
-      getProjectMembers: vi.fn(),
-      createProjectMember: vi.fn(),
-      searchTalent: vi.fn(),
+      getUser: vi.fn().mockResolvedValue(mockUser),
+      getUserByEmail: vi.fn().mockResolvedValue(mockUser),
+      createUser: vi.fn().mockResolvedValue(mockUser),
+      updateUser: vi.fn().mockResolvedValue(mockUser),
+      getUserRoles: vi.fn().mockResolvedValue([{ role: 'producer' }]),
+      createUserRole: vi.fn().mockResolvedValue({ role: 'producer' }),
+      updateUserRole: vi.fn().mockResolvedValue({ role: 'producer' }),
+      deleteRole: vi.fn().mockResolvedValue(true),
+      getProject: vi.fn().mockResolvedValue({ id: '1', title: 'Test Project', createdById: '1' }),
+      getProjects: vi.fn().mockResolvedValue([{ id: '1', title: 'Test Project', createdById: '1' }]),
+      createProject: vi.fn().mockResolvedValue({ id: '1', title: 'Test Project', createdById: '1' }),
+      updateProject: vi.fn().mockResolvedValue({ id: '1', title: 'Test Project', createdById: '1' }),
+      deleteProject: vi.fn().mockResolvedValue(true),
+      getJob: vi.fn().mockResolvedValue({ id: '1', title: 'Test Job', postedById: '1' }),
+      getJobs: vi.fn().mockResolvedValue([{ id: '1', title: 'Test Job', postedById: '1' }]),
+      createJob: vi.fn().mockResolvedValue({ id: '1', title: 'Test Job', postedById: '1' }),
+      updateJob: vi.fn().mockResolvedValue({ id: '1', title: 'Test Job', postedById: '1' }),
+      deleteJob: vi.fn().mockResolvedValue(true),
+      getJobApplication: vi.fn().mockResolvedValue({ id: '1', jobId: '1', applicantId: '1' }),
+      getJobApplications: vi.fn().mockResolvedValue([{ id: '1', jobId: '1', applicantId: '1' }]),
+      createJobApplication: vi.fn().mockResolvedValue({ id: '1', jobId: '1', applicantId: '1' }),
+      updateJobApplication: vi.fn().mockResolvedValue({ id: '1', jobId: '1', applicantId: '1' }),
+      getMessages: vi.fn().mockResolvedValue([]),
+      createMessage: vi.fn().mockResolvedValue({ id: '1', senderId: '1', recipientId: '2', content: 'test' }),
+      markMessageAsRead: vi.fn().mockResolvedValue(true),
+      getUserReviews: vi.fn().mockResolvedValue([]),
+      createReview: vi.fn().mockResolvedValue({ id: '1', rating: 5 }),
+      getProjectMembers: vi.fn().mockResolvedValue([{ userId: '1', role: 'producer' }]),
+      createProjectMember: vi.fn().mockResolvedValue({ userId: '1', role: 'producer' }),
+      searchTalent: vi.fn().mockResolvedValue([]),
     }
   };
 });
@@ -97,6 +106,35 @@ vi.mock('bcryptjs', () => {
   return {
     ...bcryptMock,
     default: bcryptMock
+  };
+});
+
+// Mock Clerk SDK
+vi.mock('@clerk/clerk-sdk-node', () => {
+  return {
+    createClerkClient: vi.fn().mockReturnValue({
+      verifyToken: vi.fn().mockResolvedValue({
+        email: 'test@example.com',
+        first_name: 'Test',
+        last_name: 'User',
+        image_url: 'https://example.com/image.png'
+      }),
+    }),
+  };
+});
+
+// Mock authentication middleware directly
+vi.mock('../middleware/auth.js', () => {
+  return {
+    authenticateWithClerk: vi.fn((req, res, next) => {
+      req.user = {
+        id: '123',
+        email: 'test@example.com',
+        firstName: 'Test',
+        lastName: 'User'
+      };
+      next();
+    }),
   };
 });
 

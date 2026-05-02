@@ -3,19 +3,28 @@ import request from 'supertest';
 import express, { type Express } from 'express';
 import { registerRoutes } from '../routes';
 import { storage } from '../storage';
-import * as jwt from 'jsonwebtoken';
 
 // Mock storage functions
 vi.mock('../storage');
 
 describe('Job Routes', () => {
   let app: Express;
+  const mockUser = {
+    id: '123',
+    email: 'test@example.com',
+    firstName: 'Test',
+    lastName: 'User'
+  };
 
   beforeEach(async () => {
     vi.clearAllMocks();
     app = express();
     app.use(express.json());
     await registerRoutes(app);
+
+    // Default mock for authentication middleware to pass
+    (storage.getUserByEmail as any).mockResolvedValue(mockUser);
+    (storage.getUser as any).mockResolvedValue(mockUser);
   });
 
   describe('GET /api/jobs', () => {
@@ -66,9 +75,6 @@ describe('Job Routes', () => {
         isActive: true
       };
 
-      // Mock JWT verification
-      (jwt.verify as any).mockReturnValue({ userId: '123' });
-      (storage.getUser as any).mockResolvedValue({ id: '123' });
       (storage.createJob as any).mockResolvedValue(mockJob);
 
       const response = await request(app)
@@ -112,13 +118,10 @@ describe('Job Routes', () => {
       const mockApplication = {
         id: '1',
         jobId: '1',
-        applicantId: '456',
+        applicantId: '123',
         coverLetter: 'I am interested in this role'
       };
 
-      // Mock JWT verification
-      (jwt.verify as any).mockReturnValue({ userId: '456' });
-      (storage.getUser as any).mockResolvedValue({ id: '456' });
       (storage.getJob as any).mockResolvedValue(mockJob);
       (storage.getJobApplications as any).mockResolvedValue([]);
       (storage.createJobApplication as any).mockResolvedValue(mockApplication);
@@ -137,11 +140,11 @@ describe('Job Routes', () => {
       expect(storage.getJob).toHaveBeenCalledWith('1');
       expect(storage.getJobApplications).toHaveBeenCalledWith({
         jobId: '1',
-        applicantId: '456'
+        applicantId: '123'
       });
       expect(storage.createJobApplication).toHaveBeenCalledWith({
         jobId: '1',
-        applicantId: '456',
+        applicantId: '123',
         coverLetter: 'I am interested in this role'
       });
     });
@@ -155,9 +158,6 @@ describe('Job Routes', () => {
         isActive: true
       };
 
-      // Mock JWT verification
-      (jwt.verify as any).mockReturnValue({ userId: '456' });
-      (storage.getUser as any).mockResolvedValue({ id: '456' });
       (storage.getJob as any).mockResolvedValue(mockJob);
       (storage.getJobApplications as any).mockResolvedValue([{}]); // Already applied
 

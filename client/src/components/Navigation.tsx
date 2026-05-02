@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/command";
 import Notifications from "@/components/Notifications";
 import MobileMenu from "@/components/MobileMenu";
+import { useHotkeys } from "@/hooks/useHotkeys";
 
 export interface NavigationProps {
   isAuthenticated?: boolean;
@@ -70,20 +71,13 @@ export default function Navigation({
   };
 
   // Keyboard shortcut for search
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === '/' && !isSearchOpen && isAuthenticated) {
-        e.preventDefault();
-        setIsSearchOpen(true);
-      }
-      if (e.key === 'Escape' && isSearchOpen) {
-        setIsSearchOpen(false);
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isSearchOpen, isAuthenticated]);
+  useHotkeys("mod+k", () => {
+    if (isAuthenticated) setIsSearchOpen(true);
+  });
+  
+  useHotkeys("/", () => {
+    if (isAuthenticated && !isSearchOpen) setIsSearchOpen(true);
+  });
 
   const quickActions = [
     { label: "Browse Jobs", icon: Briefcase, action: () => setLocation("/jobs") },
@@ -208,6 +202,7 @@ export default function Navigation({
                   size="icon"
                   onClick={() => setIsSearchOpen(true)}
                   data-testid="button-search"
+                  aria-label="Search"
                   className="relative"
                 >
                   <Search className="w-4 h-4" />
@@ -228,6 +223,7 @@ export default function Navigation({
                       size="icon" 
                       className="relative"
                       data-testid="button-notifications"
+                      aria-label="Notifications"
                     >
                       <Bell className="w-4 h-4" />
                       {notifications > 0 && (
@@ -248,6 +244,7 @@ export default function Navigation({
                   size="icon" 
                   className="relative hidden sm:flex"
                   data-testid="button-messages"
+                  aria-label="Messages"
                 >
                   <MessageCircle className="w-4 h-4" />
                   {messages > 0 && (
@@ -340,6 +337,7 @@ export default function Navigation({
               className="md:hidden"
               onClick={() => setIsMobileMenuOpen(true)}
               data-testid="button-mobile-menu"
+              aria-label="Toggle mobile menu"
             >
               <Menu className="w-4 h-4" />
             </Button>

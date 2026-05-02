@@ -1,70 +1,55 @@
-import { ReactNode, Component } from "react";
-import ResponsiveButton from "@/components/ResponsiveButton";
-import ResponsiveTypography from "@/components/ResponsiveTypography";
-import { AlertTriangle } from "lucide-react";
+import React, { Component, ErrorInfo, ReactNode } from "react";
+import { AlertTriangle, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-interface ResponsiveErrorBoundaryProps {
-  children: ReactNode;
+interface Props {
+  children?: ReactNode;
   fallback?: ReactNode;
 }
 
-interface ResponsiveErrorBoundaryState {
+interface State {
   hasError: boolean;
-  error?: Error;
 }
 
-export default class ResponsiveErrorBoundary extends Component<
-  ResponsiveErrorBoundaryProps,
-  ResponsiveErrorBoundaryState
-> {
-  constructor(props: ResponsiveErrorBoundaryProps) {
-    super(props);
-    this.state = { hasError: false };
+class ResponsiveErrorBoundary extends Component<Props, State> {
+  public state: State = {
+    hasError: false,
+  };
+
+  public static getDerivedStateFromError(_: Error): State {
+    return { hasError: true };
   }
 
-  static getDerivedStateFromError(error: Error): ResponsiveErrorBoundaryState {
-    return { hasError: true, error };
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("Uncaught error:", error, errorInfo);
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("ResponsiveErrorBoundary caught an error:", error, errorInfo);
-  }
-
-  render() {
+  public render() {
     if (this.state.hasError) {
-      if (this.props.fallback) {
-        return this.props.fallback;
-      }
-
       return (
-        <div className="flex flex-col items-center justify-center py-12 sm:py-16 px-4">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-destructive/10 rounded-full flex items-center justify-center mb-6">
-            <AlertTriangle className="w-8 h-8 sm:w-10 sm:h-10 text-destructive" />
+        this.props.fallback || (
+          <div className="flex min-h-[400px] flex-col items-center justify-center p-6 text-center">
+            <div className="mb-4 rounded-full bg-destructive/10 p-4">
+              <AlertTriangle className="h-10 w-10 text-destructive" />
+            </div>
+            <h2 className="mb-2 text-2xl font-bold tracking-tight">Something went wrong</h2>
+            <p className="mb-6 max-w-md text-muted-foreground">
+              An unexpected error occurred in this section of the app. Try refreshing the page or contact support if the problem persists.
+            </p>
+            <Button 
+              onClick={() => window.location.reload()}
+              className="gap-2"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Refresh Page
+            </Button>
           </div>
-          
-          <ResponsiveTypography variant="h3" align="center" className="mb-3">
-            Something went wrong
-          </ResponsiveTypography>
-          
-          <ResponsiveTypography 
-            variant="p" 
-            className="text-muted-foreground max-w-md mb-8 text-center"
-          >
-            We're sorry, but something went wrong. Please try again later.
-          </ResponsiveTypography>
-          
-          <ResponsiveButton 
-            onClick={() => {
-              this.setState({ hasError: false });
-              window.location.reload();
-            }}
-          >
-            Reload Page
-          </ResponsiveButton>
-        </div>
+        )
       );
     }
 
     return this.props.children;
   }
 }
+
+export default ResponsiveErrorBoundary;

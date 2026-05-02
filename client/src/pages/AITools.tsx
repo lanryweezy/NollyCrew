@@ -31,12 +31,21 @@ import ResponsiveTypography from "@/components/ResponsiveTypography";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import { api } from "@/lib/api";
+
 export default function AITools() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("script-analysis");
+  
+  // Script Analysis state
   const [scriptText, setScriptText] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<any>(null);
+
+  // Legal AI state
+  const [legalForm, setLegalForm] = useState({ talentName: '', roleName: '', projectName: '', rate: '' });
+  const [isGeneratingLegal, setIsGeneratingLegal] = useState(false);
+  const [legalResult, setLegalResult] = useState<string | null>(null);
 
   const handleScriptAnalysis = () => {
     setIsAnalyzing(true);
@@ -55,6 +64,19 @@ export default function AITools() {
       });
       setIsAnalyzing(false);
     }, 2000);
+  };
+
+  const handleLegalGeneration = async () => {
+    setIsGeneratingLegal(true);
+    try {
+      const res = await api.generateReleaseForm(legalForm.talentName, legalForm.roleName, legalForm.projectName, legalForm.rate);
+      setLegalResult(res.document);
+    } catch (e) {
+      console.error(e);
+      alert('Failed to generate document');
+    } finally {
+      setIsGeneratingLegal(false);
+    }
   };
 
   const aiTools = [
@@ -113,6 +135,19 @@ export default function AITools() {
         "Press kit development",
         "Distribution strategy planning"
       ]
+    },
+    {
+      id: "legal-ai",
+      title: "Legal AI & Release Forms",
+      description: "Auto-generate standard Nollywood talent release forms",
+      icon: FileText,
+      features: [
+        "Standard Nollywood contract clauses",
+        "Name & likeness rights in perpetuity",
+        "Customizable payment terms",
+        "Non-disclosure agreements",
+        "Union compliance checks"
+      ]
     }
   ];
 
@@ -145,6 +180,7 @@ export default function AITools() {
                 <TabsTrigger value="casting-recommendations">Casting</TabsTrigger>
                 <TabsTrigger value="schedule-optimization">Scheduling</TabsTrigger>
                 <TabsTrigger value="marketing-content">Marketing</TabsTrigger>
+                <TabsTrigger value="legal-ai">Legal AI</TabsTrigger>
               </TabsList>
 
               <TabsContent value="script-analysis" className="space-y-6">
@@ -417,6 +453,89 @@ export default function AITools() {
                           <p className="text-sm font-medium">Trailer Hook</p>
                           <p className="text-muted-foreground">"She thought she had it all figured out. He thought he was over her. But Lagos had other plans..."</p>
                         </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="legal-ai" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileText className="w-5 h-5" />
+                      Legal AI & Release Forms
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label>Talent Name</Label>
+                          <Input 
+                            placeholder="e.g., Funke Akindele" 
+                            value={legalForm.talentName}
+                            onChange={(e) => setLegalForm(prev => ({ ...prev, talentName: e.target.value }))}
+                          />
+                        </div>
+                        <div>
+                          <Label>Role Name</Label>
+                          <Input 
+                            placeholder="e.g., Lead Antagonist" 
+                            value={legalForm.roleName}
+                            onChange={(e) => setLegalForm(prev => ({ ...prev, roleName: e.target.value }))}
+                          />
+                        </div>
+                        <div>
+                          <Label>Project Name</Label>
+                          <Input 
+                            placeholder="e.g., Lagos Hustle" 
+                            value={legalForm.projectName}
+                            onChange={(e) => setLegalForm(prev => ({ ...prev, projectName: e.target.value }))}
+                          />
+                        </div>
+                        <div>
+                          <Label>Rate (NGN)</Label>
+                          <Input 
+                            placeholder="e.g., 2,500,000" 
+                            value={legalForm.rate}
+                            onChange={(e) => setLegalForm(prev => ({ ...prev, rate: e.target.value }))}
+                          />
+                        </div>
+                      </div>
+                      <Button className="w-full" onClick={handleLegalGeneration} disabled={isGeneratingLegal}>
+                        {isGeneratingLegal ? (
+                          <>
+                            <Clock className="w-4 h-4 mr-2 animate-spin" />
+                            Drafting Contract...
+                          </>
+                        ) : (
+                          <>
+                            <Zap className="w-4 h-4 mr-2" />
+                            Generate Standard Contract
+                          </>
+                        )}
+                      </Button>
+                    </div>
+
+                    <div className="p-4 bg-muted rounded-lg border">
+                      <h3 className="font-semibold mb-2 flex items-center justify-between">
+                        Preview Document
+                        {legalResult && (
+                          <Button size="sm" variant="outline" onClick={() => {
+                            const blob = new Blob([legalResult], { type: 'text/plain' });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = `Release_Form_${legalForm.talentName.replace(/\s+/g, '_')}.txt`;
+                            a.click();
+                          }}>
+                            <Download className="w-4 h-4 mr-2" /> Download
+                          </Button>
+                        )}
+                      </h3>
+                      <div className="h-64 bg-background p-4 rounded text-sm text-muted-foreground overflow-y-auto font-mono whitespace-pre-wrap">
+                        {legalResult || `THIS TALENT RELEASE AGREEMENT ("Agreement") is made and entered into...\n\n(Click Generate to draft full contract)`}
                       </div>
                     </div>
                   </CardContent>

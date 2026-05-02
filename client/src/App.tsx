@@ -1,4 +1,5 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
+import { motion, AnimatePresence } from "framer-motion";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -26,100 +27,118 @@ import Calendar from "@/pages/Calendar";
 import Collaboration from "@/pages/Collaboration";
 import EnhancedAnalytics from "@/pages/EnhancedAnalytics";
 import EnhancedCollaboration from "@/pages/EnhancedCollaboration";
+import BossDashboard from "@/pages/BossDashboard";
 import TestProxy from "./test-proxy";
 import { ResponsiveToastProvider } from "@/components/ResponsiveToast";
 
 function Router() {
+  const [location] = useLocation();
+
   return (
-    <Switch>
-      <Route path="/" component={LandingPage} />
-      <Route path="/login" component={Login} />
-      <Route path="/register" component={Register} />
-      <Route path="/test-proxy" component={TestProxy} />
-      <Route path="/payment" component={Payment} />
-      <Route path="/payment/success" component={PaymentSuccess} />
-      <Route path="/payment/error" component={PaymentError} />
-      
-      {/* Protected Routes */}
-      <Route path="/onboarding">
-        <ProtectedRoute>
-          <Onboarding />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/dashboard">
-        <ProtectedRoute>
-          <Dashboard />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/jobs">
-        <ProtectedRoute>
-          <Jobs />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/talent">
-        <ProtectedRoute>
-          <TalentSearch />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/messages">
-        <ProtectedRoute>
-          <Messages />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/auditions">
-        <ProtectedRoute>
-          <Auditions />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/talent/:userId">
-        <ProtectedRoute>
-          <TalentProfile />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/projects">
-        <ProtectedRoute>
-          <Projects />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/profile">
-        <ProtectedRoute>
-          <Profile />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/ai-tools">
-        <ProtectedRoute>
-          <AITools />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/analytics">
-        <ProtectedRoute>
-          <Analytics />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/calendar">
-        <ProtectedRoute>
-          <Calendar />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/collaboration">
-        <ProtectedRoute>
-          <Collaboration />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/enhanced-analytics">
-        <ProtectedRoute>
-          <EnhancedAnalytics />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/enhanced-collaboration">
-        <ProtectedRoute>
-          <EnhancedCollaboration />
-        </ProtectedRoute>
-      </Route>
-      
-      {/* Fallback to 404 */}
-      <Route component={NotFound} />
-    </Switch>
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.2 }}
+      >
+        <Switch>
+          <Route path="/" component={LandingPage} />
+          <Route path="/login" component={Login} />
+          <Route path="/register" component={Register} />
+          <Route path="/test-proxy" component={TestProxy} />
+          <Route path="/payment" component={Payment} />
+          <Route path="/payment/success" component={PaymentSuccess} />
+          <Route path="/payment/error" component={PaymentError} />
+          
+          {/* Protected Routes */}
+          <Route path="/onboarding">
+            <ProtectedRoute>
+              <Onboarding />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/dashboard">
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/jobs">
+            <ProtectedRoute>
+              <Jobs />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/talent">
+            <ProtectedRoute>
+              <TalentSearch />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/messages">
+            <ProtectedRoute>
+              <Messages />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/auditions">
+            <ProtectedRoute>
+              <Auditions />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/talent/:userId">
+            <ProtectedRoute>
+              <TalentProfile />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/projects">
+            <ProtectedRoute>
+              <Projects />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/profile">
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/ai-tools">
+            <ProtectedRoute>
+              <AITools />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/analytics">
+            <ProtectedRoute>
+              <Analytics />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/calendar">
+            <ProtectedRoute>
+              <Calendar />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/collaboration">
+            <ProtectedRoute>
+              <Collaboration />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/enhanced-analytics">
+            <ProtectedRoute>
+              <EnhancedAnalytics />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/enhanced-collaboration">
+            <ProtectedRoute>
+              <EnhancedCollaboration />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/boss">
+            <ProtectedRoute>
+              <BossDashboard />
+            </ProtectedRoute>
+          </Route>
+          
+          {/* Fallback to 404 */}
+          <Route component={NotFound} />
+        </Switch>
+      </motion.div>
+    </AnimatePresence>
   );
 }
 

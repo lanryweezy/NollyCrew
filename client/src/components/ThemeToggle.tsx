@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Moon, Sun } from "lucide-react";
+import ResponsiveTooltip from "./ResponsiveTooltip";
 
 export default function ThemeToggle() {
   const [isDark, setIsDark] = useState(false);
@@ -36,18 +37,20 @@ export default function ThemeToggle() {
   };
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={toggleTheme}
-      data-testid="button-theme-toggle"
-      aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
-    >
-      {isDark ? (
-        <Sun className="h-4 w-4" />
-      ) : (
-        <Moon className="h-4 w-4" />
-      )}
-    </Button>
+    <ResponsiveTooltip content={`Switch to ${isDark ? 'light' : 'dark'} mode`}>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={toggleTheme}
+        data-testid="button-theme-toggle"
+        aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+      >
+        {isDark ? (
+          <Sun className="h-4 w-4" />
+        ) : (
+          <Moon className="h-4 w-4" />
+        )}
+      </Button>
+    </ResponsiveTooltip>
   );
 }

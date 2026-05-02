@@ -1,6 +1,6 @@
 import { authService } from './auth';
 
-async function apiFetch<T>(url: string, options: RequestInit = {}): Promise<T> {
+export async function apiFetch<T>(url: string, options: RequestInit = {}): Promise<T> {
   const token = authService.getToken();
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
@@ -156,6 +156,38 @@ export const api = {
       createdAt: string;
       completedAt?: string;
     }>(`/api/jobs/${jobId}/status`);
+  },
+
+  // Advanced AI endpoints
+  async analyzeAuditionVideo(videoUri: string, mimeType?: string) {
+    return apiFetch<{ primaryEmotion: string; emotionalArc: string[]; energyLevel: number; authenticityScore: number; dictionClarity: number; strengths: string[]; weaknesses: string[]; overallNotes: string; }>('/api/ai/video-analysis', {
+      method: 'POST',
+      body: JSON.stringify({ videoUri, mimeType }),
+    });
+  },
+  async translateScript(scriptText: string, targetLanguage: string) {
+    return apiFetch<{ translation: string }>('/api/ai/translate', {
+      method: 'POST',
+      body: JSON.stringify({ scriptText, targetLanguage }),
+    });
+  },
+  async analyzeSentiment(scriptText: string) {
+    return apiFetch<{ arc: Array<{ beat: string; tension: number; primaryEmotion: string }> }>('/api/ai/sentiment', {
+      method: 'POST',
+      body: JSON.stringify({ scriptText }),
+    });
+  },
+  async generateReleaseForm(talentName: string, roleName: string, projectName: string, rate?: string) {
+    return apiFetch<{ document: string }>('/api/ai/legal/release-form', {
+      method: 'POST',
+      body: JSON.stringify({ talentName, roleName, projectName, rate }),
+    });
+  },
+  async predictFatigue(scheduleDays: any[]) {
+    return apiFetch<{ warnings: Array<{ day: number; issue: string; severity: string; suggestion: string }> }>('/api/ai/predict-fatigue', {
+      method: 'POST',
+      body: JSON.stringify({ scheduleDays }),
+    });
   },
 };
 

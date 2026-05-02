@@ -30,6 +30,7 @@ export const users = pgTable("users", {
 }, (table) => {
   return {
     emailIdx: index("users_email_idx").on(table.email),
+    isVerifiedIdx: index("users_is_verified_idx").on(table.isVerified),
   };
 });
 
@@ -93,6 +94,7 @@ export const projectMembers = pgTable("project_members", {
   character: text("character"), // For actors
   department: text("department"), // 'camera', 'sound', 'editing', etc.
   isLead: boolean("is_lead").notNull().default(false),
+  permissions: jsonb("permissions"), // Granular permissions for this project
   joinedAt: timestamp("joined_at").notNull().defaultNow(),
 }, (table) => {
   return {
@@ -129,6 +131,7 @@ export const jobs = pgTable("jobs", {
     postedByIdx: index("jobs_posted_by_idx").on(table.postedById),
     projectIdIdx: index("jobs_project_id_idx").on(table.projectId),
     typeIdx: index("jobs_type_idx").on(table.type),
+    categoryIdx: index("jobs_category_idx").on(table.category),
     isActiveIdx: index("jobs_is_active_idx").on(table.isActive),
   };
 });
@@ -192,6 +195,166 @@ export const reviews = pgTable("reviews", {
   };
 });
 
+// Audit Logs
+export const auditLogs = pgTable("audit_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id),
+  action: text("action").notNull(), // 'CREATE', 'UPDATE', 'DELETE'
+  entityType: text("entity_type").notNull(), // 'projects', 'jobs', 'users'
+  entityId: varchar("entity_id").notNull(),
+  previousData: jsonb("previous_data"),
+  newData: jsonb("new_data"),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => {
+  return {
+    userIdIdx: index("audit_logs_user_id_idx").on(table.userId),
+    entityIdx: index("audit_logs_entity_idx").on(table.entityType, table.entityId),
+  };
+});
+
+// Subscription Plans
+export const subscriptionPlans = pgTable("subscription_plans", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(), // 'Indie', 'Studio', 'Enterprise'
+  description: text("description"),
+  price: decimal("price", { precision: 15, scale: 2 }).notNull(),
+  currency: text("currency").notNull().default("NGN"),
+  interval: text("interval").notNull().default("monthly"), // 'monthly', 'yearly'
+  features: jsonb("features"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// User Subscriptions
+export const subscriptions = pgTable("subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  planId: varchar("plan_id").notNull().references(() => subscriptionPlans.id),
+  status: text("status").notNull(), // 'active', 'cancelled', 'expired', 'past_due'
+  startDate: timestamp("start_date").notNull().defaultNow(),
+  endDate: timestamp("end_date").notNull(),
+  paystackSubscriptionCode: text("paystack_subscription_code"),
+  paystackEmailToken: text("paystack_email_token"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => {
+  return {
+    userIdIdx: index("subscriptions_user_id_idx").on(table.userId),
+    statusIdx: index("subscriptions_status_idx").on(table.status),
+  };
+});
+
+// API Keys for Enterprise/Studio integration
+export const apiKeys = pgTable("api_keys", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  keyHash: text("key_hash").notNull(),
+  lastUsedAt: timestamp("last_used_at"),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => {
+  return {
+    userIdIdx: index("api_keys_user_id_idx").on(table.userId),
+  };
+});
+
+// Escrow Transactions
+export const escrowTransactions = pgTable("escrow_transactions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").references(() => projects.id),
+  jobId: varchar("job_id").references(() => jobs.id),
+  senderId: varchar("sender_id").notNull().references(() => users.id),
+  recipientId: varchar("recipient_id").notNull().references(() => users.id),
+  amount: decimal("amount", { precision: 15, scale: 2 }).notNull(),
+  currency: text("currency").notNull().default("NGN"),
+  status: text("status").notNull().default("escrow"), // 'escrow', 'released', 'disputed', 'refunded'
+  paystackReference: text("paystack_reference"),
+  releaseDate: timestamp("release_date"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => {
+  return {
+    projectIdIdx: index("escrow_transactions_project_id_idx").on(table.projectId),
+    senderIdIdx: index("escrow_transactions_sender_id_idx").on(table.senderId),
+    recipientIdIdx: index("escrow_transactions_recipient_id_idx").on(table.recipientId),
+  };
+});
+
+// KYC Verifications
+export const kycVerifications = pgTable("kyc_verifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  type: text("type").notNull(), // 'NIN', 'BVN', 'Passport', 'DriversLicense'
+  status: text("status").notNull().default("pending"), // 'pending', 'verified', 'rejected'
+  provider: text("provider"), // 'SmileIdentity', 'Dojah'
+  providerReference: text("provider_reference"),
+  idNumberMasked: text("id_number_masked"),
+  notes: text("notes"),
+  verifiedAt: timestamp("verified_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => {
+  return {
+    userIdIdx: index("kyc_verifications_user_id_idx").on(table.userId),
+    statusIdx: index("kyc_verifications_status_idx").on(table.status),
+  };
+});
+
+// Daily Progress Reports (Task 90)
+export const dailyProgressReports = pgTable("daily_progress_reports", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  reportDate: timestamp("report_date").notNull(),
+  scenesPlanned: jsonb("scenes_planned"),
+  scenesShot: jsonb("scenes_shot"),
+  crewPresent: jsonb("crew_present"),
+  highlights: text("highlights"),
+  challenges: text("challenges"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => {
+  return {
+    projectIdIdx: index("dpr_project_id_idx").on(table.projectId),
+  };
+});
+
+// Support Tickets / Dispute Resolution (Task 66)
+export const supportTickets = pgTable("support_tickets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  projectId: varchar("project_id").references(() => projects.id),
+  subject: text("subject").notNull(),
+  description: text("description").notNull(),
+  type: text("type").notNull(), // 'dispute', 'bug', 'feature_request', 'other'
+  status: text("status").notNull().default("open"), // 'open', 'in_progress', 'resolved', 'closed'
+  priority: text("priority").notNull().default("medium"), // 'low', 'medium', 'high', 'critical'
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => {
+  return {
+    userIdIdx: index("support_tickets_user_id_idx").on(table.userId),
+    statusIdx: index("support_tickets_status_idx").on(table.status),
+    };
+    });
+
+    // Referral Program (Task 70)
+    export const referrals = pgTable("referrals", {
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    referrerId: varchar("referrer_id").notNull().references(() => users.id),
+    referredEmail: text("referred_email").notNull(),
+    status: text("status").notNull().default("pending"), // 'pending', 'joined', 'rewarded'
+    rewardStatus: text("reward_status").notNull().default("none"), // 'none', 'applied'
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    }, (table) => {
+    return {
+      referrerIdIdx: index("referrals_referrer_id_idx").on(table.referrerId),
+      emailIdx: index("referrals_email_idx").on(table.referredEmail),
+    };
+    });
+
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -242,6 +405,54 @@ export const insertReviewSchema = createInsertSchema(reviews).omit({
   rating: z.number().min(1).max(5),
 });
 
+export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({
+  id: true,
+  createdAt: true,
+} as any);
+
+export const insertSubscriptionPlanSchema = createInsertSchema(subscriptionPlans).omit({
+  id: true,
+  createdAt: true,
+} as any);
+
+export const insertSubscriptionSchema = createInsertSchema(subscriptions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+} as any);
+
+export const insertApiKeySchema = createInsertSchema(apiKeys).omit({
+  id: true,
+  createdAt: true,
+} as any);
+
+export const insertEscrowTransactionSchema = createInsertSchema(escrowTransactions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+} as any);
+
+export const insertKycVerificationSchema = createInsertSchema(kycVerifications).omit({
+  id: true,
+  createdAt: true,
+} as any);
+
+export const insertDailyProgressReportSchema = createInsertSchema(dailyProgressReports).omit({
+  id: true,
+  createdAt: true,
+} as any);
+
+export const insertSupportTicketSchema = createInsertSchema(supportTickets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+} as any);
+
+export const insertReferralSchema = createInsertSchema(referrals).omit({
+  id: true,
+  createdAt: true,
+} as any);
+
 // Waitlist insert schema
 export const insertWaitlistSchema = createInsertSchema(waitlist).omit({
   id: true,
@@ -271,3 +482,21 @@ export type Review = typeof reviews.$inferSelect;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
 export type Waitlist = typeof waitlist.$inferSelect;
 export type InsertWaitlist = z.infer<typeof insertWaitlistSchema>;
+export type AuditLog = typeof auditLogs.$inferSelect;
+export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
+export type SubscriptionPlan = typeof subscriptionPlans.$inferSelect;
+export type InsertSubscriptionPlan = z.infer<typeof insertSubscriptionPlanSchema>;
+export type Subscription = typeof subscriptions.$inferSelect;
+export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
+export type ApiKey = typeof apiKeys.$inferSelect;
+export type InsertApiKey = z.infer<typeof insertApiKeySchema>;
+export type EscrowTransaction = typeof escrowTransactions.$inferSelect;
+export type InsertEscrowTransaction = z.infer<typeof insertEscrowTransactionSchema>;
+export type KycVerification = typeof kycVerifications.$inferSelect;
+export type InsertKycVerification = z.infer<typeof insertKycVerificationSchema>;
+export type DailyProgressReport = typeof dailyProgressReports.$inferSelect;
+export type InsertDailyProgressReport = z.infer<typeof insertDailyProgressReportSchema>;
+export type SupportTicket = typeof supportTickets.$inferSelect;
+export type InsertSupportTicket = z.infer<typeof insertSupportTicketSchema>;
+export type Referral = typeof referrals.$inferSelect;
+export type InsertReferral = z.infer<typeof insertReferralSchema>;
