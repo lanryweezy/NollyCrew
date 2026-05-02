@@ -7,6 +7,7 @@ import bcrypt from "bcryptjs";
 import { sign as jwtSign, verify as jwtVerify } from "./utils/jwt.js";
 import { storage } from "./storage.js";
 import { logAction } from "./utils/audit.js";
+import { openai } from "./ai.js";
 import { requirePermission } from "./middleware/rbac.js";
 import { 
   initializeTransaction, 
@@ -885,6 +886,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI: casting recommendations (async)
+  app.post('/api/ai/analyze-script', authenticateToken, async (req: any, res) => {
+    try {
+      const { scriptText } = req.body;
+      if (!scriptText) {
+        return res.status(400).json({ error: 'Script text is required' });
+      }
+
+      const analysis = await ai.analyzeScriptWithAI(scriptText);
+      
+      await logAction(req, { 
+        action: 'CREATE', 
+        entityType: 'ai_analysis', 
+        entityId: 'new',
+        newData: { type: 'script_analysis' } 
+      });
+
+      res.json(analysis);
+    } catch (error) {
+      logger.error('Script analysis error', { error: (error as Error).message });
+      res.status(500).json({ error: 'Failed to analyze script' });
+    }
+  });
+
+  app.post('/api/ai/director-chat', authenticateToken, async (req: any, res) => {
+    try {
+      const { message, history = [] } = req.body;
+      if (!message) {
+        return res.status(400).json({ error: 'Message is required' });
+      }
+
+      if (!openai) {
+        return res.json({ reply: "I'm currently in 'script-reading' mode (OpenAI not configured). I'd love to help you once the connection is established!" });
+      }
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "You are a professional Nollywood Virtual Director. You provide creative, logistical, and technical advice for film productions in Nigeria. Be professional, encouraging, and highly specific to the Nollywood context (Lagos locations, regional preferences, industry standards)."
+          },
+          ...history.map((m: any) => ({ role: m.role, content: m.content })),
+          {
+            role: "user",
+            content: message
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 1000
+      });
+
+      const reply = completion.choices[0]?.message?.content;
+      res.json({ reply });
+    } catch (error) {
+      logger.error('Director chat error', { error: (error as Error).message });
+      res.status(500).json({ error: 'Failed to get director advice' });
+    }
+  });
+
   app.post('/api/ai/casting', authenticateToken, async (req: any, res) => {
     try {
       const { role, requirements, location, skills, limit } = req.body as any;

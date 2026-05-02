@@ -3,7 +3,7 @@ import { getCache, setCache } from './utils/cache.js';
 import crypto from 'node:crypto';
 
 // Initialize OpenAI client
-const openai = process.env.OPENAI_API_KEY ? new OpenAI({
+export const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 }) : null;
 

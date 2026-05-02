@@ -123,29 +123,29 @@ export default function LandingPage() {
       description: "Build your network with verified actors, crew members, and producers across Nigeria and beyond."
     },
     {
+      icon: MessageSquare,
+      title: "AI Virtual Director",
+      description: "Get real-time creative and logistical advice from our specialized Nollywood AI consultant."
+    },
+    {
       icon: Zap,
-      title: "AI-Powered Matching",
-      description: "Our intelligent system matches the right talent with the right projects using advanced AI algorithms."
+      title: "Automated Talent Matching",
+      description: "Our background engine continuously matches your profile to the perfect casting calls."
     },
     {
       icon: Briefcase,
-      title: "Complete Project Management",
-      description: "From script breakdown to final delivery, manage every aspect of your film production in one place."
-    },
-    {
-      icon: Shield,
-      title: "Secure Payments",
-      description: "Built-in escrow system ensures safe and timely payments for all project participants."
+      title: "Escrow-Protected Payments",
+      description: "Secure payments for every milestone. Funds are held in escrow until deliverables are approved."
     },
     {
       icon: Globe,
-      title: "Global Reach",
-      description: "Connect with international distributors and expand your reach beyond the local market."
+      title: "Industry-Standard Workflow",
+      description: "Professional tools for script breakdown, scheduling, and digital call sheets."
     },
     {
       icon: Film,
-      title: "Industry Tools",
-      description: "Access professional tools for casting, scheduling, budgeting, and post-production workflows."
+      title: "Production Intelligence",
+      description: "Data-driven insights and predictive analytics for project success and budget optimization."
     }
   ];
 

@@ -21,7 +21,8 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
-  Star
+  Star,
+  MessageSquare
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import ResponsiveGrid from "@/components/ResponsiveGrid";
@@ -30,6 +31,7 @@ import ResponsiveButton from "@/components/ResponsiveButton";
 import ResponsiveTypography from "@/components/ResponsiveTypography";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import VirtualDirectorChat from "@/components/VirtualDirectorChat";
 
 import { api } from "@/lib/api";
 
@@ -47,23 +49,22 @@ export default function AITools() {
   const [isGeneratingLegal, setIsGeneratingLegal] = useState(false);
   const [legalResult, setLegalResult] = useState<string | null>(null);
 
-  const handleScriptAnalysis = () => {
+  const handleScriptAnalysis = async () => {
+    if (!scriptText.trim()) return;
     setIsAnalyzing(true);
-    // Simulate AI processing
-    setTimeout(() => {
-      setAnalysisResult({
-        scenes: 12,
-        characters: ["John Doe", "Jane Smith", "Mike Johnson"],
-        locations: ["City Street", "Office Building", "Apartment"],
-        estimatedCrew: { director: 1, camera: 3, sound: 2 },
-        props: ["Car", "Phone", "Documents"],
-        wardrobe: ["Business Suit", "Casual Clothes"],
-        vfx: ["Background Replacement", "Color Grading"],
-        timeline: { preProduction: 45, shooting: 30, postProduction: 60 },
-        budget: { low: 2000000, high: 4000000 }
+    try {
+      const response = await fetch('/api/ai/analyze-script', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scriptText })
       });
+      const data = await response.json();
+      setAnalysisResult(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
       setIsAnalyzing(false);
-    }, 2000);
+    }
   };
 
   const handleLegalGeneration = async () => {
@@ -148,6 +149,18 @@ export default function AITools() {
         "Non-disclosure agreements",
         "Union compliance checks"
       ]
+    },
+    {
+      id: "director-chat",
+      title: "Virtual Director Chat",
+      description: "Get real-time advice from our AI Director",
+      icon: MessageSquare,
+      features: [
+        "Creative script feedback",
+        "Directorial advice",
+        "Production troubleshooting",
+        "Context-aware recommendations"
+      ]
     }
   ];
 
@@ -175,15 +188,20 @@ export default function AITools() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6 sm:space-y-8">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="script-analysis">Script Analysis</TabsTrigger>
-                <TabsTrigger value="casting-recommendations">Casting</TabsTrigger>
-                <TabsTrigger value="schedule-optimization">Scheduling</TabsTrigger>
-                <TabsTrigger value="marketing-content">Marketing</TabsTrigger>
-                <TabsTrigger value="legal-ai">Legal AI</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 h-auto">
+                <TabsTrigger value="script-analysis" className="py-2">Script</TabsTrigger>
+                <TabsTrigger value="director-chat" className="py-2">Director</TabsTrigger>
+                <TabsTrigger value="casting-recommendations" className="py-2">Casting</TabsTrigger>
+                <TabsTrigger value="schedule-optimization" className="py-2">Schedule</TabsTrigger>
+                <TabsTrigger value="marketing-content" className="py-2">Marketing</TabsTrigger>
+                <TabsTrigger value="legal-ai" className="py-2">Legal</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="script-analysis" className="space-y-6">
+              <TabsContent value="director-chat" className="space-y-6 mt-6">
+                <VirtualDirectorChat />
+              </TabsContent>
+
+              <TabsContent value="script-analysis" className="space-y-6 mt-6">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
