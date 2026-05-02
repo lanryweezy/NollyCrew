@@ -70,6 +70,7 @@ export default {
         nollywood: {
           gold: "45 90% 60%",
           "film-blue": "220 85% 15%",
+          crimson: "348 83% 47%",
         },
         sidebar: {
           ring: "hsl(var(--sidebar-ring) / <alpha-value>)",
@@ -96,7 +97,7 @@ export default {
       },
       fontFamily: {
         sans: ["var(--font-sans)"],
-        serif: ["var(--font-serif)"],
+        serif: ["Playfair Display", "var(--font-serif)"],
         mono: ["var(--font-mono)"],
       },
       keyframes: {
