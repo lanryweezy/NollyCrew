@@ -13,23 +13,27 @@ app.use(express.urlencoded({ extended: false }));
 // Initialize routes
 const serverPromise = registerRoutes(app);
 
-const distPath = path.join(process.cwd(), 'dist/public');
-const publicPath = path.join(process.cwd(), 'public');
+// Use absolute paths relative to process.cwd() for Vercel
+const distPath = path.resolve(process.cwd(), 'dist', 'public');
+const publicPath = path.resolve(process.cwd(), 'public');
 
-// Middleware to serve static files manually if needed, or use express.static
-app.use(express.static(distPath));
-app.use(express.static(publicPath));
+// Serve static files from the build output directory first
+app.use('/assets', express.static(path.join(distPath, 'assets'), {
+  maxAge: '1y',
+  immutable: true,
+  fallthrough: true
+}));
+
+app.use(express.static(distPath, { fallthrough: true }));
+app.use(express.static(publicPath, { fallthrough: true }));
 
 app.get('*', async (req, res) => {
-  // If it's an API request, it should have been handled by registerRoutes
-  // But since we route everything here, we must be careful.
+  // If it's an API request that wasn't caught by registerRoutes
   if (req.path.startsWith('/api')) {
-    // Let the registered routes handle it.
-    // If we are here, it means no API route matched.
     return res.status(404).json({ error: 'API endpoint not found' });
   }
 
-  // Handle HTML serving with metadata injection
+  // Define possible index paths
   const indexPath = path.join(distPath, 'index.html');
   const fallbackPath = path.join(publicPath, 'index.html');
   
