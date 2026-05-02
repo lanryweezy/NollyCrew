@@ -124,6 +124,7 @@ export default function GanttChart({ tasks, onTaskUpdate, onTaskCreate }: GanttC
               variant="outline" 
               size="icon" 
               onClick={() => navigateTimeline('prev')}
+              aria-label="Previous timeline period"
             >
               <ChevronLeft className="w-4 h-4" />
             </Button>
@@ -136,6 +137,7 @@ export default function GanttChart({ tasks, onTaskUpdate, onTaskCreate }: GanttC
               variant="outline" 
               size="icon" 
               onClick={() => navigateTimeline('next')}
+              aria-label="Next timeline period"
             >
               <ChevronRight className="w-4 h-4" />
             </Button>

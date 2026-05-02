@@ -276,6 +276,7 @@ export default function RiskManagementDashboard({
                           variant="ghost" 
                           size="icon"
                           onClick={() => handleEditRisk(risk)}
+                          aria-label={`Edit risk ${risk.title}`}
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
@@ -283,6 +284,7 @@ export default function RiskManagementDashboard({
                           variant="ghost" 
                           size="icon"
                           onClick={() => onRiskDelete && onRiskDelete(risk.id)}
+                          aria-label={`Delete risk ${risk.title}`}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
