@@ -22,14 +22,47 @@ app.use(express.urlencoded({ extended: false }));
 // Initialize routes
 const serverPromise = registerRoutes(app);
 
-// 1. Serve static files from /assets explicitly to ensure MIME types
-app.use("/assets", express.static(path.join(distPath, "assets"), {
-  maxAge: "1y",
-  immutable: true,
-  fallthrough: false // If it's in /assets and not found, 404 immediately
-}));
+// Debug endpoint to check file paths on Vercel
+app.get('/debug/paths', async (req, res) => {
+  const getDir = async (dir: string) => {
+    try {
+      return await fs.readdir(dir, { recursive: true });
+    } catch (e) {
+      return [`Error reading ${dir}: ${e}`];
+    }
+  };
+  
+  res.json({
+    cwd: process.cwd(),
+    dirname: __dirname,
+    rootPath,
+    distPath,
+    publicPath,
+    distFiles: await getDir(distPath),
+    publicFiles: await getDir(publicPath),
+    env: {
+      NODE_ENV: process.env.NODE_ENV,
+      VERCEL: process.env.VERCEL
+    }
+  });
+});
 
-// 2. Serve other static files
+// 1. Specialized asset serving with explicit MIME types
+app.get('/assets/:file', async (req, res) => {
+  const fileName = req.params.file;
+  const filePath = path.join(distPath, 'assets', fileName);
+  
+  try {
+    const content = await fs.readFile(filePath);
+    if (fileName.endsWith('.js')) res.setHeader('Content-Type', 'application/javascript');
+    else if (fileName.endsWith('.css')) res.setHeader('Content-Type', 'text/css');
+    res.send(content);
+  } catch (e) {
+    res.status(404).send('Asset not found');
+  }
+});
+
+// 2. Fallback static serving
 app.use(express.static(distPath, { fallthrough: true }));
 app.use(express.static(publicPath, { fallthrough: true }));
 
@@ -39,12 +72,7 @@ app.get("*", async (req, res) => {
     return res.status(404).json({ error: "API endpoint not found" });
   }
 
-  // If the request is for a file that wasn't found (has an extension), don't serve HTML
-  if (req.path.includes(".") && !req.path.endsWith(".html")) {
-    return res.status(404).send("Not found");
-  }
-
-  // Handle HTML serving with metadata injection
+  // Final catch-all for HTML serving with metadata injection
   const indexPath = path.join(distPath, "index.html");
   const fallbackPath = path.join(publicPath, "index.html");
   
@@ -56,7 +84,7 @@ app.get("*", async (req, res) => {
       await fs.access(fallbackPath);
       activePath = fallbackPath;
     } catch {
-      return res.status(500).send("Frontend assets not found. Build may have failed.");
+      return res.status(500).send("Frontend assets not found. Please run 'npm run build' first.");
     }
   }
 
