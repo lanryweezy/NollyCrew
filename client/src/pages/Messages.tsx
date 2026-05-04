@@ -13,6 +13,7 @@ import {
   Phone, 
   Video, 
   Info,
+  MessageSquare,
   CheckCheck,
   Clock,
   UserPlus

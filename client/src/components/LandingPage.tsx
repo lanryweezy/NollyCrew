@@ -17,6 +17,7 @@ import {
   Zap, 
   Shield, 
   Globe,
+  MessageSquare,
   ArrowRight,
   CheckCircle,
   Star,
