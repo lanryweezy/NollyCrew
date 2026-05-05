@@ -105,7 +105,7 @@ export default function Messages() {
               <div className="p-4 border-b space-y-4">
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-bold">Messages</h2>
-                  <Button variant="ghost" size="icon" className="rounded-full">
+                  <Button variant="ghost" size="icon" className="rounded-full" aria-label="New chat">
                     <UserPlus className="h-5 w-5" />
                   </Button>
                 </div>
@@ -177,10 +177,10 @@ export default function Messages() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" className="text-muted-foreground"><Phone className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" className="text-muted-foreground"><Video className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" className="text-muted-foreground"><Info className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" className="text-muted-foreground"><MoreVertical className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="text-muted-foreground" aria-label="Start voice call"><Phone className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="text-muted-foreground" aria-label="Start video call"><Video className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="text-muted-foreground" aria-label="Chat info"><Info className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="text-muted-foreground" aria-label="More options"><MoreVertical className="h-4 w-4" /></Button>
                   </div>
                 </div>
 
