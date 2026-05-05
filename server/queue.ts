@@ -4,19 +4,19 @@ import { storage } from './storage.js';
 import { logger } from './utils/logger.js';
 
 const redisUrl = process.env.REDIS_URL;
-const redisHost = process.env.REDIS_HOST || 'localhost';
+const redisHost = process.env.REDIS_HOST;
 const redisPort = parseInt(process.env.REDIS_PORT || '6379', 10);
 const redisPassword = process.env.REDIS_PASSWORD;
 
 const queueConfig = {
   redis: redisUrl ? redisUrl : {
-    host: redisHost,
+    host: redisHost || 'localhost',
     port: redisPort,
     password: redisPassword
   }
 };
 
-const redisAvailable = !!(redisUrl || redisHost);
+const redisAvailable = !!(redisUrl || (redisHost && redisHost !== ''));
 
 // Create queues
 export const scriptAnalysisQueue = redisAvailable ? new Queue('script-analysis', (redisUrl || queueConfig) as any) : null;
