@@ -76,8 +76,8 @@ describe('AITools', () => {
     // Check if all tabs are rendered
     expect(screen.getAllByText('Script Analysis')[0]).toBeInTheDocument();
     expect(screen.getByText('Casting')).toBeInTheDocument();
-    expect(screen.getByText('Scheduling')).toBeInTheDocument();
-    expect(screen.getByText('Marketing')).toBeInTheDocument();
+    expect(screen.getByText('Schedule Optimization')).toBeInTheDocument();
+    expect(screen.getByText('Marketing Content Generation')).toBeInTheDocument();
   });
 
   it('should switch between different AI tools', async () => {

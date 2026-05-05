@@ -110,11 +110,11 @@ describe('LandingPage', () => {
     render(<LandingPage />);
     
     expect(screen.getByText('Connect & Collaborate')).toBeInTheDocument();
-    expect(screen.getByText('AI-Powered Matching')).toBeInTheDocument();
-    expect(screen.getByText('Complete Project Management')).toBeInTheDocument();
-    expect(screen.getByText('Secure Payments')).toBeInTheDocument();
-    expect(screen.getByText('Global Reach')).toBeInTheDocument();
-    expect(screen.getByText('Industry Tools')).toBeInTheDocument();
+    expect(screen.getByText('AI Virtual Director')).toBeInTheDocument();
+    expect(screen.getByText('Automated Talent Matching')).toBeInTheDocument();
+    expect(screen.getByText('Escrow-Protected Payments')).toBeInTheDocument();
+    expect(screen.getByText('Industry-Standard Workflow')).toBeInTheDocument();
+    expect(screen.getByText('Production Intelligence')).toBeInTheDocument();
   });
 
   it('should render testimonials', () => {
