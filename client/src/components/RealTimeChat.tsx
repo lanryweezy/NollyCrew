@@ -149,6 +149,7 @@ export default function RealTimeChat({ projectId, channelId, users }: RealTimeCh
               onClick={handleSendMessage}
               disabled={!newMessage.trim()}
               size="icon"
+              aria-label="Send message"
             >
               <Send className="w-4 h-4" />
             </Button>

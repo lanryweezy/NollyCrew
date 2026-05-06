@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -85,15 +85,42 @@ export default function RiskManagementDashboard({
   };
 
   // Filter risks based on search and filters
-  const filteredRisks = risks.filter(risk => {
-    const matchesSearch = risk.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         risk.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesCategory = filterCategory === "all" || risk.category === filterCategory;
-    const matchesStatus = filterStatus === "all" || risk.status === filterStatus;
-    
-    return matchesSearch && matchesCategory && matchesStatus;
-  });
+  // Optimization: Memoize the filtered risks list to prevent O(N) recalculation
+  // on every render, improving performance when users interact with other UI elements
+  // like opening edit forms or interacting with generic state.
+  // Impact: Eliminates unnecessary array traversals on non-search related renders.
+  const filteredRisks = useMemo(() => {
+    const searchLower = searchTerm.toLowerCase();
+    return risks.filter(risk => {
+      const matchesSearch = risk.title.toLowerCase().includes(searchLower) ||
+                           risk.description.toLowerCase().includes(searchLower);
+
+      const matchesCategory = filterCategory === "all" || risk.category === filterCategory;
+      const matchesStatus = filterStatus === "all" || risk.status === filterStatus;
+
+      return matchesSearch && matchesCategory && matchesStatus;
+    });
+  }, [risks, searchTerm, filterCategory, filterStatus]);
+
+  // Optimization: Accumulate the summary totals in a single O(N) pass, wrapped
+  // in useMemo to prevent running the loop on every single render.
+  // Impact: Replaces 5 separate array.filter() calls in the render body with a single O(N) pass.
+  const riskSummary = useMemo(() => {
+    const summary = { high: 0, medium: 0, low: 0, mitigated: 0, resolved: 0 };
+    for (const risk of risks) {
+      const level = getRiskLevel(calculateRiskScore(risk)).level;
+      if (level === 'high') summary.high++;
+      else if (level === 'medium') summary.medium++;
+      else if (level === 'low') summary.low++;
+
+      if (risk.status === 'mitigated') {
+        summary.mitigated++;
+      } else if (risk.status === 'resolved') {
+        summary.resolved++;
+      }
+    }
+    return summary;
+  }, [risks]);
 
   // Handle edit risk
   const handleEditRisk = (risk: Risk) => {
@@ -377,31 +404,31 @@ export default function RiskManagementDashboard({
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div className="bg-red-50 p-3 rounded-lg">
               <div className="text-2xl font-bold text-red-600">
-                {risks.filter(r => getRiskLevel(calculateRiskScore(r)).level === 'high').length}
+                {riskSummary.high}
               </div>
               <div className="text-sm text-muted-foreground">High Risks</div>
             </div>
             <div className="bg-yellow-50 p-3 rounded-lg">
               <div className="text-2xl font-bold text-yellow-600">
-                {risks.filter(r => getRiskLevel(calculateRiskScore(r)).level === 'medium').length}
+                {riskSummary.medium}
               </div>
               <div className="text-sm text-muted-foreground">Medium Risks</div>
             </div>
             <div className="bg-green-50 p-3 rounded-lg">
               <div className="text-2xl font-bold text-green-600">
-                {risks.filter(r => getRiskLevel(calculateRiskScore(r)).level === 'low').length}
+                {riskSummary.low}
               </div>
               <div className="text-sm text-muted-foreground">Low Risks</div>
             </div>
             <div className="bg-blue-50 p-3 rounded-lg">
               <div className="text-2xl font-bold text-blue-600">
-                {risks.filter(r => r.status === 'mitigated').length}
+                {riskSummary.mitigated}
               </div>
               <div className="text-sm text-muted-foreground">Mitigated</div>
             </div>
             <div className="bg-gray-50 p-3 rounded-lg">
               <div className="text-2xl font-bold text-gray-600">
-                {risks.filter(r => r.status === 'resolved').length}
+                {riskSummary.resolved}
               </div>
               <div className="text-sm text-muted-foreground">Resolved</div>
             </div>

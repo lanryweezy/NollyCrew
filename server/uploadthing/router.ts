@@ -3,7 +3,10 @@ import { verify as jwtVerify } from "../utils/jwt.js";
 
 const f = createUploadthing();
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-super-secret-jwt-key";
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable is required");
+}
 
 const auth = async (req: any) => {
   const token = req.headers.authorization?.split(" ")[1];

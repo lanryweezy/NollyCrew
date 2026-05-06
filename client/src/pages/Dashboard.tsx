@@ -24,7 +24,11 @@ import {
   Plus,
   Bell,
   MessageSquare,
-  AlertTriangle
+  AlertTriangle,
+  Play,
+  Star,
+  Zap,
+  Activity
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import ResponsiveGrid from "@/components/ResponsiveGrid";
@@ -70,55 +74,58 @@ export default function Dashboard() {
     switch (primaryRole) {
       case "actor":
         return {
-          title: "Actor Dashboard",
-          subtitle: "Discover roles and showcase your talent",
+          title: "Artist Portal",
+          subtitle: "Orchestrating your next major performance.",
+          accent: "from-blue-500 to-cyan-400",
           quickActions: [
-            { label: "Browse Casting Calls", icon: Film, action: () => setLocation("/jobs?type=casting") },
-            { label: "Update Showreel", icon: Plus, action: () => setLocation("/profile") },
-            { label: "View Applications", icon: Briefcase, action: () => setLocation("/jobs") }
+            { label: "Find Castings", icon: Film, desc: "Browse latest calls", action: () => setLocation("/jobs?type=casting") },
+            { label: "Edit Showreel", icon: Play, desc: "Update your portfolio", action: () => setLocation("/profile") },
+            { label: "My Auditions", icon: Star, desc: "Track applications", action: () => setLocation("/jobs") }
           ]
         };
       case "crew":
         return {
-          title: "Crew Dashboard", 
-          subtitle: "Find crew opportunities and manage projects",
+          title: "Technical Hub", 
+          subtitle: "Managing technical excellence across productions.",
+          accent: "from-orange-500 to-yellow-400",
           quickActions: [
-            { label: "Browse Crew Jobs", icon: Briefcase, action: () => setLocation("/jobs?type=crew") },
-            { label: "Create Project", icon: Plus, action: () => setLocation("/projects") },
-            { label: "Manage Portfolio", icon: Film, action: () => setLocation("/profile") }
+            { label: "Gig Board", icon: Briefcase, desc: "Find crew openings", action: () => setLocation("/jobs?type=crew") },
+            { label: "Create Project", icon: Plus, desc: "Start new production", action: () => setLocation("/projects") },
+            { label: "Inventory", icon: Zap, desc: "Manage gear & skills", action: () => setLocation("/profile") }
           ]
         };
       case "producer":
         return {
-          title: "Producer Dashboard",
-          subtitle: "Manage productions and discover talent",
+          title: "Producer HQ",
+          subtitle: "Commanding the production pipeline.",
+          accent: "from-primary to-nollywood-crimson",
           quickActions: [
-            { label: "Post Casting Call", icon: Plus, action: () => setLocation("/jobs") },
-            { label: "Manage Projects", icon: Film, action: () => setLocation("/projects") },
-            { label: "Browse Talent", icon: Users, action: () => setLocation("/talent") }
+            { label: "Post Call", icon: Plus, desc: "Hire new talent", action: () => setLocation("/jobs") },
+            { label: "Pipeline", icon: Activity, desc: "Track all projects", action: () => setLocation("/projects") },
+            { label: "Discover", icon: Users, desc: "Search for talent", action: () => setLocation("/talent") }
           ]
         };
       default:
         return {
           title: "Dashboard",
-          subtitle: "Welcome to NollyCrew",
+          subtitle: "Your Nollywood Command Center.",
+          accent: "from-primary to-orange-500",
           quickActions: [
-            { label: "Complete Profile", icon: Plus, action: () => setLocation("/profile") },
-            { label: "Browse Jobs", icon: Briefcase, action: () => setLocation("/jobs") },
-            { label: "Explore Projects", icon: Film, action: () => setLocation("/projects") }
+            { label: "Profile", icon: Plus, desc: "Complete your setup", action: () => setLocation("/profile") },
+            { label: "Jobs", icon: Briefcase, desc: "Browse opportunities", action: () => setLocation("/jobs") },
+            { label: "Projects", icon: Film, desc: "Explore the industry", action: () => setLocation("/projects") }
           ]
         };
     }
   };
 
   const roleContent = getRoleBasedContent();
-
   const roleStats = getStatsForRole(primaryRole, dashboardData);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="relative">
+      <div className="min-h-screen bg-black film-grain">
+        <div className="relative z-50">
           <Navigation
             isAuthenticated={true}
             userRole={primaryRole}
@@ -126,37 +133,25 @@ export default function Dashboard() {
           />
         </div>
         <ResponsiveSection padding="medium">
-          <div className="space-y-8">
-            <Skeleton className="h-12 w-1/3" />
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
+          <div className="space-y-12">
+            <div className="space-y-4">
+               <Skeleton className="h-14 w-1/3 bg-white/5 rounded-2xl" />
+               <Skeleton className="h-6 w-1/4 bg-white/5 rounded-full" />
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-8">
-                <Skeleton className="h-64 w-full" />
-                <Skeleton className="h-96 w-full" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+              {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-40 w-full bg-white/5 rounded-[32px]" />)}
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              <div className="lg:col-span-8 space-y-8">
+                <Skeleton className="h-64 w-full bg-white/5 rounded-[40px]" />
+                <Skeleton className="h-96 w-full bg-white/5 rounded-[40px]" />
               </div>
-              <div className="space-y-8">
-                <Skeleton className="h-96 w-full" />
-                <Skeleton className="h-64 w-full" />
+              <div className="lg:col-span-4 space-y-8">
+                <Skeleton className="h-full w-full bg-white/5 rounded-[40px]" />
               </div>
             </div>
           </div>
         </ResponsiveSection>
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Alert variant="destructive" className="max-w-lg">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>
-            Failed to load dashboard data. {error.message}
-          </AlertDescription>
-        </Alert>
       </div>
     );
   }
@@ -166,9 +161,15 @@ export default function Dashboard() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="min-h-screen bg-background"
+      className="min-h-screen bg-black text-white film-grain overflow-x-hidden"
     >
-      <div className="relative">
+      {/* Ambient Lighting */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className={`absolute -top-[10%] -left-[5%] w-[40%] h-[40%] bg-primary/10 blur-[150px] rounded-full`} />
+        <div className="absolute top-[20%] -right-[10%] w-[30%] h-[30%] bg-blue-600/5 blur-[120px] rounded-full" />
+      </div>
+
+      <div className="relative z-50">
         <Navigation 
           isAuthenticated={true}
           userRole={primaryRole}
@@ -179,247 +180,284 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <ResponsiveSection padding="medium">
+      <ResponsiveSection padding="medium" className="relative z-10 pt-10">
+        {/* Cinematic Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="mb-8"
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6"
         >
-          <h1 className="text-4xl md:text-5xl font-bold font-serif mb-3 tracking-tight text-foreground">
-            Welcome back, <span className="bg-gradient-to-r from-primary to-nollywood-crimson bg-clip-text text-transparent">{user?.firstName}</span>
-          </h1>
-          <p className="text-muted-foreground text-lg flex items-center gap-2">
-            <Film className="w-5 h-5 text-primary" />
-            {roleContent.subtitle}
-          </p>
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+               <Badge className={`bg-gradient-to-r ${roleContent.accent} text-white border-none py-1 px-3 shadow-lg shadow-primary/20`}>
+                 <Zap className="w-3.5 h-3.5 mr-1.5 fill-current" />
+                 {roleContent.title}
+               </Badge>
+            </div>
+            <h1 className="text-5xl md:text-7xl font-bold font-serif mb-4 tracking-tighter leading-none">
+              Welcome, <span className={`bg-gradient-to-r ${roleContent.accent} bg-clip-text text-transparent italic`}>{user?.firstName}</span>
+            </h1>
+            <p className="text-white/40 text-xl font-light max-w-xl">
+              {roleContent.subtitle}
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-4">
+             <div className="glass-card px-6 py-4 rounded-3xl border-white/5 flex items-center gap-4">
+                <div className="text-right">
+                   <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold">Session Status</p>
+                   <p className="text-sm font-bold text-green-500 flex items-center gap-1.5 justify-end">
+                     <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                     Live Connection
+                   </p>
+                </div>
+             </div>
+          </div>
         </motion.div>
 
-        {/* Stats Overview */}
-        <ResponsiveGrid cols={{ xs: 2, sm: 2, md: 4 }} className="mb-6 sm:mb-8">
+        {/* Stats Command Center */}
+        <div className="mb-12">
           <DashboardStats userRole={primaryRole} stats={roleStats} />
-        </ResponsiveGrid>
+        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-          {/* Main Content */}
-          <motion.div
-            initial={{ x: -20, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="lg:col-span-2 space-y-6 sm:space-y-8"
-          >
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
-                  Quick Actions
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveGrid cols={{ xs: 1, sm: 3 }} gap="medium">
-                  {roleContent.quickActions.map((action, index) => (
-                    <Button
-                      key={index}
-                      variant="outline"
-                      className="h-auto p-3 sm:p-4 flex flex-col items-center gap-2"
-                      onClick={action.action}
-                    >
-                      <action.icon className="w-5 h-5 sm:w-6 sm:h-6" />
-                      <span className="text-xs sm:text-sm text-center">{action.label}</span>
-                    </Button>
-                  ))}
-                </ResponsiveGrid>
-              </CardContent>
-            </Card>
-
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="overview">Recent Applications</TabsTrigger>
-                <TabsTrigger value="projects">My Projects</TabsTrigger>
-              </TabsList>
-              
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeTab}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                  className="mt-4"
-                >
-                  <TabsContent value="overview" className="space-y-4 mt-0">
-                    {(dashboardData?.recentApplications || []).map((job: any) => (
-                      <Card key={job.id} className="hover:shadow-md transition-shadow">
-                        <CardContent className="p-4 sm:p-6">
-                          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                            <div className="flex-1">
-                              <div className="flex flex-wrap items-center gap-2 mb-2">
-                                <ResponsiveTypography variant="h4">
-                                  {job.jobTitle}
-                                </ResponsiveTypography>
-                                {job.isUrgent && (
-                                  <Badge variant="destructive" className="text-xs">Urgent</Badge>
-                                )}
-                              </div>
-                              <p className="text-muted-foreground text-sm mb-2">{job.status}</p>
-                              <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground mb-2">
-                                <div className="flex items-center gap-1">
-                                  <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-                                  Applied: {new Date(job.appliedAt).toLocaleDateString()}
-                                </div>
-                              </div>
-                            </div>
-                            <ResponsiveButton variant="outline" size="sm" className="w-full sm:w-auto">
-                              View Details
-                            </ResponsiveButton>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                    <ResponsiveButton
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => setLocation("/jobs")}
-                      icon={<ArrowRight className="w-4 h-4 ml-2" />}
-                      iconPosition="right"
-                    >
-                      View All Jobs
-                    </ResponsiveButton>
-                  </TabsContent>
-
-                  <TabsContent value="projects" className="space-y-4 mt-0">
-                    {(dashboardData?.recentProjects || []).map((project: any) => (
-                      <Card key={project.id} className="hover:shadow-md transition-shadow">
-                        <CardContent className="p-4 sm:p-6">
-                          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                            <div className="flex-1">
-                              <div className="flex flex-wrap items-center gap-2 mb-2">
-                                <ResponsiveTypography variant="h4">
-                                  {project.title}
-                                </ResponsiveTypography>
-                                <Badge variant="secondary" className="text-xs">{project.genre}</Badge>
-                              </div>
-                              <p className="text-muted-foreground text-sm mb-2">Director: {project.director}</p>
-                              <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground mb-3">
-                                <div className="flex items-center gap-1">
-                                  <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
-                                  {project.startDate} - {project.deadline}
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Users className="w-3 h-3 sm:w-4 sm:h-4" />
-                                  {project.teamSize} team members
-                                </div>
-                              </div>
-                              <div className="space-y-2 mb-3">
-                                <div className="flex justify-between text-xs sm:text-sm">
-                                  <span>Progress</span>
-                                  <span>{project.progress}%</span>
-                                </div>
-                                <div className="w-full bg-muted rounded-full h-2">
-                                  <div
-                                    className="bg-primary h-2 rounded-full transition-all"
-                                    style={{ width: `${project.progress}%` }}
-                                  />
-                                </div>
-                              </div>
-                              <p className="text-primary font-medium text-sm sm:text-base">Budget: {project.budget}</p>
-                            </div>
-                            <ResponsiveButton variant="outline" size="sm" className="w-full sm:w-auto">
-                              Manage
-                            </ResponsiveButton>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                    <ResponsiveButton
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => setLocation("/projects")}
-                      icon={<ArrowRight className="w-4 h-4 ml-2" />}
-                      iconPosition="right"
-                    >
-                      View All Projects
-                    </ResponsiveButton>
-                  </TabsContent>
-                </motion.div>
-              </AnimatePresence>
-            </Tabs>
-          </motion.div>
-
-          {/* Sidebar */}
-          <motion.div
-            initial={{ x: 20, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="space-y-6 sm:space-y-8"
-          >
-            {/* Notifications */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
-                  Notifications
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {(dashboardData?.notifications || []).map((notification: any) => (
-                  <div 
-                    key={notification.id} 
-                    className={`p-3 sm:p-4 rounded-lg border ${
-                      !notification.isRead ? 'bg-primary/5 border-primary/20' : 'bg-muted/50'
-                    }`}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Main Workspace */}
+          <div className="lg:col-span-8 space-y-10">
+            {/* Bento Quick Actions */}
+            <section>
+              <div className="flex items-center justify-between mb-6 px-2">
+                 <h2 className="text-xl font-bold tracking-tight text-white/80">Command Hub</h2>
+                 <p className="text-xs text-white/30 font-medium">Quick Orchestration</p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                {roleContent.quickActions.map((action, index) => (
+                  <motion.div
+                    key={index}
+                    whileHover={{ y: -5, scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={action.action}
+                    className="glass-deep p-8 rounded-[40px] border-white/5 cursor-pointer group relative overflow-hidden transition-all duration-500 hover:bg-white/5 shadow-2xl"
                   >
-                    <div className="flex items-start gap-2 sm:gap-3">
-                      <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
-                      <div className="flex-1">
-                        <h4 className="font-medium text-sm">{notification.title}</h4>
-                        <p className="text-xs text-muted-foreground mt-1">{notification.message}</p>
-                        <p className="text-xs text-muted-foreground mt-1">{notification.time}</p>
-                      </div>
+                    <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${roleContent.accent} opacity-0 group-hover:opacity-10 blur-3xl transition-opacity`} />
+                    <div className="mb-6 w-14 h-14 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center group-hover:border-primary/50 transition-colors">
+                      <action.icon className="w-7 h-7 text-primary group-hover:scale-110 transition-transform" />
                     </div>
-                  </div>
+                    <h3 className="text-xl font-bold text-white mb-2">{action.label}</h3>
+                    <p className="text-xs text-white/30 group-hover:text-white/50 transition-colors">{action.desc}</p>
+                  </motion.div>
                 ))}
-                <ResponsiveButton variant="outline" size="sm" className="w-full">
-                  View All Notifications
-                </ResponsiveButton>
-              </CardContent>
-            </Card>
+              </div>
+            </section>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="w-4 h-4 sm:w-5 sm:h-5" />
-                  Recent Connections
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {[
-                  { name: "Funke Akindele", role: "Actor", avatar: "FA" },
-                  { name: "Kemi Adetiba", role: "Director", avatar: "KA" },
-                  { name: "Tunde Cinematography", role: "Crew", avatar: "TC" }
-                ].map((connection, index) => (
-                  <div key={index} className="flex items-center gap-3">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                      <span className="text-xs sm:text-sm font-semibold text-primary">{connection.avatar}</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">{connection.name}</p>
-                      <p className="text-xs text-muted-foreground">{connection.role}</p>
-                    </div>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 sm:h-9 sm:w-9">
-                      <MessageSquare className="w-4 h-4" />
-                    </Button>
+            {/* Feed/Tabs Upgrade */}
+            <div className="glass-deep rounded-[48px] p-2 border-white/5 shadow-2xl overflow-hidden">
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <div className="p-6">
+                  <TabsList className="inline-flex h-14 items-center justify-center rounded-3xl bg-white/5 p-1 text-white/40">
+                    <TabsTrigger value="overview" className="h-12 rounded-[22px] px-8 text-sm font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg">Intelligence Feed</TabsTrigger>
+                    <TabsTrigger value="projects" className="h-12 rounded-[22px] px-8 text-sm font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg">Production Log</TabsTrigger>
+                  </TabsList>
+                </div>
+                
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeTab}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.4 }}
+                    className="p-8 pt-0"
+                  >
+                    <TabsContent value="overview" className="space-y-4 mt-0">
+                      {(dashboardData?.recentApplications || []).length > 0 ? (
+                        (dashboardData?.recentApplications || []).map((job: any) => (
+                          <div key={job.id} className="group glass-card p-6 rounded-[32px] border-white/5 hover:bg-white/5 transition-all flex items-center justify-between">
+                            <div className="flex items-center gap-6">
+                               <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 shrink-0">
+                                  <Film className="w-8 h-8 text-primary/40 group-hover:text-primary transition-colors" />
+                               </div>
+                               <div>
+                                  <div className="flex items-center gap-3 mb-1">
+                                     <h4 className="text-xl font-bold text-white tracking-tight">{job.jobTitle}</h4>
+                                     {job.isUrgent && <Badge variant="destructive" className="h-5 px-2 text-[10px] uppercase font-black tracking-widest">Urgent</Badge>}
+                                  </div>
+                                  <div className="flex items-center gap-4 text-xs font-medium text-white/30 uppercase tracking-widest">
+                                     <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> Applied {new Date(job.appliedAt).toLocaleDateString()}</span>
+                                     <span className="flex items-center gap-1.5 text-primary"><Activity className="w-3.5 h-3.5" /> {job.status}</span>
+                                  </div>
+                               </div>
+                            </div>
+                            <Button variant="ghost" className="rounded-full bg-white/5 hover:bg-white/10 text-white/60 h-12 px-6">View Details</Button>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="py-20 text-center">
+                           <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+                              <Bell className="w-10 h-10 text-white/10" />
+                           </div>
+                           <h4 className="text-2xl font-bold text-white/80 mb-2">Feed is quiet</h4>
+                           <p className="text-white/30 font-light max-w-xs mx-auto">No recent applications found. Start browsing new opportunities in the portal.</p>
+                        </div>
+                      )}
+                      
+                      <div className="pt-6">
+                        <Button
+                          variant="ghost"
+                          className="w-full h-16 rounded-[28px] border-2 border-dashed border-white/10 text-white/40 hover:text-white hover:border-primary/50 transition-all font-bold text-lg"
+                          onClick={() => setLocation("/jobs")}
+                        >
+                          View Full Career Log
+                          <ArrowRight className="w-5 h-5 ml-2" />
+                        </Button>
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="projects" className="space-y-6 mt-0">
+                      {(dashboardData?.recentProjects || []).map((project: any) => (
+                        <div key={project.id} className="glass-card p-8 rounded-[40px] border-white/5 hover:bg-white/5 transition-all">
+                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+                            <div className="flex items-center gap-6">
+                               <div className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
+                                  <Briefcase className="w-10 h-10 text-primary" />
+                               </div>
+                               <div>
+                                  <div className="flex items-center gap-3 mb-1">
+                                    <h4 className="text-2xl font-black text-white tracking-tight">{project.title}</h4>
+                                    <Badge variant="secondary" className="bg-white/10 text-white border-none">{project.genre}</Badge>
+                                  </div>
+                                  <p className="text-white/40 font-medium">Under the direction of <span className="text-white/70 italic">{project.director}</span></p>
+                               </div>
+                            </div>
+                            <div className="text-right">
+                               <p className="text-3xl font-black text-primary leading-none mb-1">{project.budget}</p>
+                               <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold">Production Budget</p>
+                            </div>
+                          </div>
+
+                          <div className="space-y-3 mb-8">
+                             <div className="flex justify-between items-end mb-2">
+                                <span className="text-xs uppercase tracking-widest text-white/30 font-bold">Production Progress</span>
+                                <span className="text-sm font-black text-primary">{project.progress}%</span>
+                             </div>
+                             <div className="w-full bg-white/5 rounded-full h-3 overflow-hidden">
+                                <motion.div
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${project.progress}%` }}
+                                  transition={{ duration: 1, ease: "easeOut" }}
+                                  className={`h-full bg-gradient-to-r ${roleContent.accent} rounded-full`}
+                                />
+                             </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-6 pt-6 border-t border-white/5">
+                             <div className="flex items-center gap-3">
+                                <Calendar className="w-4 h-4 text-white/20" />
+                                <span className="text-xs text-white/60 font-medium">{project.startDate} - {project.deadline}</span>
+                             </div>
+                             <div className="flex items-center gap-3">
+                                <Users className="w-4 h-4 text-white/20" />
+                                <span className="text-xs text-white/60 font-medium">{project.teamSize} specialized crew</span>
+                             </div>
+                             <div className="flex justify-end">
+                                <Button className="rounded-full bg-white text-black hover:bg-white/90 font-bold px-8">Manage Desk</Button>
+                             </div>
+                          </div>
+                        </div>
+                      ))}
+                    </TabsContent>
+                  </motion.div>
+                </AnimatePresence>
+              </Tabs>
+            </div>
+          </div>
+
+          {/* Sidebar - Intelligent Activity Timeline */}
+          <div className="lg:col-span-4 space-y-8">
+            <section>
+              <div className="flex items-center justify-between mb-6 px-2">
+                 <h2 className="text-xl font-bold tracking-tight text-white/80">Intelligence Stream</h2>
+                 <Bell className="w-4 h-4 text-white/20" />
+              </div>
+              
+              <div className="glass-deep rounded-[48px] p-8 border-white/5 relative overflow-hidden shadow-2xl">
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl" />
+                 
+                 <div className="relative space-y-8">
+                    {(dashboardData?.notifications || []).length > 0 ? (
+                      (dashboardData?.notifications || []).map((notification: any, i: number) => (
+                        <div key={notification.id} className="relative pl-10 group">
+                           {/* Timeline line */}
+                           {i !== (dashboardData?.notifications || []).length - 1 && (
+                             <div className="absolute left-[11px] top-8 bottom-[-32px] w-[2px] bg-white/5 group-hover:bg-primary/20 transition-colors" />
+                           )}
+                           
+                           {/* Node */}
+                           <div className={`absolute left-0 top-1.5 w-6 h-6 rounded-full border-4 border-black z-10 transition-transform group-hover:scale-110 ${
+                             !notification.isRead ? 'bg-primary shadow-[0_0_12px_rgba(var(--primary),0.5)]' : 'bg-white/10'
+                           }`} />
+                           
+                           <div>
+                              <h4 className="font-bold text-sm text-white/90 mb-1 group-hover:text-primary transition-colors">{notification.title}</h4>
+                              <p className="text-xs text-white/40 leading-relaxed font-light mb-2">{notification.message}</p>
+                              <div className="flex items-center gap-2">
+                                 <div className="px-2 py-0.5 rounded-full bg-white/5 text-[9px] font-black uppercase tracking-tighter text-white/30">{notification.time}</div>
+                              </div>
+                           </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="py-12 text-center">
+                         <p className="text-white/20 text-sm italic">Synchronizing latest events...</p>
+                      </div>
+                    )}
+                 </div>
+
+                 <Button variant="ghost" className="w-full mt-10 rounded-2xl text-white/30 hover:text-white hover:bg-white/5 py-6">
+                    Analyze Full Stream
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                 </Button>
+              </div>
+            </section>
+
+            {/* Network Insight Card */}
+            <section>
+               <div className="flex items-center justify-between mb-6 px-2">
+                 <h2 className="text-xl font-bold tracking-tight text-white/80">Network Insights</h2>
+                 <Users className="w-4 h-4 text-white/20" />
+               </div>
+               
+               <div className="glass-deep rounded-[48px] p-8 border-white/5 shadow-2xl">
+                  <div className="space-y-6">
+                    {[
+                      { name: "Funke Akindele", role: "Actor", avatar: "FA", match: "98% Match" },
+                      { name: "Kemi Adetiba", role: "Director", avatar: "KA", match: "High Priority" },
+                      { name: "Jade Osiberu", role: "Producer", avatar: "JO", match: "New Connection" }
+                    ].map((connection, index) => (
+                      <div key={index} className="flex items-center gap-4 group cursor-pointer">
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-white/10 to-transparent flex items-center justify-center border border-white/5 group-hover:border-primary/50 transition-colors">
+                          <span className="text-lg font-black text-white/80">{connection.avatar}</span>
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-bold text-base text-white group-hover:text-primary transition-colors leading-none mb-1">{connection.name}</p>
+                          <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold">{connection.role}</p>
+                        </div>
+                        <div className="text-right">
+                           <div className="px-2 py-1 rounded-lg bg-primary/10 text-[9px] font-black text-primary uppercase tracking-tighter">{connection.match}</div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-                <ResponsiveButton variant="outline" size="sm" className="w-full">
-                  View All Connections
-                </ResponsiveButton>
-              </CardContent>
-            </Card>
-          </motion.div>
+                  
+                  <Button className="w-full mt-10 rounded-3xl h-14 bg-white text-black hover:bg-white/90 font-bold shadow-xl">
+                    Expand Industry Network
+                  </Button>
+               </div>
+            </section>
+          </div>
         </div>
       </ResponsiveSection>
     </motion.div>
   );
 }
+

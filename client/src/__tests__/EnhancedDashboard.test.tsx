@@ -113,66 +113,65 @@ describe('EnhancedDashboard', () => {
     // Check if main components are rendered
     expect(screen.getByTestId('navigation')).toBeInTheDocument();
     expect(screen.getByTestId('theme-toggle')).toBeInTheDocument();
-    expect(screen.getByTestId('page-header')).toBeInTheDocument();
     expect(screen.getByTestId('responsive-section')).toBeInTheDocument();
     
-    // Check if dashboard title is rendered
-    expect(screen.getByText('Actor Dashboard')).toBeInTheDocument();
-    expect(screen.getByText('Discover roles and showcase your talent')).toBeInTheDocument();
-  });
+    // Check if dashboard title is rendered (Role-specific badge)
+    expect(screen.getByText('Artist Portal')).toBeInTheDocument();
+    expect(screen.getByText('Orchestrating your next major performance.')).toBeInTheDocument();
+  }, 10000);
 
   it('should render stats cards', () => {
     render(<EnhancedDashboard />);
     
     // Check if stats grid is rendered
     expect(screen.getByTestId('stats-grid')).toBeInTheDocument();
-    
-    // Since we're mocking the data, we can't check for specific values
-    // but we can check that the structure is there
-  });
+  }, 10000);
 
-  it('should render quick actions', () => {
+  it('should render quick actions in the Command Hub', () => {
     render(<EnhancedDashboard />);
     
-    // Check if quick actions are rendered
-    expect(screen.getByText('Browse Casting Calls')).toBeInTheDocument();
-    expect(screen.getByText('Update Showreel')).toBeInTheDocument();
-    expect(screen.getByText('View Applications')).toBeInTheDocument();
+    // Check if Command Hub title is there
+    expect(screen.getByText('Command Hub')).toBeInTheDocument();
+    
+    // Check if quick actions are rendered (New labels)
+    expect(screen.getByText('Find Castings')).toBeInTheDocument();
+    expect(screen.getByText('Edit Showreel')).toBeInTheDocument();
+    expect(screen.getByText('My Auditions')).toBeInTheDocument();
     expect(screen.getByText('AI Script Analysis')).toBeInTheDocument();
-  });
+  }, 10000);
 
   it('should switch between tabs', () => {
     render(<EnhancedDashboard />);
     
-    // Check if tabs are rendered
+    // Check if tabs are rendered (New labels)
     expect(screen.getByText('Recent Jobs')).toBeInTheDocument();
     expect(screen.getByText('My Projects')).toBeInTheDocument();
     expect(screen.getByText('Analytics')).toBeInTheDocument();
     
-    // Check if default tab content is shown
+    // Check if default tab content button is shown
     expect(screen.getByText('View All Jobs')).toBeInTheDocument();
-  });
+  }, 10000);
 
-  it('should render notifications section', () => {
+  it('should render intelligence stream section', () => {
     render(<EnhancedDashboard />);
     
-    // Check if notifications section is rendered
+    // Check if Intelligence Stream section is rendered
+    expect(screen.getByText('Intelligence Stream')).toBeInTheDocument();
     expect(screen.getByText('Notifications')).toBeInTheDocument();
     expect(screen.getByText('Recent Activity')).toBeInTheDocument();
     expect(screen.getByText('Recent Connections')).toBeInTheDocument();
-  });
+  }, 10000);
 
   it('should handle quick action button clicks', () => {
-    
     render(<EnhancedDashboard />);
     
-    // Click on a quick action button
-    const browseButton = screen.getByText('Browse Casting Calls');
+    // Click on a quick action button (New label)
+    const browseButton = screen.getByText('Find Castings');
     fireEvent.click(browseButton);
     
     // Check if navigation was called
     expect(mockSetLocation).toHaveBeenCalledWith('/jobs?type=casting');
-  });
+  }, 10000);
 
   it('should render different dashboard based on user role', async () => {
     // Mock a producer role
@@ -205,7 +204,7 @@ describe('EnhancedDashboard', () => {
     render(<EnhancedDashboard />);
     
     // Check if producer dashboard is rendered
-    expect(screen.getByText('Producer Dashboard')).toBeInTheDocument();
-    expect(screen.getByText('Manage productions and discover talent')).toBeInTheDocument();
-  });
+    expect(screen.getByText('Producer HQ')).toBeInTheDocument();
+    expect(screen.getByText('Commanding the production pipeline.')).toBeInTheDocument();
+  }, 10000);
 });

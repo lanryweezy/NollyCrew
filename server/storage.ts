@@ -616,7 +616,7 @@ export class MemStorage implements IStorage {
   }
 
   async createUser(user: Omit<InsertUser, 'password'> & { passwordHash: string }): Promise<User> {
-    const id = Math.random().toString(36).substring(2, 11);
+    const id = crypto.randomUUID();
     const u = user as any;
     const newUser: User = {
       id,
@@ -650,7 +650,7 @@ export class MemStorage implements IStorage {
   }
 
   async createUserRole(role: InsertUserRole): Promise<UserRole> {
-    const id = Math.random().toString(36).substring(2, 11);
+    const id = crypto.randomUUID();
     const r = role as any;
     const newRole: UserRole = {
       id,
@@ -697,7 +697,7 @@ export class MemStorage implements IStorage {
   }
 
   async createProject(project: InsertProject): Promise<Project> {
-    const id = Math.random().toString(36).substring(2, 11);
+    const id = crypto.randomUUID();
     const p = project as any;
     const newProject: Project = {
       id,
@@ -744,7 +744,7 @@ export class MemStorage implements IStorage {
   }
 
   async createProjectMember(member: InsertProjectMember): Promise<ProjectMember> {
-    const id = Math.random().toString(36).substring(2, 11);
+    const id = crypto.randomUUID();
     const m = member as any;
     const newMember: ProjectMember = {
       id,
@@ -787,7 +787,7 @@ export class MemStorage implements IStorage {
   }
 
   async createJob(job: InsertJob): Promise<Job> {
-    const id = Math.random().toString(36).substring(2, 11);
+    const id = crypto.randomUUID();
     const j = job as any;
     const newJob: Job = {
       id,
@@ -840,7 +840,7 @@ export class MemStorage implements IStorage {
   }
 
   async createJobApplication(application: InsertJobApplication): Promise<JobApplication> {
-    const id = Math.random().toString(36).substring(2, 11);
+    const id = crypto.randomUUID();
     const a = application as any;
     const newApp: JobApplication = {
       id,
@@ -875,7 +875,7 @@ export class MemStorage implements IStorage {
   }
 
   async createMessage(message: InsertMessage): Promise<Message> {
-    const id = Math.random().toString(36).substring(2, 11);
+    const id = crypto.randomUUID();
     const m = message as any;
     const newMessage: Message = {
       id,
@@ -904,7 +904,7 @@ export class MemStorage implements IStorage {
   }
 
   async createReview(review: InsertReview): Promise<Review> {
-    const id = Math.random().toString(36).substring(2, 11);
+    const id = crypto.randomUUID();
     const r = review as any;
     const newReview: Review = {
       id,
@@ -931,7 +931,7 @@ export class MemStorage implements IStorage {
   }
 
   async createAuditLog(log: InsertAuditLog): Promise<AuditLog> {
-    const id = Math.random().toString(36).substring(2, 11);
+    const id = crypto.randomUUID();
     const l = log as any;
     const newLog: AuditLog = {
       id,
@@ -958,7 +958,7 @@ export class MemStorage implements IStorage {
   }
 
   async createSubscriptionPlan(plan: InsertSubscriptionPlan): Promise<SubscriptionPlan> {
-    const id = Math.random().toString(36).substring(2, 11);
+    const id = crypto.randomUUID();
     const p = plan as any;
     const newPlan: SubscriptionPlan = {
       id,
@@ -983,7 +983,7 @@ export class MemStorage implements IStorage {
   }
 
   async createSubscription(subscription: InsertSubscription): Promise<Subscription> {
-    const id = Math.random().toString(36).substring(2, 11);
+    const id = crypto.randomUUID();
     const s = subscription as any;
     const newSub: Subscription = {
       id,
@@ -1018,7 +1018,7 @@ export class MemStorage implements IStorage {
   }
 
   async createApiKey(apiKey: InsertApiKey): Promise<ApiKey> {
-    const id = Math.random().toString(36).substring(2, 11);
+    const id = crypto.randomUUID();
     const k = apiKey as any;
     const newKey: ApiKey = {
       id,
@@ -1049,7 +1049,7 @@ export class MemStorage implements IStorage {
   }
 
   async createEscrowTransaction(transaction: InsertEscrowTransaction): Promise<EscrowTransaction> {
-    const id = Math.random().toString(36).substring(2, 11);
+    const id = crypto.randomUUID();
     const t = transaction as any;
     const newTransaction: EscrowTransaction = {
       id,
@@ -1084,7 +1084,7 @@ export class MemStorage implements IStorage {
   }
 
   async createKycVerification(verification: InsertKycVerification): Promise<KycVerification> {
-    const id = Math.random().toString(36).substring(2, 11);
+    const id = crypto.randomUUID();
     const v = verification as any;
     const newVerification: KycVerification = {
       id,
@@ -1117,7 +1117,7 @@ export class MemStorage implements IStorage {
   }
 
   async createDPR(report: InsertDailyProgressReport): Promise<DailyProgressReport> {
-    const id = Math.random().toString(36).substring(2, 11);
+    const id = crypto.randomUUID();
     const r = report as any;
     const newReport: DailyProgressReport = {
       id,
@@ -1149,7 +1149,7 @@ export class MemStorage implements IStorage {
   }
 
   async createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket> {
-    const id = Math.random().toString(36).substring(2, 11);
+    const id = crypto.randomUUID();
     const t = ticket as any;
     const newTicket: SupportTicket = {
       id,
@@ -1183,7 +1183,7 @@ export class MemStorage implements IStorage {
   }
 
   async createReferral(referral: InsertReferral): Promise<Referral> {
-    const id = Math.random().toString(36).substring(2, 11);
+    const id = crypto.randomUUID();
     const r = referral as any;
     const newReferral: Referral = {
       id,
