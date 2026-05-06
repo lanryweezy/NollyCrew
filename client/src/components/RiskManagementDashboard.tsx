@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -85,15 +85,22 @@ export default function RiskManagementDashboard({
   };
 
   // Filter risks based on search and filters
-  const filteredRisks = risks.filter(risk => {
-    const matchesSearch = risk.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         risk.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesCategory = filterCategory === "all" || risk.category === filterCategory;
-    const matchesStatus = filterStatus === "all" || risk.status === filterStatus;
-    
-    return matchesSearch && matchesCategory && matchesStatus;
-  });
+  // Optimization: Memoize the filtered risks list to prevent O(N) recalculation
+  // on every render, improving performance when users interact with unrelated UI elements (like editing a risk form).
+  // Also lifted `searchTerm.toLowerCase()` out of the loop to prevent repeated string allocations.
+  // Impact: Eliminates redundant array traversals and string allocations.
+  const filteredRisks = useMemo(() => {
+    const term = searchTerm.toLowerCase();
+    return risks.filter(risk => {
+      const matchesSearch = risk.title.toLowerCase().includes(term) ||
+                           risk.description.toLowerCase().includes(term);
+
+      const matchesCategory = filterCategory === "all" || risk.category === filterCategory;
+      const matchesStatus = filterStatus === "all" || risk.status === filterStatus;
+
+      return matchesSearch && matchesCategory && matchesStatus;
+    });
+  }, [risks, searchTerm, filterCategory, filterStatus]);
 
   // Handle edit risk
   const handleEditRisk = (risk: Risk) => {
