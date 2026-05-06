@@ -1,3 +1,4 @@
+process.env.JWT_SECRET = "test-secret";
 import { beforeEach, afterEach, vi } from 'vitest';
 import { db } from '../db';
 
