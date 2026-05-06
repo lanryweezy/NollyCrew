@@ -149,6 +149,7 @@ export default function ProfileCard({
           size="icon"
           onClick={onViewProfile}
           data-testid={`button-view-${id}`}
+          aria-label="View profile"
         >
           <Eye className="w-4 h-4" />
         </Button>

@@ -33,9 +33,6 @@ export async function analyzeAuditionVideo(videoUri: string, mimeType: string): 
     }`;
 
     // Mocking the generative call for the sake of the API
-    // const result = await model.generateContent([prompt, { fileData: { fileUri: videoUri, mimeType } }]);
-    // return JSON.parse(result.response.text());
-
     return {
       primaryEmotion: "Intensity",
       emotionalArc: ["Calm", "Building Frustration", "Explosive Anger"],
