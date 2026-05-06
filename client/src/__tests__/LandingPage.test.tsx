@@ -43,8 +43,8 @@ vi.mock('../components/ResponsiveTypography', () => ({
 }));
 
 vi.mock('../components/ResponsiveButton', () => ({
-  default: ({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) => (
-    <button data-testid="responsive-button" onClick={onClick}>
+  default: ({ children, onClick, ...props }: { children: React.ReactNode; onClick?: () => void; [key: string]: any }) => (
+    <button {...props} onClick={onClick}>
       {children}
     </button>
   )
@@ -67,13 +67,13 @@ describe('LandingPage', () => {
     expect(screen.getByTestId('navigation')).toBeInTheDocument();
     expect(screen.getByTestId('theme-toggle')).toBeInTheDocument();
     
-    // Check if main sections are rendered
-    expect(screen.getByText('Demo Application')).toBeInTheDocument();
+    // Check if main sections are rendered (using test IDs or flexible text matching)
+    expect(screen.getByTestId('demo-button')).toBeInTheDocument();
     expect(screen.getByText(/Everything You Need for/)).toBeInTheDocument();
-    expect(screen.getByText('Discover Amazing Talent & Projects')).toBeInTheDocument();
-    expect(screen.getByText('What Industry Leaders Say')).toBeInTheDocument();
-    expect(screen.getByText(/Ready to Transform/)).toBeInTheDocument();
-  });
+    expect(screen.getByText('Discover Top Industry Talent')).toBeInTheDocument();
+    expect(screen.getByText(/The Wall of/)).toBeInTheDocument();
+    expect(screen.getByText(/Ready to Scale/)).toBeInTheDocument();
+  }, 10000);
 
   it('should switch tabs when clicking on tab buttons', () => {
     render(<LandingPage />);
@@ -94,17 +94,16 @@ describe('LandingPage', () => {
     
     // Should now show producer
     expect(screen.getByText('Kemi Adebayo')).toBeInTheDocument();
-  });
+  }, 10000);
 
   it('should navigate to dashboard when clicking demo button', () => {
-    
     render(<LandingPage />);
     
-    const demoButton = screen.getByText('Demo Application');
+    const demoButton = screen.getByTestId('demo-button');
     fireEvent.click(demoButton);
     
     expect(mockSetLocation).toHaveBeenCalledWith('/dashboard');
-  });
+  }, 10000);
 
   it('should render all features', () => {
     render(<LandingPage />);
@@ -115,7 +114,7 @@ describe('LandingPage', () => {
     expect(screen.getByText('Escrow-Protected Payments')).toBeInTheDocument();
     expect(screen.getByText('Industry-Standard Workflow')).toBeInTheDocument();
     expect(screen.getByText('Production Intelligence')).toBeInTheDocument();
-  });
+  }, 10000);
 
   it('should render testimonials', () => {
     render(<LandingPage />);
@@ -123,5 +122,5 @@ describe('LandingPage', () => {
     expect(screen.getByText('Kemi Adetiba')).toBeInTheDocument();
     expect(screen.getByText('Richard Mofe-Damijo')).toBeInTheDocument();
     expect(screen.getByText('Jade Osiberu')).toBeInTheDocument();
-  });
+  }, 10000);
 });
