@@ -1,8 +1,0 @@
-{"timestamp":"2026-05-01T05:30:14.876Z","level":"info","message":"Using MemStorage (In-memory storage)"}
-{"timestamp":"2026-05-01T23:20:55.858Z","level":"info","message":"Using MemStorage (In-memory storage)"}
-{"timestamp":"2026-05-01T23:21:00.557Z","level":"info","message":"WebSocket server initialized"}
-{"timestamp":"2026-05-01T23:50:12.400Z","level":"info","message":"Using MemStorage (In-memory storage)"}
-{"timestamp":"2026-05-01T23:50:18.105Z","level":"info","message":"WebSocket server initialized"}
-{"timestamp":"2026-05-01T23:58:49.598Z","level":"info","message":"Using MemStorage (In-memory storage)"}
-{"timestamp":"2026-05-01T23:58:54.171Z","level":"info","message":"WebSocket server initialized"}
-{"timestamp":"2026-05-01T23:58:54.245Z","level":"info","message":"Server started on port 5000"}
