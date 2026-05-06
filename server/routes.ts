@@ -63,7 +63,10 @@ import { HealthChecker } from './utils/monitoring.js';
 import { exportToCSV } from './utils/export.js';
 
 // JWT secrets
-const JWT_SECRET = process.env.JWT_SECRET || "your-super-secret-jwt-key";
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable is required");
+}
 const REFRESH_SECRET = process.env.REFRESH_SECRET || (JWT_SECRET + ":refresh");
 const EMAIL_TOKEN_SECRET = process.env.EMAIL_TOKEN_SECRET || (JWT_SECRET + ":email");
 const RESET_TOKEN_SECRET = process.env.RESET_TOKEN_SECRET || (JWT_SECRET + ":reset");
