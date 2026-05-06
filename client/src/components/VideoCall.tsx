@@ -165,6 +165,7 @@ export default function VideoCall({ targetUserId, onClose, isIncoming, incomingO
               size="icon" 
               className="rounded-full w-12 h-12"
               onClick={toggleMute}
+              aria-label={isMuted ? "Unmute" : "Mute"}
             >
               {isMuted ? <MicOff /> : <Mic />}
             </Button>
@@ -174,6 +175,7 @@ export default function VideoCall({ targetUserId, onClose, isIncoming, incomingO
               size="icon" 
               className="rounded-full w-12 h-12"
               onClick={toggleVideo}
+              aria-label={isVideoOff ? "Turn on video" : "Turn off video"}
             >
               {isVideoOff ? <VideoOff /> : <Video />}
             </Button>
@@ -183,6 +185,7 @@ export default function VideoCall({ targetUserId, onClose, isIncoming, incomingO
               size="icon" 
               className="rounded-full w-14 h-14"
               onClick={endCall}
+              aria-label="End call"
             >
               <PhoneOff className="fill-current" />
             </Button>
@@ -191,6 +194,7 @@ export default function VideoCall({ targetUserId, onClose, isIncoming, incomingO
               variant="secondary" 
               size="icon" 
               className="rounded-full w-12 h-12"
+              aria-label="Maximize video"
             >
               <Maximize2 />
             </Button>

@@ -107,7 +107,7 @@ export default function VirtualDirectorChat() {
           </div>
           <div className="flex gap-2">
             <Badge variant="outline" className="bg-background/50 backdrop-blur-sm">Nollywood Expert</Badge>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
+            <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="More options">
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </div>
@@ -200,7 +200,7 @@ export default function VirtualDirectorChat() {
                 className="pr-10 h-11 rounded-xl focus-visible:ring-primary/20 transition-all border-primary/10 shadow-inner"
               />
               <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary">
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" aria-label="Use microphone">
                   <Mic className="h-4 w-4" />
                 </Button>
               </div>
