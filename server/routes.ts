@@ -16,7 +16,7 @@ import {
   calculateServiceFee 
 } from "./utils/paystack.js";
 import crypto from "node:crypto";
-import { insertUserSchema, insertUserRoleSchema, insertJobSchema, insertProjectSchema, insertJobApplicationSchema, insertWaitlistSchema, insertMessageSchema, insertReviewSchema, insertSupportTicketSchema } from "../shared/schema.js";
+import { insertUserSchema, insertUserRoleSchema, insertJobSchema, insertProjectSchema, insertJobApplicationSchema, insertWaitlistSchema, insertMessageSchema, insertReviewSchema, insertSupportTicketSchema, insertDailyProgressReportSchema, insertReferralSchema } from "../shared/schema.js";
 import { z } from "zod";
 import paystackapi from 'paystack-api';
 // AWS SDK imports - conditional based on environment
@@ -1617,14 +1617,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(403).json({ error: "Insufficient permissions to create DPR" });
     }
 
-    const dpr = await storage.createDPR({
-      ...req.body,
-      projectId,
-      reportDate: new Date(req.body.reportDate),
-    });
+    try {
+      // SENTINEL SECURITY FIX: Prevent mass assignment by validating inputs
+      // Use .safeParse() and explicit type extraction where possible to avoid `as any` issues
+      const validatedData = insertDailyProgressReportSchema.omit({ projectId: true } as any).parse(req.body);
 
-    await logAction(req, { action: 'CREATE', entityType: 'daily_progress_reports', entityId: dpr.id });
-    res.status(201).json(dpr);
+      const dpr = await storage.createDPR({
+        ...validatedData,
+        projectId,
+        reportDate: new Date(validatedData.reportDate),
+      });
+
+      await logAction(req, { action: 'CREATE', entityType: 'daily_progress_reports', entityId: dpr.id });
+      res.status(201).json(dpr);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: 'Invalid input data', details: error.errors });
+      }
+      logger.error('Create DPR error', { error: (error as Error).message });
+      res.status(500).json({ error: 'Internal server error' });
+    }
     });
 
     // Support Tickets / Dispute Resolution (Task 66, 77)
@@ -1638,13 +1650,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
 
     app.post("/api/support/tickets", authenticateToken, async (req: any, res) => {
-    const ticket = await storage.createSupportTicket({
-      ...req.body,
-      userId: req.user.id,
-    });
+    try {
+      // SENTINEL SECURITY FIX: Prevent mass assignment by validating inputs
+      const validatedData = insertSupportTicketSchema.omit({ userId: true, status: true } as any).parse(req.body);
 
-    await logAction(req, { action: 'CREATE', entityType: 'support_tickets', entityId: ticket.id });
-    res.status(201).json(ticket);
+      const ticket = await storage.createSupportTicket({
+        ...validatedData,
+        userId: req.user.id,
+      });
+
+      await logAction(req, { action: 'CREATE', entityType: 'support_tickets', entityId: ticket.id });
+      res.status(201).json(ticket);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: 'Invalid input data', details: error.errors });
+      }
+      logger.error('Create support ticket error', { error: (error as Error).message });
+      res.status(500).json({ error: 'Internal server error' });
+    }
     });
 
     app.patch("/api/support/tickets/:id", authenticateToken, async (req: any, res) => {
@@ -1678,15 +1701,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
 
     app.post("/api/referrals", authenticateToken, async (req: any, res) => {
-    const referral = await storage.createReferral({
-      referrerId: req.user.id,
-      referredEmail: req.body.referredEmail,
-      status: 'pending',
-      rewardStatus: 'none'
-    });
+    try {
+      // SENTINEL SECURITY FIX: Prevent mass assignment by validating inputs
+      const validatedData = insertReferralSchema.pick({ referredEmail: true } as any).parse(req.body);
 
-    await logAction(req, { action: 'CREATE', entityType: 'referrals', entityId: referral.id });
-    res.status(201).json(referral);
+      const referral = await storage.createReferral({
+        referrerId: req.user.id,
+        referredEmail: validatedData.referredEmail,
+        status: 'pending',
+        rewardStatus: 'none'
+      });
+
+      await logAction(req, { action: 'CREATE', entityType: 'referrals', entityId: referral.id });
+      res.status(201).json(referral);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: 'Invalid input data', details: error.errors });
+      }
+      logger.error('Create referral error', { error: (error as Error).message });
+      res.status(500).json({ error: 'Internal server error' });
+    }
     });
 
     return createServer(app);
