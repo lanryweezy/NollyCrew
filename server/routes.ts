@@ -466,8 +466,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/profile', authenticateToken, async (req: any, res) => {
     try {
       // SENTINEL SECURITY FIX: Prevent mass assignment by validating inputs
-      // Omit sensitive fields like isVerified and passwordHash from updates
-      const updates = insertUserSchema.partial().omit({ isVerified: true, passwordHash: true } as any).parse(req.body);
+      // Omit sensitive fields like isVerified, passwordHash, password, and email from updates
+      const updates = insertUserSchema.partial().omit({ isVerified: true, passwordHash: true, password: true, email: true } as any).parse(req.body);
       const updatedUser = await storage.updateUser(req.user.id, updates);
       if (!updatedUser) {
         return res.status(404).json({ error: 'User not found' });
