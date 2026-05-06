@@ -1658,8 +1658,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(403).json({ error: "Forbidden: You do not have permission to modify this ticket" });
     }
 
-    let updates = req.body;
-    if (!isAdmin) {
+    let updates;
+    if (isAdmin) {
+      // Admin users still need input validation to prevent mass assignment/injection
+      updates = insertSupportTicketSchema.partial().parse(req.body);
+    } else {
       // Prevent non-admins from changing the ticket owner or escalating priority
       updates = insertSupportTicketSchema.partial().omit({ userId: true, priority: true } as any).parse(req.body);
     }
