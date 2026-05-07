@@ -256,23 +256,13 @@ export class DbStorage implements IStorage {
     const { type, location, isActive, limit } = filters || {};
     // @ts-ignore
     const rows: Job[] = await db.query.jobs.findMany({
-      where: (j: any, { and, eq, ilike }: any) => and(
+      where: (j: any, { and, eq }: any) => and(
         type ? eq(j.type, type) : undefined,
         typeof isActive === 'boolean' ? eq(j.isActive, isActive) : undefined,
-        location ? ilike ? ilike(j.location, `%${location}%`) : undefined : undefined,
+        location ? ilike(j.location, `%${location}%`) : undefined,
       ),
       limit: limit && Number.isFinite(limit) ? Math.max(1, Math.min(100, limit)) : undefined,
     });
-    if (location && (!rows.length || typeof rows[0] === 'undefined')) {
-      // @ts-ignore
-      const all: Job[] = await db.query.jobs.findMany({
-        where: (j: any, { and, eq }: any) => and(
-          type ? eq(j.type, type) : undefined,
-          typeof isActive === 'boolean' ? eq(j.isActive, isActive) : undefined,
-        ),
-      });
-      return all.filter(j => j.location?.toLowerCase().includes(location.toLowerCase())).slice(0, limit ?? 50);
-    }
     return rows;
   }
 
