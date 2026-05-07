@@ -2,7 +2,7 @@ import { Redis } from 'ioredis';
 import { logger } from './logger.js';
 
 const redisUrl = process.env.REDIS_URL;
-const redisHost = process.env.REDIS_HOST || 'localhost';
+const redisHost = process.env.REDIS_HOST;
 const redisPort = parseInt(process.env.REDIS_PORT || '6379', 10);
 const redisPassword = process.env.REDIS_PASSWORD;
 
@@ -12,10 +12,11 @@ let isRedisAvailable = false;
 // In-memory fallback
 const memoryCache = new Map<string, { value: any; expires: number }>();
 
-if (redisUrl || redisHost) {
+if (redisUrl || (redisHost && redisHost !== '')) {
+  const finalHost = redisHost || 'localhost';
   try {
     const config = redisUrl || {
-      host: redisHost,
+      host: finalHost,
       port: redisPort,
       password: redisPassword,
       retryStrategy: (times: number) => {

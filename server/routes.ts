@@ -63,7 +63,10 @@ import { HealthChecker } from './utils/monitoring.js';
 import { exportToCSV } from './utils/export.js';
 
 // JWT secrets
-const JWT_SECRET = process.env.JWT_SECRET || "your-super-secret-jwt-key";
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable is required");
+}
 const REFRESH_SECRET = process.env.REFRESH_SECRET || (JWT_SECRET + ":refresh");
 const EMAIL_TOKEN_SECRET = process.env.EMAIL_TOKEN_SECRET || (JWT_SECRET + ":email");
 const RESET_TOKEN_SECRET = process.env.RESET_TOKEN_SECRET || (JWT_SECRET + ":reset");
@@ -1658,8 +1661,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(403).json({ error: "Forbidden: You do not have permission to modify this ticket" });
     }
 
-    let updates = req.body;
-    if (!isAdmin) {
+    let updates;
+    if (isAdmin) {
+      // Admin users still need input validation to prevent mass assignment/injection
+      updates = insertSupportTicketSchema.partial().parse(req.body);
+    } else {
       // Prevent non-admins from changing the ticket owner or escalating priority
       updates = insertSupportTicketSchema.partial().omit({ userId: true, priority: true } as any).parse(req.body);
     }

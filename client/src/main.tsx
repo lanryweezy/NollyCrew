@@ -9,8 +9,14 @@ if (!PUBLISHABLE_KEY) {
   console.warn("Clerk Publishable Key is missing. Authentication features will be disabled.");
 }
 
-createRoot(document.getElementById("root")!).render(
-  <ClerkProvider publishableKey={PUBLISHABLE_KEY || "pk_test_placeholder"} afterSignOutUrl="/">
-    <App />
-  </ClerkProvider>
-);
+const root = createRoot(document.getElementById("root")!);
+
+if (PUBLISHABLE_KEY) {
+  root.render(
+    <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
+      <App />
+    </ClerkProvider>
+  );
+} else {
+  root.render(<App />);
+}

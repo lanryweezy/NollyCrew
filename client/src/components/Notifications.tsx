@@ -160,6 +160,7 @@ export default function Notifications() {
                         size="icon" 
                         className="h-5 w-5 ml-2"
                         onClick={() => clearNotification(notification.id)}
+                        aria-label="Clear notification"
                       >
                         <X className="w-3 h-3" />
                       </Button>

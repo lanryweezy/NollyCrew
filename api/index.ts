@@ -9,6 +9,11 @@ import { storage } from "../dist/server/server/storage.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// On Vercel, the API is in /api, so the root is ..
+const rootPath = path.resolve(__dirname, "..");
+const distPath = path.join(rootPath, "dist", "public");
+const publicPath = path.join(rootPath, "public");
+
 const app = express();
 app.use(cookieParser());
 app.use(express.json());
@@ -17,35 +22,59 @@ app.use(express.urlencoded({ extended: false }));
 // Initialize routes
 const serverPromise = registerRoutes(app);
 
-// Use absolute paths relative to process.cwd() for Vercel, fallback to __dirname
-const getPath = (relPath: string) => {
-  const cwdPath = path.resolve(process.cwd(), relPath);
-  return cwdPath;
-};
+// Debug endpoint to check file paths on Vercel
+app.get('/debug/paths', async (req, res) => {
+  const getDir = async (dir: string) => {
+    try {
+      return await fs.readdir(dir, { recursive: true });
+    } catch (e) {
+      return [`Error reading ${dir}: ${e}`];
+    }
+  };
+  
+  res.json({
+    cwd: process.cwd(),
+    dirname: __dirname,
+    rootPath,
+    distPath,
+    publicPath,
+    distFiles: await getDir(distPath),
+    publicFiles: await getDir(publicPath),
+    env: {
+      NODE_ENV: process.env.NODE_ENV,
+      VERCEL: process.env.VERCEL
+    }
+  });
+});
 
-const distPath = getPath('dist/public');
-const publicPath = getPath('public');
+// 1. Specialized asset serving with explicit MIME types
+app.get('/assets/:file', async (req, res) => {
+  const fileName = req.params.file;
+  const filePath = path.join(distPath, 'assets', fileName);
+  
+  try {
+    const content = await fs.readFile(filePath);
+    if (fileName.endsWith('.js')) res.setHeader('Content-Type', 'application/javascript');
+    else if (fileName.endsWith('.css')) res.setHeader('Content-Type', 'text/css');
+    res.send(content);
+  } catch (e) {
+    res.status(404).send('Asset not found');
+  }
+});
 
-// Serve static files from the build output directory first
-// We explicitly set the content-type for assets to prevent MIME errors
-app.use('/assets', express.static(path.join(distPath, 'assets'), {
-  maxAge: '1y',
-  immutable: true,
-  fallthrough: true
-}));
-
+// 2. Fallback static serving
 app.use(express.static(distPath, { fallthrough: true }));
 app.use(express.static(publicPath, { fallthrough: true }));
 
-app.get('*', async (req, res) => {
-  // If it's an API request that wasn't caught by registerRoutes
-  if (req.path.startsWith('/api')) {
-    return res.status(404).json({ error: 'API endpoint not found' });
+app.get("*", async (req, res) => {
+  // If it's an API request, it should have been handled by registerRoutes
+  if (req.path.startsWith("/api")) {
+    return res.status(404).json({ error: "API endpoint not found" });
   }
 
-  // Handle HTML serving with metadata injection
-  const indexPath = path.join(distPath, 'index.html');
-  const fallbackPath = path.join(publicPath, 'index.html');
+  // Final catch-all for HTML serving with metadata injection
+  const indexPath = path.join(distPath, "index.html");
+  const fallbackPath = path.join(publicPath, "index.html");
   
   let activePath = indexPath;
   try {
@@ -60,34 +89,38 @@ app.get('*', async (req, res) => {
   }
 
   try {
-    let html = await fs.readFile(activePath, 'utf-8');
+    let html = await fs.readFile(activePath, "utf-8");
     
     // Default metadata
-    let title = 'NollyCrew - All-in-One Nollywood Platform';
-    let description = 'Connect actors, crew, and producers in the Nollywood industry. AI-powered script breakdown, casting calls, and project management.';
-    let ogImage = 'https://nollycrew.com/og-image.png';
+    let title = "NollyCrew - All-in-One Nollywood Platform";
+    let description = "Connect actors, crew, and producers in the Nollywood industry. AI-powered script breakdown, casting calls, and project management.";
+    let ogImage = "https://nollycrew.com/og-image.png";
 
     // Dynamic metadata logic
-    if (req.path.startsWith('/talent/')) {
-      const userId = req.path.split('/')[2];
+    if (req.path.startsWith("/talent/")) {
+      const userId = req.path.split("/")[2];
       if (userId) {
-        const user = await storage.getUser(userId);
-        const roles = await storage.getUserRoles(userId);
-        if (user) {
-          const roleNames = roles.map(r => r.role).join(', ');
-          title = `${user.firstName} ${user.lastName} - ${roleNames} | NollyCrew`;
-          description = user.bio || `${user.firstName} is a ${roleNames} on NollyCrew. Check out their portfolio and credits.`;
-          if (user.avatar) ogImage = user.avatar;
-        }
+        try {
+          const user = await storage.getUser(userId);
+          const roles = await storage.getUserRoles(userId);
+          if (user) {
+            const roleNames = roles.map(r => r.role).join(", ");
+            title = `${user.firstName} ${user.lastName} - ${roleNames} | NollyCrew`;
+            description = user.bio || `${user.firstName} is a ${roleNames} on NollyCrew.`;
+            if (user.avatar) ogImage = user.avatar;
+          }
+        } catch (e) {}
       }
-    } else if (req.path.startsWith('/jobs/')) {
-      const jobId = req.path.split('/')[2];
+    } else if (req.path.startsWith("/jobs/")) {
+      const jobId = req.path.split("/")[2];
       if (jobId) {
-        const job = await storage.getJob(jobId);
-        if (job) {
-          title = `${job.title} - Job Opportunity | NollyCrew`;
-          description = `New ${job.type} job in ${job.location}: ${job.description.substring(0, 150)}...`;
-        }
+        try {
+          const job = await storage.getJob(jobId);
+          if (job) {
+            title = `${job.title} - Job Opportunity | NollyCrew`;
+            description = `New ${job.type} job in ${job.location}`;
+          }
+        } catch (e) {}
       }
     }
 
