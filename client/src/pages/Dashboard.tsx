@@ -124,7 +124,7 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-black film-grain">
+      <div className="min-h-screen bg-background film-grain">
         <div className="relative z-50">
           <Navigation
             isAuthenticated={true}
@@ -135,19 +135,19 @@ export default function Dashboard() {
         <ResponsiveSection padding="medium">
           <div className="space-y-12">
             <div className="space-y-4">
-               <Skeleton className="h-14 w-1/3 bg-white/5 rounded-2xl" />
-               <Skeleton className="h-6 w-1/4 bg-white/5 rounded-full" />
+               <Skeleton className="h-14 w-1/3 bg-muted rounded-2xl" />
+               <Skeleton className="h-6 w-1/4 bg-muted rounded-full" />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-              {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-40 w-full bg-white/5 rounded-[32px]" />)}
+              {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-40 w-full bg-muted rounded-[32px]" />)}
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               <div className="lg:col-span-8 space-y-8">
-                <Skeleton className="h-64 w-full bg-white/5 rounded-[40px]" />
-                <Skeleton className="h-96 w-full bg-white/5 rounded-[40px]" />
+                 <Skeleton className="h-[400px] w-full bg-muted rounded-[32px]" />
+                 <Skeleton className="h-[300px] w-full bg-muted rounded-[32px]" />
               </div>
               <div className="lg:col-span-4 space-y-8">
-                <Skeleton className="h-full w-full bg-white/5 rounded-[40px]" />
+                 <Skeleton className="h-[500px] w-full bg-muted rounded-[32px]" />
               </div>
             </div>
           </div>
@@ -161,7 +161,7 @@ export default function Dashboard() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="min-h-screen bg-black text-white film-grain overflow-x-hidden"
+      className="min-h-screen bg-background text-foreground film-grain overflow-x-hidden"
     >
       {/* Ambient Lighting */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
