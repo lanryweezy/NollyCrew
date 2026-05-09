@@ -5,3 +5,6 @@
 ## 2024-05-19 - Added ARIA labels to Utility Dashboard Icons
 **Learning:** Found multiple instances where utility icon-only buttons (like edit, delete, and navigation arrows) within dashboard components (e.g. `ResourceAllocation`, `RiskManagementDashboard`, `GanttChart`) were missing `aria-label`s. Because these lists of items map to similar buttons, it's crucial to provide context-aware labels (e.g., "Delete resource X") rather than generic ones.
 **Action:** When creating or reviewing lists or cards with action buttons in dashboard components, ensure all icon-only `Button size="icon"` elements have descriptive and context-aware `aria-label`s.
+## 2024-05-24 - Accessibility pattern: Dynamic Aria Labels
+**Learning:** Found a recurring pattern in VideoCall and VirtualDirectorChat where icon-only buttons toggle states (e.g. mic on/off, video on/off). It is not enough to just add a static label; the label must dynamically update to reflect the current actionable state (e.g., `aria-label={isMuted ? "Unmute" : "Mute"}`). This provides much clearer context to screen reader users than a static "Toggle Mute" label.
+**Action:** When adding `aria-label` to state-toggling icon buttons, use a ternary operator to make the label dynamically reflect the action that will happen when clicked, rather than a generic toggle description.

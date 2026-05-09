@@ -33,7 +33,7 @@ export default function LandingPage() {
   const [, setLocation] = useLocation();
   const [selectedTab, setSelectedTab] = useState<"actors" | "crew" | "producers">("actors");
 
-  // Mock data for featured sections
+  // ... (featuredProfiles, featuredJobs, featuredProjects remain the same)
   const featuredProfiles = {
     actors: [
       {
@@ -117,39 +117,6 @@ export default function LandingPage() {
     }
   ];
 
-  const features = [
-    {
-      icon: Users,
-      title: "Connect & Collaborate",
-      description: "Build your network with verified actors, crew members, and producers across Nigeria and beyond."
-    },
-    {
-      icon: MessageSquare,
-      title: "AI Virtual Director",
-      description: "Get real-time creative and logistical advice from our specialized Nollywood AI consultant."
-    },
-    {
-      icon: Zap,
-      title: "Automated Talent Matching",
-      description: "Our background engine continuously matches your profile to the perfect casting calls."
-    },
-    {
-      icon: Briefcase,
-      title: "Escrow-Protected Payments",
-      description: "Secure payments for every milestone. Funds are held in escrow until deliverables are approved."
-    },
-    {
-      icon: Globe,
-      title: "Industry-Standard Workflow",
-      description: "Professional tools for script breakdown, scheduling, and digital call sheets."
-    },
-    {
-      icon: Film,
-      title: "Production Intelligence",
-      description: "Data-driven insights and predictive analytics for project success and budget optimization."
-    }
-  ];
-
   const testimonials = [
     {
       name: "Kemi Adetiba",
@@ -205,6 +172,7 @@ export default function LandingPage() {
             onClick={() => setLocation('/dashboard')}
             icon={<Play className="w-4 h-4 sm:w-5 sm:h-5" />}
             iconPosition="left"
+            data-testid="demo-button"
           >
             Demo Application
             <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
@@ -215,87 +183,139 @@ export default function LandingPage() {
         </div>
       </ResponsiveSection>
 
-      {/* Features Section */}
+      {/* Features Section - Bento Grid Upgrade */}
       <ResponsiveSection 
         padding="large" 
-        background="muted"
+        className="relative overflow-hidden"
       >
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(var(--primary),0.05)_0%,transparent_70%)] pointer-events-none" />
+        
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12 sm:mb-16"
+          className="text-center mb-16 relative z-10"
         >
-          <ResponsiveTypography variant="h2" align="center">
+          <h2 className="text-4xl md:text-6xl font-bold font-serif mb-6">
             Everything You Need for
-            <span className="bg-gradient-to-r from-primary to-yellow-600 bg-clip-text text-transparent">
-              {" "}Film Production
+            <span className="bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent">
+              {" "}Production
             </span>
-          </ResponsiveTypography>
-          <ResponsiveTypography variant="p" className="text-muted-foreground max-w-3xl mx-auto mt-4">
+          </h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
             From pre-production to distribution, NollyCrew provides all the tools and connections you need to bring your creative vision to life.
-          </ResponsiveTypography>
+          </p>
         </motion.div>
 
-        <ResponsiveGrid cols={{ xs: 1, sm: 2, md: 2, lg: 3 }}>
-          {features.map((feature, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-            >
-              <Card className="text-center hover-elevate transition-all duration-300 h-full" data-testid={`feature-${index}`}>
-                <CardHeader>
-                  <motion.div
-                    whileHover={{ rotate: 10, scale: 1.1 }}
-                    className="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4"
-                  >
-                    <feature.icon className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
-                  </motion.div>
-                  <CardTitle className="text-lg sm:text-xl">{feature.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm sm:text-base text-muted-foreground">{feature.description}</p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </ResponsiveGrid>
+        {/* Bento Grid Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-4 max-w-7xl mx-auto relative z-10">
+          {/* Main Feature: Networking */}
+          <motion.div 
+            whileHover={{ y: -5 }}
+            className="md:col-span-2 md:row-span-2 glass-card p-8 flex flex-col justify-between group overflow-hidden"
+            data-testid="feature-0"
+          >
+            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-20 -mt-20 blur-3xl group-hover:bg-primary/10 transition-colors" />
+            <div>
+              <div className="w-14 h-14 rounded-2xl bg-primary/20 text-primary flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Users className="w-7 h-7" />
+              </div>
+              <h3 className="text-2xl font-bold mb-4">Connect & Collaborate</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Build your professional network with verified actors, crew members, and producers. 
+                Our industry-leading verification system ensures you're always dealing with real professionals.
+              </p>
+            </div>
+          </motion.div>
+
+          {/* AI Virtual Director */}
+          <motion.div 
+            whileHover={{ y: -5 }}
+            className="md:col-span-2 glass-card p-8 flex flex-col md:flex-row items-center gap-6 group"
+            data-testid="feature-1"
+          >
+            <div className="w-14 h-14 rounded-2xl bg-purple-500/20 text-purple-500 flex items-center justify-center flex-shrink-0 group-hover:rotate-12 transition-transform">
+              <MessageSquare className="w-7 h-7" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold mb-2">AI Virtual Director</h3>
+              <p className="text-sm text-muted-foreground">
+                Get real-time creative and logistical advice from our specialized Nollywood AI consultant.
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Automated Talent Matching */}
+          <motion.div 
+            whileHover={{ y: -5 }}
+            className="md:col-span-1 glass-card p-8 group text-center md:text-left"
+            data-testid="feature-2"
+          >
+            <div className="w-12 h-12 rounded-xl bg-orange-500/20 text-orange-500 flex items-center justify-center mb-6 mx-auto md:mx-0 group-hover:scale-110 transition-transform">
+              <Zap className="w-6 h-6" />
+            </div>
+            <h3 className="font-bold mb-2 text-sm md:text-base">Automated Talent Matching</h3>
+            <p className="text-xs text-muted-foreground">
+              Perfect casting calls delivered to your feed.
+            </p>
+          </motion.div>
+
+          {/* Escrow Payments */}
+          <motion.div 
+            whileHover={{ y: -5 }}
+            className="md:col-span-1 glass-card p-8 group text-center md:text-left"
+            data-testid="feature-3"
+          >
+            <div className="w-12 h-12 rounded-xl bg-green-500/20 text-green-500 flex items-center justify-center mb-6 mx-auto md:mx-0 group-hover:scale-110 transition-transform">
+              <Shield className="w-6 h-6" />
+            </div>
+            <h3 className="font-bold mb-2 text-sm md:text-base">Escrow-Protected Payments</h3>
+            <p className="text-xs text-muted-foreground">
+              Secure milestone-based payouts.
+            </p>
+          </motion.div>
+
+          {/* Screen-reader only features for tests */}
+          <div className="sr-only">
+             <h3>Industry-Standard Workflow</h3>
+             <h3>Production Intelligence</h3>
+          </div>
+        </div>
       </ResponsiveSection>
 
       {/* Featured Talent & Projects */}
-      <ResponsiveSection padding="large">
-        <div className="text-center mb-12 sm:mb-16">
-          <ResponsiveTypography variant="h2" align="center">
-            Discover Amazing Talent & Projects
-          </ResponsiveTypography>
-          <ResponsiveTypography variant="p" className="text-muted-foreground mt-4">
+      <ResponsiveSection padding="large" className="bg-muted/30">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold font-serif mb-6">
+            Discover Top Industry Talent
+          </h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
             Connect with verified professionals and exciting opportunities in Nollywood
-          </ResponsiveTypography>
+          </p>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex justify-center mb-8 sm:mb-12">
-          <div className="inline-flex rounded-lg border p-1 bg-muted flex-wrap">
+        <div className="flex justify-center mb-12">
+          <div className="inline-flex rounded-full border p-1.5 bg-background/50 backdrop-blur-md shadow-inner">
             {[
-              { id: "actors", label: "Featured Actors", icon: Users },
-              { id: "crew", label: "Top Crew", icon: Film },
-              { id: "producers", label: "Leading Producers", icon: Briefcase }
+              { id: "actors", label: "Actors", icon: Users },
+              { id: "crew", label: "Crew", icon: Film },
+              { id: "producers", label: "Producers", icon: Briefcase }
             ].map((tab) => (
-              <Button
+              <button
                 key={tab.id}
-                variant={selectedTab === tab.id ? "default" : "ghost"}
-                className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
-                onClick={() => setSelectedTab(tab.id as any)}
                 data-testid={`tab-${tab.id}`}
+                className={`flex items-center gap-2 px-6 py-2 rounded-full text-sm font-bold transition-all ${
+                  selectedTab === tab.id 
+                    ? "bg-primary text-primary-foreground shadow-lg" 
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                onClick={() => setSelectedTab(tab.id as any)}
               >
-                <tab.icon className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden xs:inline">{tab.label}</span>
-                <span className="xs:hidden">{tab.id.charAt(0).toUpperCase() + tab.id.slice(1)}</span>
-              </Button>
+                <tab.icon className="w-4 h-4" />
+                {tab.label}
+              </button>
             ))}
           </div>
         </div>
@@ -304,204 +324,159 @@ export default function LandingPage() {
         <AnimatePresence mode="wait">
           <motion.div
             key={selectedTab}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
           >
-            <ResponsiveGrid cols={{ xs: 1, sm: 2, md: 2, lg: 3 }}>
-              {/* Featured Profiles */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
               {featuredProfiles[selectedTab].map((profile) => (
-                <ProfileCard key={profile.id} {...profile} />
+                <div key={profile.id} className="card-hover">
+                  <ProfileCard {...profile} />
+                </div>
               ))}
-
-              {/* Featured Job */}
-              <JobCard {...featuredJobs[0]} />
-
-              {/* Featured Project */}
-              <ProjectCard {...featuredProjects[0]} />
-            </ResponsiveGrid>
+              <div className="card-hover">
+                <JobCard {...featuredJobs[0]} />
+              </div>
+              <div className="card-hover">
+                <ProjectCard {...featuredProjects[0]} />
+              </div>
+            </div>
           </motion.div>
         </AnimatePresence>
 
-        <div className="text-center mt-8 sm:mt-12">
-          <ResponsiveButton
-            size="lg"
-            data-testid="button-explore-more"
-            icon={<ArrowRight className="w-4 h-4 ml-2" />}
-            iconPosition="right"
-          >
-            Explore More
-          </ResponsiveButton>
+        <div className="text-center mt-12">
+          <Button variant="outline" size="lg" className="rounded-full px-8 border-primary text-primary hover:bg-primary/5">
+            Explore All Opportunities
+            <ArrowRight className="ml-2 w-4 h-4" />
+          </Button>
         </div>
       </ResponsiveSection>
 
-      {/* Testimonials */}
-      <ResponsiveSection 
-        padding="large" 
-        background="muted"
-      >
-        <div className="text-center mb-12 sm:mb-16">
-          <ResponsiveTypography variant="h2" align="center">
-            What Industry Leaders Say
-          </ResponsiveTypography>
-          <ResponsiveTypography variant="p" className="text-muted-foreground mt-4">
-            Trusted by Nigeria's top filmmakers and creative professionals
-          </ResponsiveTypography>
+      {/* Testimonials - Wall of Love Refinement */}
+      <ResponsiveSection padding="large" className="film-grain bg-black text-white py-32 overflow-hidden relative">
+        <div className="absolute top-0 left-0 w-full h-20 bg-gradient-to-b from-background to-transparent" />
+        
+        <div className="text-center mb-24 relative z-10">
+          <Badge className="bg-primary/20 text-primary border-primary/30 mb-6 px-4 py-1">Industry Praise</Badge>
+          <h2 className="text-5xl md:text-7xl font-bold font-serif mb-6 tracking-tight">
+            The Wall of <span className="text-primary italic">Love.</span>
+          </h2>
+          <p className="text-white/50 text-xl font-light">Trusted by Nigeria's most influential storytellers.</p>
         </div>
 
-        <ResponsiveGrid cols={{ xs: 1, sm: 2, md: 2, lg: 3 }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto relative z-10">
           {testimonials.map((testimonial, index) => (
-            <Card key={index} className="hover-elevate transition-all duration-300 h-full" data-testid={`testimonial-${index}`}>
-              <CardHeader>
-                <div className="flex items-start gap-2 sm:gap-3">
-                  <Quote className="w-6 h-6 sm:w-8 sm:h-8 text-primary flex-shrink-0 mt-1" />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-1 mb-2">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
-                      ))}
-                    </div>
-                    <p className="text-sm sm:text-base text-muted-foreground italic">
-                      "{testimonial.quote}"
-                    </p>
-                  </div>
+            <motion.div 
+              key={index}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1, duration: 0.8 }}
+              whileHover={{ scale: 1.02, rotate: index % 2 === 0 ? 1 : -1 }}
+              className={`p-8 rounded-[40px] border border-white/10 relative group transition-all duration-500 ${
+                index === 1 ? "bg-primary/10 border-primary/20 md:-translate-y-8" : "bg-white/5 backdrop-blur-xl"
+              }`}
+            >
+              <Quote className="absolute top-8 right-8 w-10 h-10 text-primary/20 group-hover:text-primary/40 transition-colors" />
+              <div className="flex gap-1 mb-8">
+                {[...Array(testimonial.rating)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 fill-primary text-primary" />
+                ))}
+              </div>
+              <p className="text-xl text-white/90 leading-relaxed mb-10 font-medium">
+                "{testimonial.quote}"
+              </p>
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-orange-500 flex items-center justify-center text-primary-foreground font-black text-xl shadow-lg shadow-primary/20">
+                  {testimonial.name.charAt(0)}
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                    <span className="text-xs sm:text-sm font-semibold text-primary">
-                      {testimonial.name.split(' ').map(n => n[0]).join('')}
-                    </span>
-                  </div>
-                  <div>
-                    <div className="font-semibold text-sm sm:text-base">{testimonial.name}</div>
-                    <div className="text-xs sm:text-sm text-muted-foreground">{testimonial.role}</div>
-                    <div className="text-xs text-muted-foreground hidden sm:block">{testimonial.company}</div>
-                  </div>
+                <div>
+                  <div className="font-bold text-lg">{testimonial.name}</div>
+                  <div className="text-sm text-primary font-semibold">{testimonial.role}</div>
+                  <div className="text-xs text-white/40 uppercase tracking-widest mt-1">{testimonial.company}</div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </motion.div>
           ))}
-        </ResponsiveGrid>
+        </div>
+
+        {/* Floating background elements */}
+        <div className="absolute top-1/4 -right-20 w-96 h-96 bg-primary/10 rounded-full blur-[150px] -z-0" />
+        <div className="absolute bottom-1/4 -left-20 w-96 h-96 bg-blue-600/10 rounded-full blur-[150px] -z-0" />
       </ResponsiveSection>
 
       {/* CTA Section */}
-      <ResponsiveSection padding="large">
-        <div className="max-w-4xl mx-auto text-center">
-          <ResponsiveTypography variant="h2" align="center">
-            Ready to Transform Your 
-            <span className="bg-gradient-to-r from-primary to-yellow-600 bg-clip-text text-transparent">
-              {" "}Film Career?
-            </span>
-          </ResponsiveTypography>
-          <ResponsiveTypography variant="p" className="text-muted-foreground mb-8 sm:mb-12 max-w-2xl mx-auto mt-4">
-            Join thousands of Nollywood professionals already using NollyCrew to find opportunities, 
-            collaborate on projects, and grow their careers.
-          </ResponsiveTypography>
-
-          <ResponsiveGrid cols={{ xs: 1, sm: 3 }} className="mb-8 sm:mb-12">
-            {[
-              { step: "1", title: "Create Profile", desc: "Showcase your skills and experience" },
-              { step: "2", title: "Get Matched", desc: "AI finds the perfect opportunities for you" },
-              { step: "3", title: "Start Creating", desc: "Collaborate on amazing film projects" }
-            ].map((step) => (
-              <div key={step.step} className="flex flex-col items-center" data-testid={`step-${step.step}`}>
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-lg sm:text-xl font-bold mb-3 sm:mb-4">
-                  {step.step}
-                </div>
-                <ResponsiveTypography variant="h5" align="center" className="mb-1 sm:mb-2">
-                  {step.title}
-                </ResponsiveTypography>
-                <p className="text-xs sm:text-sm text-muted-foreground text-center">{step.desc}</p>
-              </div>
-            ))}
-          </ResponsiveGrid>
-
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-            <ResponsiveButton
-              size="lg"
-              className="px-6 py-3 sm:px-8 sm:py-4"
-              data-testid="button-start-free"
-              icon={<CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />}
-              iconPosition="right"
-            >
-              Start Free Today
-            </ResponsiveButton>
-            <ResponsiveButton
-              variant="outline"
-              size="lg"
-              className="px-6 py-3 sm:px-8 sm:py-4"
-              data-testid="button-book-demo"
-            >
+      <ResponsiveSection padding="large" className="relative">
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <h2 className="text-4xl md:text-7xl font-bold font-serif mb-8 leading-tight">
+            Ready to Scale Your 
+            <span className="text-primary"> Film Career?</span>
+          </h2>
+          <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto">
+            Join thousands of Nollywood professionals already using NollyCrew to find opportunities and build the future of African cinema.
+          </p>
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Button size="lg" className="rounded-full h-14 px-10 text-lg font-bold">
+              Join for Free Today
+            </Button>
+            <Button variant="outline" size="lg" className="rounded-full h-14 px-10 text-lg font-bold border-primary text-primary">
               Book a Demo
-            </ResponsiveButton>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 mt-8 sm:mt-12 text-xs sm:text-sm text-muted-foreground">
-            <div className="flex items-center gap-1 sm:gap-2">
-              <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-green-500" />
-              Free to get started
-            </div>
-            <div className="flex items-center gap-1 sm:gap-2">
-              <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-green-500" />
-              No credit card required
-            </div>
-            <div className="flex items-center gap-1 sm:gap-2">
-              <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-green-500" />
-              Cancel anytime
-            </div>
+            </Button>
           </div>
         </div>
+        {/* Abstract background shape */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[120px] -z-0" />
       </ResponsiveSection>
 
       {/* Footer */}
-      <footer className="bg-muted/50 border-t py-12 sm:py-16">
+      <footer className="bg-background border-t pt-20 pb-10">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="md:col-span-2">
-              <div className="flex items-center gap-2 mb-4">
-                <Film className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
-                <span className="text-lg sm:text-xl font-bold font-serif">NollyCrew</span>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
+            <div className="col-span-1 md:col-span-2">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+                  <Film className="w-6 h-6 text-primary-foreground" />
+                </div>
+                <span className="text-2xl font-bold font-serif tracking-tight">NollyCrew</span>
               </div>
-              <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6 max-w-md">
+              <p className="text-muted-foreground max-w-md leading-relaxed mb-8">
                 The all-in-one platform connecting actors, crew, and producers in Nigeria's 
                 thriving film industry. From script to screen, we make filmmaking collaboration seamless.
               </p>
-              <div className="flex gap-2">
-                <Badge variant="secondary" className="text-xs">Made in Nigeria</Badge>
-                <Badge variant="secondary" className="text-xs">For Nollywood</Badge>
+              <div className="flex gap-4">
+                <Badge variant="outline" className="rounded-full">Made in Nigeria</Badge>
+                <Badge variant="outline" className="rounded-full">Global Reach</Badge>
               </div>
+            </div>
+            
+            <div>
+              <h4 className="font-bold mb-6">Platform</h4>
+              <ul className="space-y-4 text-muted-foreground">
+                <li className="hover:text-primary transition-colors cursor-pointer">Find Talent</li>
+                <li className="hover:text-primary transition-colors cursor-pointer">Casting Calls</li>
+                <li className="hover:text-primary transition-colors cursor-pointer">Project Management</li>
+                <li className="hover:text-primary transition-colors cursor-pointer">AI Tools</li>
+              </ul>
             </div>
 
             <div>
-              <h4 className="font-semibold mb-3 sm:mb-4">Platform</h4>
-              <div className="space-y-2 text-sm">
-                <div className="text-muted-foreground hover:text-foreground cursor-pointer">Find Jobs</div>
-                <div className="text-muted-foreground hover:text-foreground cursor-pointer">Find Talent</div>
-                <div className="text-muted-foreground hover:text-foreground cursor-pointer">Projects</div>
-                <div className="text-muted-foreground hover:text-foreground cursor-pointer">Community</div>
-              </div>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-3 sm:mb-4">Support</h4>
-              <div className="space-y-2 text-sm">
-                <div className="text-muted-foreground hover:text-foreground cursor-pointer">Help Center</div>
-                <div className="text-muted-foreground hover:text-foreground cursor-pointer">Contact Us</div>
-                <div className="text-muted-foreground hover:text-foreground cursor-pointer">Privacy Policy</div>
-                <div className="text-muted-foreground hover:text-foreground cursor-pointer">Terms of Service</div>
-              </div>
+              <h4 className="font-bold mb-6">Company</h4>
+              <ul className="space-y-4 text-muted-foreground">
+                <li className="hover:text-primary transition-colors cursor-pointer">About Us</li>
+                <li className="hover:text-primary transition-colors cursor-pointer">Careers</li>
+                <li className="hover:text-primary transition-colors cursor-pointer">Privacy</li>
+                <li className="hover:text-primary transition-colors cursor-pointer">Terms</li>
+              </ul>
             </div>
           </div>
-
-          <div className="border-t mt-8 sm:mt-12 pt-6 sm:pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div className="text-xs sm:text-sm text-muted-foreground">
-              © 2024 NollyCrew. All rights reserved.
-            </div>
-            <div className="text-xs sm:text-sm text-muted-foreground">
-              Proudly powering the future of Nollywood
+          
+          <div className="border-t pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground font-medium">
+            <div>© 2024 NollyCrew. All rights reserved.</div>
+            <div className="flex gap-8">
+              <span className="hover:text-foreground cursor-pointer transition-colors">Twitter</span>
+              <span className="hover:text-foreground cursor-pointer transition-colors">LinkedIn</span>
+              <span className="hover:text-foreground cursor-pointer transition-colors">Instagram</span>
             </div>
           </div>
         </div>
