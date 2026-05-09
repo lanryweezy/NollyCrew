@@ -513,7 +513,7 @@ export default function EnhancedCollaboration() {
                                   <p className="text-xs text-muted-foreground">{doc.size}</p>
                                 </div>
                               </div>
-                              <Button variant="ghost" size="icon">
+                              <Button variant="ghost" size="icon" aria-label="Share document">
                                 <Share2 className="w-4 h-4" />
                               </Button>
                             </div>
@@ -558,7 +558,7 @@ export default function EnhancedCollaboration() {
                     <div className="space-y-4">
                       {filteredTasks.map((task) => (
                         <div key={task.id} className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50">
-                          <Button variant="ghost" size="icon">
+                          <Button variant="ghost" size="icon" aria-label={task.status === "done" ? "Mark as pending" : "Mark as done"}>
                             {task.status === "done" ? (
                               <CheckCircle className="w-5 h-5 text-green-500" />
                             ) : (
@@ -584,10 +584,10 @@ export default function EnhancedCollaboration() {
                               <AvatarImage src={task.assigneeAvatar} />
                               <AvatarFallback>{task.assignee.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                             </Avatar>
-                            <Button variant="ghost" size="icon">
+                            <Button variant="ghost" size="icon" aria-label="Edit task">
                               <Edit3 className="w-4 h-4" />
                             </Button>
-                            <Button variant="ghost" size="icon">
+                            <Button variant="ghost" size="icon" aria-label="Delete task">
                               <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
