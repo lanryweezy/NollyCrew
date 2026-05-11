@@ -67,9 +67,18 @@ const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
   throw new Error("JWT_SECRET environment variable is required");
 }
-const REFRESH_SECRET = process.env.REFRESH_SECRET || (JWT_SECRET + ":refresh");
-const EMAIL_TOKEN_SECRET = process.env.EMAIL_TOKEN_SECRET || (JWT_SECRET + ":email");
-const RESET_TOKEN_SECRET = process.env.RESET_TOKEN_SECRET || (JWT_SECRET + ":reset");
+const REFRESH_SECRET = process.env.REFRESH_SECRET;
+if (!REFRESH_SECRET) {
+  throw new Error("REFRESH_SECRET environment variable is required");
+}
+const EMAIL_TOKEN_SECRET = process.env.EMAIL_TOKEN_SECRET;
+if (!EMAIL_TOKEN_SECRET) {
+  throw new Error("EMAIL_TOKEN_SECRET environment variable is required");
+}
+const RESET_TOKEN_SECRET = process.env.RESET_TOKEN_SECRET;
+if (!RESET_TOKEN_SECRET) {
+  throw new Error("RESET_TOKEN_SECRET environment variable is required");
+}
 
 // Configure multer for file uploads
 const upload = multer({ 
