@@ -1221,8 +1221,12 @@ export class MemStorage implements IStorage {
         ...app,
         jobTitle: this.jobs.get(app.jobId)?.title || 'Unknown Job'
       }));
-    const unreadMessagesCount = Array.from(this.messages.values())
-      .filter(m => m.recipientId === userId && !m.isRead).length;
+    let unreadMessagesCount = 0;
+    for (const m of this.messages.values()) {
+      if (m.recipientId === userId && !m.isRead) {
+        unreadMessagesCount++;
+      }
+    }
     const userProfile = await this.getUser(userId);
     return {
       recentProjects,
