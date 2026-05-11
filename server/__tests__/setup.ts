@@ -1,4 +1,7 @@
 process.env.JWT_SECRET = "test-secret";
+process.env.REFRESH_SECRET = "test-refresh-secret";
+process.env.EMAIL_TOKEN_SECRET = "test-email-secret";
+process.env.RESET_TOKEN_SECRET = "test-reset-secret";
 import { beforeEach, afterEach, vi } from 'vitest';
 import { db } from '../db';
 
