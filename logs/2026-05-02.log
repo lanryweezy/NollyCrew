@@ -38,3 +38,11 @@
 {"timestamp":"2026-05-02T15:57:41.998Z","level":"error","message":"Redis error:","meta":{"code":"ECONNREFUSED"}}
 {"timestamp":"2026-05-02T15:57:42.029Z","level":"warn","message":"Login attempt with non-existent email","meta":{"email":"wrong@example.com"}}
 {"timestamp":"2026-05-02T15:57:49.088Z","level":"info","message":"Using MemStorage (In-memory storage)"}
+{"timestamp":"2026-05-02T21:40:27.212Z","level":"info","message":"Using MemStorage (In-memory storage)"}
+{"timestamp":"2026-05-02T21:40:31.641Z","level":"info","message":"WebSocket server initialized"}
+{"timestamp":"2026-05-02T21:40:31.730Z","level":"error","message":"Redis error:","meta":{"code":"ECONNREFUSED"}}
+{"timestamp":"2026-05-02T21:40:31.759Z","level":"info","message":"Server started on port 5000"}
+{"timestamp":"2026-05-02T21:40:32.088Z","level":"error","message":"Redis error:","meta":{"code":"ECONNREFUSED"}}
+{"timestamp":"2026-05-02T21:40:34.794Z","level":"error","message":"Redis error:","meta":{"code":"ECONNREFUSED"}}
+{"timestamp":"2026-05-02T21:40:35.111Z","level":"error","message":"Redis error:","meta":{"code":"ECONNREFUSED"}}
+{"timestamp":"2026-05-02T21:40:35.114Z","level":"warn","message":"Redis connection failed, falling back to in-memory cache"}

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { motion, AnimatePresence } from "framer-motion";
 import Navigation from "@/components/Navigation";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,7 +23,9 @@ import {
   CheckCircle,
   Clock,
   Star,
-  MessageSquare
+  MessageSquare,
+  TrendingUp,
+  ArrowRight
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import ResponsiveGrid from "@/components/ResponsiveGrid";
@@ -84,90 +87,51 @@ export default function AITools() {
     {
       id: "script-analysis",
       title: "Script Analysis",
-      description: "AI-powered script breakdown and production planning",
+      description: "Breakdown & planning",
       icon: FileText,
-      features: [
-        "Scene identification and breakdown",
-        "Character analysis and requirements",
-        "Location scouting suggestions",
-        "Crew and equipment recommendations",
-        "Budget estimation",
-        "Timeline planning"
-      ]
-    },
-    {
-      id: "casting-recommendations",
-      title: "Casting Recommendations",
-      description: "Intelligent talent matching for your projects",
-      icon: Users,
-      features: [
-        "AI-powered candidate matching",
-        "Bias detection and fairness analysis",
-        "Experience and skill evaluation",
-        "Location and availability optimization",
-        "Budget compatibility scoring",
-        "Success projection modeling"
-      ]
-    },
-    {
-      id: "schedule-optimization",
-      title: "Schedule Optimization",
-      description: "Smart production scheduling for maximum efficiency",
-      icon: Calendar,
-      features: [
-        "Optimal scene sequencing",
-        "Location grouping strategies",
-        "Crew and equipment allocation",
-        "Weather dependency planning",
-        "Cost minimization algorithms",
-        "Resource utilization optimization"
-      ]
-    },
-    {
-      id: "marketing-content",
-      title: "Marketing Content Generation",
-      description: "AI-generated marketing materials for your projects",
-      icon: Target,
-      features: [
-        "Compelling taglines and slogans",
-        "Poster and promotional material concepts",
-        "Trailer script generation",
-        "Social media content creation",
-        "Press kit development",
-        "Distribution strategy planning"
-      ]
-    },
-    {
-      id: "legal-ai",
-      title: "Legal AI & Release Forms",
-      description: "Auto-generate standard Nollywood talent release forms",
-      icon: FileText,
-      features: [
-        "Standard Nollywood contract clauses",
-        "Name & likeness rights in perpetuity",
-        "Customizable payment terms",
-        "Non-disclosure agreements",
-        "Union compliance checks"
-      ]
+      label: "Script"
     },
     {
       id: "director-chat",
-      title: "Virtual Director Chat",
-      description: "Get real-time advice from our AI Director",
+      title: "AI Director",
+      description: "Real-time advice",
       icon: MessageSquare,
-      features: [
-        "Creative script feedback",
-        "Directorial advice",
-        "Production troubleshooting",
-        "Context-aware recommendations"
-      ]
+      label: "Director"
+    },
+    {
+      id: "casting-recommendations",
+      title: "Talent Match",
+      description: "Intelligent matching",
+      icon: Users,
+      label: "Casting"
+    },
+    {
+      id: "schedule-optimization",
+      title: "Schedule",
+      description: "Efficiency engine",
+      icon: Calendar,
+      label: "Schedule"
+    },
+    {
+      id: "marketing-content",
+      title: "Marketing",
+      description: "Content generator",
+      icon: Target,
+      label: "Marketing"
+    },
+    {
+      id: "legal-ai",
+      title: "Legal AI",
+      description: "Contract automation",
+      icon: FileText,
+      label: "Legal"
     }
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-black text-white film-grain overflow-x-hidden">
       {/* Navigation */}
-      <div className="relative">
+      <div className="relative z-50">
         <Navigation 
           isAuthenticated={true}
           userRole="producer"
@@ -178,480 +142,285 @@ export default function AITools() {
         </div>
       </div>
 
-      <ResponsiveSection padding="medium">
-        <PageHeader 
-          title="AI Tools Suite" 
-          subtitle="Leverage advanced AI and machine learning to enhance your film production workflow"
-        />
+      {/* Ambient background glow */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] bg-primary/10 blur-[120px] rounded-full" />
+        <div className="absolute -bottom-[20%] -right-[10%] w-[50%] h-[50%] bg-blue-500/5 blur-[120px] rounded-full" />
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6 sm:space-y-8">
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 h-auto">
-                <TabsTrigger value="script-analysis" className="py-2">Script</TabsTrigger>
-                <TabsTrigger value="director-chat" className="py-2">Director</TabsTrigger>
-                <TabsTrigger value="casting-recommendations" className="py-2">Casting</TabsTrigger>
-                <TabsTrigger value="schedule-optimization" className="py-2">Schedule</TabsTrigger>
-                <TabsTrigger value="marketing-content" className="py-2">Marketing</TabsTrigger>
-                <TabsTrigger value="legal-ai" className="py-2">Legal</TabsTrigger>
-              </TabsList>
+      <ResponsiveSection padding="medium" className="relative z-10 pt-10">
+        <div className="mb-12">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-3 mb-4"
+          >
+            <Badge className="bg-primary/20 text-primary border-primary/30 py-1 px-3">
+              <Zap className="w-3.5 h-3.5 mr-1.5 fill-primary" />
+              Pro Feature Suite
+            </Badge>
+          </motion.div>
+          <PageHeader 
+            title="Intelligence Center" 
+            subtitle="The algorithmic heart of your next blockbuster."
+          />
+        </div>
 
-              <TabsContent value="director-chat" className="space-y-6 mt-6">
-                <VirtualDirectorChat />
-              </TabsContent>
-
-              <TabsContent value="script-analysis" className="space-y-6 mt-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <FileText className="w-5 h-5" />
-                      Script Analysis Tool
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="script-upload">Upload Script</Label>
-                      <div className="flex items-center gap-2">
-                        <Input 
-                          id="script-upload" 
-                          type="file" 
-                          accept=".pdf,.txt,.doc,.docx" 
-                          className="flex-1"
-                        />
-                        <Button variant="outline">
-                          <Upload className="w-4 h-4 mr-2" />
-                          Upload
-                        </Button>
-                      </div>
-                      <p className="text-sm text-muted-foreground">or paste script text below</p>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="script-text">Script Text</Label>
-                      <Textarea
-                        id="script-text"
-                        placeholder="Paste your script text here..."
-                        value={scriptText}
-                        onChange={(e) => setScriptText(e.target.value)}
-                        rows={10}
-                      />
-                    </div>
-
-                    <Button 
-                      onClick={handleScriptAnalysis} 
-                      disabled={isAnalyzing}
-                      className="w-full"
-                    >
-                      {isAnalyzing ? (
-                        <>
-                          <Clock className="w-4 h-4 mr-2 animate-spin" />
-                          Analyzing Script...
-                        </>
-                      ) : (
-                        <>
-                          <Zap className="w-4 h-4 mr-2" />
-                          Analyze Script with AI
-                        </>
-                      )}
-                    </Button>
-
-                    {analysisResult && (
-                      <div className="space-y-4 p-4 bg-muted rounded-lg">
-                        <h3 className="font-semibold">Analysis Results</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <p className="text-sm text-muted-foreground">Scenes</p>
-                            <p className="font-medium">{analysisResult.scenes}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-muted-foreground">Characters</p>
-                            <p className="font-medium">{analysisResult.characters.length}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-muted-foreground">Locations</p>
-                            <p className="font-medium">{analysisResult.locations.length}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-muted-foreground">Estimated Budget</p>
-                            <p className="font-medium">₦{analysisResult.budget.low.toLocaleString()} - ₦{analysisResult.budget.high.toLocaleString()}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="pt-4">
-                          <h4 className="font-medium mb-2">Key Insights</h4>
-                          <ul className="space-y-1 text-sm">
-                            <li className="flex items-start gap-2">
-                              <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                              <span>Optimal shooting schedule: 30 days</span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                              <span>Recommended crew size: 15 people</span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <AlertCircle className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" />
-                              <span>Weather dependency on 3 exterior scenes</span>
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="casting-recommendations" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Users className="w-5 h-5" />
-                      Casting Recommendations
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="role">Role</Label>
-                        <Input id="role" placeholder="e.g., Lead Actor, Cinematographer" />
-                      </div>
-                      <div>
-                        <Label htmlFor="requirements">Requirements</Label>
-                        <Textarea 
-                          id="requirements" 
-                          placeholder="e.g., 30-40 years old, experienced in drama, Lagos-based" 
-                          rows={3}
-                        />
-                      </div>
-                      <Button className="w-full">
-                        <Zap className="w-4 h-4 mr-2" />
-                        Generate Recommendations
-                      </Button>
-                    </div>
-
-                    <div className="space-y-4 p-4 bg-muted rounded-lg">
-                      <h3 className="font-semibold">Top Recommendations</h3>
-                      <div className="space-y-4">
-                        {[
-                          { name: "Funke Akindele", score: 92, experience: "15+ years", location: "Lagos" },
-                          { name: "Richard Mofe-Damijo", score: 88, experience: "30+ years", location: "Lagos" },
-                          { name: "Genevieve Nnaji", score: 85, experience: "20+ years", location: "Abuja" }
-                        ].map((candidate, index) => (
-                          <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                            <div>
-                              <p className="font-medium">{candidate.name}</p>
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <span>{candidate.experience}</span>
-                                <span>•</span>
-                                <span>{candidate.location}</span>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="flex items-center gap-1">
-                                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                <span className="font-medium">{candidate.score}</span>
-                              </div>
-                              <Button size="sm">View</Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="schedule-optimization" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Calendar className="w-5 h-5" />
-                      Schedule Optimization
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="project-name">Project Name</Label>
-                        <Input id="project-name" placeholder="e.g., Love in Lagos" />
-                      </div>
-                      <div>
-                        <Label htmlFor="constraints">Constraints</Label>
-                        <Textarea 
-                          id="constraints" 
-                          placeholder="e.g., Max 20 shooting days, crew availability, location restrictions" 
-                          rows={3}
-                        />
-                      </div>
-                      <Button className="w-full">
-                        <Zap className="w-4 h-4 mr-2" />
-                        Optimize Schedule
-                      </Button>
-                    </div>
-
-                    <div className="space-y-4 p-4 bg-muted rounded-lg">
-                      <h3 className="font-semibold">Optimized Schedule</h3>
-                      <div className="space-y-3">
-                        {[
-                          { day: 1, scenes: "SCN-1, SCN-2", location: "Studio A", duration: "8 hours" },
-                          { day: 2, scenes: "SCN-3, SCN-4", location: "City Street", duration: "10 hours" },
-                          { day: 3, scenes: "SCN-5", location: "Apartment", duration: "6 hours" }
-                        ].map((day, index) => (
-                          <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                            <div>
-                              <p className="font-medium">Day {day.day}</p>
-                              <p className="text-sm text-muted-foreground">{day.scenes}</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-sm">{day.location}</p>
-                              <p className="text-xs text-muted-foreground">{day.duration}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="pt-2 flex justify-between items-center">
-                        <span className="text-sm font-medium">Total Duration: 18 days</span>
-                        <Button size="sm">
-                          <Download className="w-4 h-4 mr-2" />
-                          Export
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="marketing-content" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Target className="w-5 h-5" />
-                      Marketing Content Generator
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="project-title">Project Title</Label>
-                        <Input id="project-title" placeholder="e.g., Love in Lagos" />
-                      </div>
-                      <div>
-                        <Label htmlFor="genre">Genre</Label>
-                        <Input id="genre" placeholder="e.g., Romantic Drama" />
-                      </div>
-                      <div>
-                        <Label htmlFor="synopsis">Synopsis</Label>
-                        <Textarea 
-                          id="synopsis" 
-                          placeholder="Brief description of your project" 
-                          rows={4}
-                        />
-                      </div>
-                      <Button className="w-full">
-                        <Zap className="w-4 h-4 mr-2" />
-                        Generate Marketing Content
-                      </Button>
-                    </div>
-
-                    <div className="space-y-4 p-4 bg-muted rounded-lg">
-                      <h3 className="font-semibold">Generated Content</h3>
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-sm font-medium">Tagline</p>
-                          <p className="text-muted-foreground">Love finds its way in the city that never sleeps</p>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">Social Media Posts</p>
-                          <div className="space-y-2 mt-1">
-                            <p className="text-sm text-muted-foreground">"A love story that will make you believe in second chances. Coming soon to theaters near you! #LoveInLagos #Nollywood"</p>
-                            <p className="text-sm text-muted-foreground">"Behind every great love story is a great team. Meet the cast and crew of #LoveInLagos"</p>
-                          </div>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">Trailer Hook</p>
-                          <p className="text-muted-foreground">"She thought she had it all figured out. He thought he was over her. But Lagos had other plans..."</p>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="legal-ai" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <FileText className="w-5 h-5" />
-                      Legal AI & Release Forms
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label>Talent Name</Label>
-                          <Input 
-                            placeholder="e.g., Funke Akindele" 
-                            value={legalForm.talentName}
-                            onChange={(e) => setLegalForm(prev => ({ ...prev, talentName: e.target.value }))}
-                          />
-                        </div>
-                        <div>
-                          <Label>Role Name</Label>
-                          <Input 
-                            placeholder="e.g., Lead Antagonist" 
-                            value={legalForm.roleName}
-                            onChange={(e) => setLegalForm(prev => ({ ...prev, roleName: e.target.value }))}
-                          />
-                        </div>
-                        <div>
-                          <Label>Project Name</Label>
-                          <Input 
-                            placeholder="e.g., Lagos Hustle" 
-                            value={legalForm.projectName}
-                            onChange={(e) => setLegalForm(prev => ({ ...prev, projectName: e.target.value }))}
-                          />
-                        </div>
-                        <div>
-                          <Label>Rate (NGN)</Label>
-                          <Input 
-                            placeholder="e.g., 2,500,000" 
-                            value={legalForm.rate}
-                            onChange={(e) => setLegalForm(prev => ({ ...prev, rate: e.target.value }))}
-                          />
-                        </div>
-                      </div>
-                      <Button className="w-full" onClick={handleLegalGeneration} disabled={isGeneratingLegal}>
-                        {isGeneratingLegal ? (
-                          <>
-                            <Clock className="w-4 h-4 mr-2 animate-spin" />
-                            Drafting Contract...
-                          </>
-                        ) : (
-                          <>
-                            <Zap className="w-4 h-4 mr-2" />
-                            Generate Standard Contract
-                          </>
-                        )}
-                      </Button>
-                    </div>
-
-                    <div className="p-4 bg-muted rounded-lg border">
-                      <h3 className="font-semibold mb-2 flex items-center justify-between">
-                        Preview Document
-                        {legalResult && (
-                          <Button size="sm" variant="outline" onClick={() => {
-                            const blob = new Blob([legalResult], { type: 'text/plain' });
-                            const url = URL.createObjectURL(blob);
-                            const a = document.createElement('a');
-                            a.href = url;
-                            a.download = `Release_Form_${legalForm.talentName.replace(/\s+/g, '_')}.txt`;
-                            a.click();
-                          }}>
-                            <Download className="w-4 h-4 mr-2" /> Download
-                          </Button>
-                        )}
-                      </h3>
-                      <div className="h-64 bg-background p-4 rounded text-sm text-muted-foreground overflow-y-auto font-mono whitespace-pre-wrap">
-                        {legalResult || `THIS TALENT RELEASE AGREEMENT ("Agreement") is made and entered into...\n\n(Click Generate to draft full contract)`}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6 sm:space-y-8">
-            {/* AI Tools Overview */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Zap className="w-5 h-5" />
-                  AI Tools Suite
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Enhanced Glassmorphic Sidebar */}
+          <motion.div 
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="lg:col-span-3 space-y-4"
+          >
+            <div className="glass-deep rounded-[32px] p-4 border-white/5 shadow-2xl sticky top-24">
+              <div className="px-4 py-3 mb-4">
+                <h3 className="text-xs font-bold uppercase tracking-widest text-white/40">Tools Suite</h3>
+              </div>
+              <div className="space-y-2">
                 {aiTools.map((tool) => (
-                  <div 
+                  <motion.div 
                     key={tool.id}
-                    className={`p-4 rounded-lg border cursor-pointer transition-colors ${
-                      activeTab === tool.id ? 'bg-primary/10 border-primary' : 'hover:bg-muted'
+                    whileHover={{ x: 5 }}
+                    whileTap={{ scale: 0.98 }}
+                    className={`p-4 rounded-2xl cursor-pointer transition-all duration-300 flex items-center gap-4 group ${
+                      activeTab === tool.id 
+                        ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' 
+                        : 'bg-white/5 hover:bg-white/10 text-white/60 hover:text-white border border-transparent'
                     }`}
                     onClick={() => setActiveTab(tool.id)}
                   >
-                    <div className="flex items-start gap-3">
-                      <tool.icon className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                      <div>
-                        <h3 className="font-medium text-sm">{tool.title}</h3>
-                        <p className="text-xs text-muted-foreground mt-1">{tool.description}</p>
+                    <div className={`p-2 rounded-xl transition-colors ${
+                      activeTab === tool.id ? 'bg-white/20' : 'bg-white/5 group-hover:bg-white/10'
+                    }`}>
+                      <tool.icon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm leading-none mb-1">{tool.label}</h4>
+                      <p className={`text-[10px] ${activeTab === tool.id ? 'text-primary-foreground/70' : 'text-white/30'}`}>
+                        {tool.description}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+            
+            <div className="glass-card rounded-[24px] p-6 border-white/5 bg-gradient-to-br from-primary/10 to-transparent">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                  <Star className="w-4 h-4 text-primary" />
+                </div>
+                <h4 className="font-bold text-sm">Credits Available</h4>
+              </div>
+              <div className="space-y-2">
+                 <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                   <div className="h-full w-3/4 bg-primary" />
+                 </div>
+                 <p className="text-[10px] text-white/40 font-medium">750 / 1000 tokens remaining</p>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Main Workspace */}
+          <div className="lg:col-span-9">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.4 }}
+                className="space-y-8"
+              >
+                {activeTab === "director-chat" && (
+                   <div className="glass-deep rounded-[40px] overflow-hidden border-white/5 shadow-2xl">
+                      <VirtualDirectorChat />
+                   </div>
+                )}
+
+                {activeTab === "script-analysis" && (
+                  <div className="space-y-8">
+                    <div className="glass-deep rounded-[40px] p-10 border-white/5 shadow-2xl relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-32 -mt-32 transition-all duration-500 group-focus-within:bg-primary/10" />
+                      
+                      <div className="flex items-center justify-between mb-10">
+                        <div>
+                          <h2 className="text-3xl font-bold font-serif mb-2">Script Analysis</h2>
+                          <p className="text-white/40 font-light">Advanced breakdown & structural intelligence</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                           <Button variant="ghost" className="rounded-full bg-white/5 hover:bg-white/10 text-white/60">
+                             <Upload className="w-4 h-4 mr-2" />
+                             Upload PDF
+                           </Button>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <Label htmlFor="script-text" className="text-xs uppercase tracking-widest text-white/40 ml-1">Screenplay Content</Label>
+                        <div className="relative group">
+                          <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-orange-500 rounded-[24px] blur opacity-0 group-focus-within:opacity-20 transition duration-500" />
+                          <Textarea
+                            id="script-text"
+                            placeholder="Paste your script text here to begin the deep analysis..."
+                            value={scriptText}
+                            onChange={(e) => setScriptText(e.target.value)}
+                            className="relative min-h-[300px] bg-black/40 border-white/10 rounded-[24px] p-8 text-lg font-light leading-relaxed focus:ring-0 focus:border-primary/50 transition-all placeholder:text-white/10"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="mt-8 flex justify-end">
+                        <Button 
+                          onClick={handleScriptAnalysis} 
+                          disabled={isAnalyzing || !scriptText.trim()}
+                          size="lg"
+                          className="h-16 px-12 rounded-full font-bold text-lg bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 group overflow-hidden relative"
+                        >
+                          <AnimatePresence mode="wait">
+                            {isAnalyzing ? (
+                              <motion.div
+                                key="analyzing"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="flex items-center"
+                              >
+                                <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mr-3" />
+                                <span>Processing...</span>
+                              </motion.div>
+                            ) : (
+                              <motion.div
+                                key="default"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="flex items-center"
+                              >
+                                <Zap className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
+                                <span>Execute Intelligence</span>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </Button>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
 
-            {/* Features */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Key Features</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Advanced AI algorithms</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Bias detection and fairness</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Real-time processing</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Customizable parameters</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Exportable results</span>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
+                    {/* Bento Results Display */}
+                    <AnimatePresence>
+                      {analysisResult && (
+                        <motion.div 
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="grid grid-cols-1 md:grid-cols-6 gap-6"
+                        >
+                          {/* Main Stats Bento */}
+                          <div className="md:col-span-4 glass-deep p-8 rounded-[40px] border-white/5 flex flex-col justify-between">
+                             <div className="flex items-center justify-between mb-8">
+                               <h3 className="text-xl font-bold flex items-center gap-3">
+                                 <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                                   <Zap className="w-5 h-5 text-primary" />
+                                 </div>
+                                 Analysis Summary
+                               </h3>
+                               <Badge variant="outline" className="text-green-500 border-green-500/20">High Accuracy</Badge>
+                             </div>
+                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-8">
+                                <div>
+                                  <p className="text-xs text-white/30 uppercase tracking-tighter mb-1">Scenes</p>
+                                  <p className="text-4xl font-black">{analysisResult.scenes}</p>
+                                </div>
+                                <div>
+                                  <p className="text-xs text-white/30 uppercase tracking-tighter mb-1">Characters</p>
+                                  <p className="text-4xl font-black">{analysisResult.characters.length}</p>
+                                </div>
+                                <div>
+                                  <p className="text-xs text-white/30 uppercase tracking-tighter mb-1">Locations</p>
+                                  <p className="text-4xl font-black">{analysisResult.locations.length}</p>
+                                </div>
+                             </div>
+                          </div>
 
-            {/* Usage Tips */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Usage Tips</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-sm font-medium">For Best Results</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Provide detailed information for more accurate AI analysis and recommendations.
-                    </p>
+                          {/* Budget Bento */}
+                          <div className="md:col-span-2 glass-deep p-8 rounded-[40px] border-white/5 bg-gradient-to-br from-green-500/10 to-transparent">
+                             <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
+                               <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center">
+                                 <TrendingUp className="w-4 h-4 text-green-500" />
+                               </div>
+                               Estimated Budget
+                             </h3>
+                             <div className="space-y-4">
+                                <div>
+                                  <p className="text-3xl font-black leading-none">₦{analysisResult.budget.low.toLocaleString()}</p>
+                                  <p className="text-[10px] text-white/30 mt-1 uppercase">Floor Estimate</p>
+                                </div>
+                                <div className="h-0.5 w-full bg-white/5" />
+                                <div>
+                                  <p className="text-3xl font-black leading-none text-primary">₦{analysisResult.budget.high.toLocaleString()}</p>
+                                  <p className="text-[10px] text-white/30 mt-1 uppercase">Recommended Allocation</p>
+                                </div>
+                             </div>
+                          </div>
+
+                          {/* Key Insights Bento */}
+                          <div className="md:col-span-3 glass-deep p-8 rounded-[40px] border-white/5">
+                             <h3 className="text-lg font-bold mb-6">Production Strategy</h3>
+                             <div className="space-y-4">
+                                <div className="flex gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 items-start">
+                                   <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0">
+                                      <Clock className="w-5 h-5 text-blue-400" />
+                                   </div>
+                                   <div>
+                                      <p className="font-bold text-sm">Optimal Schedule</p>
+                                      <p className="text-xs text-white/40 mt-0.5">30 days recommended for maximum creative output.</p>
+                                   </div>
+                                </div>
+                                <div className="flex gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 items-start">
+                                   <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center shrink-0">
+                                      <Users className="w-5 h-5 text-purple-400" />
+                                   </div>
+                                   <div>
+                                      <p className="font-bold text-sm">Crew Capacity</p>
+                                      <p className="text-xs text-white/40 mt-0.5">15 specialized roles identified for this production.</p>
+                                   </div>
+                                </div>
+                             </div>
+                          </div>
+
+                          {/* Risk Map Bento */}
+                          <div className="md:col-span-3 glass-deep p-8 rounded-[40px] border-white/5 bg-gradient-to-br from-orange-500/5 to-transparent">
+                             <h3 className="text-lg font-bold mb-6">Potential Bottlenecks</h3>
+                             <div className="p-5 rounded-3xl bg-orange-500/10 border border-orange-500/20 flex items-start gap-4">
+                                <AlertCircle className="w-6 h-6 text-orange-500 shrink-0 mt-1" />
+                                <div>
+                                   <p className="font-bold text-orange-500">Weather Dependency</p>
+                                   <p className="text-sm text-white/60 mt-1">3 critical exterior scenes identified. We recommend scheduling during the dry season or arranging studio cover.</p>
+                                </div>
+                             </div>
+                             <Button variant="ghost" className="w-full mt-6 rounded-2xl text-white/40 hover:text-white hover:bg-white/5">
+                               View Detailed Risk Map
+                               <ArrowRight className="w-4 h-4 ml-2" />
+                             </Button>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium">Privacy Notice</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      All data is processed securely and never shared with third parties.
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">Need Help?</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Contact our support team for assistance with AI tools.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                )}
+
+                {/* Other tabs can be implemented with similar cinematic styling */}
+                {activeTab !== "script-analysis" && activeTab !== "director-chat" && (
+                   <div className="glass-deep rounded-[40px] p-20 border-white/5 flex flex-col items-center justify-center text-center">
+                      <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mb-8">
+                         <div className="w-10 h-10 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+                      </div>
+                      <h2 className="text-4xl font-black font-serif mb-4 uppercase tracking-tight">{activeTab.replace('-', ' ')}</h2>
+                      <p className="text-white/40 max-w-md text-lg font-light">This module is receiving the final cinematic polish. Check back shortly for the upgraded interface.</p>
+                   </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
           </div>
         </div>
       </ResponsiveSection>

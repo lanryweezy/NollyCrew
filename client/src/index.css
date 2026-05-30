@@ -77,9 +77,71 @@
   --chart-5: 320 60% 45%;
 
   --font-sans: Inter, sans-serif;
-  --font-serif: Georgia, serif;
+  --font-serif: "Playfair Display", Georgia, serif;
   --font-mono: JetBrains Mono, monospace;
   --radius: .5rem; /* 8px */
+
+  /* Custom Scrollbar Styles */
+  --scrollbar-width: 8px;
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: hsl(var(--muted-foreground) / 0.3);
+  --scrollbar-thumb-hover: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* Custom Scrollbar Implementation */
+::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-width);
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Cinematic Utilities */
+@layer utilities {
+  .film-grain {
+    position: relative;
+  }
+  
+  .film-grain::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+    filter: contrast(150%) brightness(100%);
+    opacity: 0.05;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .glass-deep {
+    @apply bg-background/40 backdrop-blur-xl border border-white/10 shadow-xl;
+  }
+
+  .glass-card {
+    @apply bg-card/60 backdrop-blur-md border border-border/50 shadow-lg hover:shadow-xl transition-all duration-300;
+  }
+
+  .text-glow {
+    text-shadow: 0 0 15px hsl(var(--primary) / 0.5);
+  }
+
+  .mask-radial {
+    mask-image: radial-gradient(circle, black, transparent);
+  }
+
   --shadow-2xs: 0px 2px 0px 0px hsl(220 15% 75% / 0.15);
   --shadow-xs: 0px 2px 0px 0px hsl(220 15% 75% / 0.15);
   --shadow-sm: 0px 2px 0px 0px hsl(220 15% 75% / 0.15), 0px 1px 2px -1px hsl(220 15% 75% / 0.10);

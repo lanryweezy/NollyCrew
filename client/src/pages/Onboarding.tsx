@@ -118,14 +118,18 @@ export default function Onboarding() {
 
     setIsLoading(true);
     try {
-      // Add each selected role
-      for (const roleId of selectedRoles) {
-        await addRole({
-          role: roleId as any,
-          experience: "entry", // Default experience level
-          specialties: [], // Will be filled in profile setup
-        });
-      }
+      // ⚡ Bolt Optimization: Replace sequential 'for...await' loop with Promise.all()
+      // to execute multiple API calls concurrently, reducing total wait time
+      // from O(N) to max(O(1)) of the slowest request.
+      await Promise.all(
+        selectedRoles.map(roleId =>
+          addRole({
+            role: roleId as any,
+            experience: "entry", // Default experience level
+            specialties: [], // Will be filled in profile setup
+          })
+        )
+      );
 
       toast({
         title: "Welcome to NollyCrew!",

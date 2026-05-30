@@ -25,6 +25,9 @@ if (process.env.NODE_ENV === 'production') {
   const requiredEnvVars = [
     'DATABASE_URL',
     'JWT_SECRET',
+    'REFRESH_SECRET',
+    'EMAIL_TOKEN_SECRET',
+    'RESET_TOKEN_SECRET',
     'PAYSTACK_SECRET_KEY',
     'PAYSTACK_PUBLIC_KEY'
   ];
@@ -94,11 +97,19 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Enforce JWT secret in production
+  // Enforce JWT secrets in production
   if (process.env.NODE_ENV === 'production') {
-    if (!process.env.JWT_SECRET) {
-      logger.error('FATAL: JWT_SECRET must be set in production');
-      process.exit(1);
+    const criticalSecrets = [
+      'JWT_SECRET',
+      'REFRESH_SECRET',
+      'EMAIL_TOKEN_SECRET',
+      'RESET_TOKEN_SECRET'
+    ];
+    for (const secret of criticalSecrets) {
+      if (!process.env[secret]) {
+        logger.error(`FATAL: ${secret} must be set in production`);
+        process.exit(1);
+      }
     }
   }
 

@@ -121,13 +121,18 @@ export const api = {
   async getUserProfile(userId: string) {
     return apiFetch<{ user: any; roles: any[] }>(`/api/users/${userId}/profile`);
   },
-  async requestAudition(payload: { recipientId: string; projectId?: string; roleDescription?: string }) {
+  async requestAudition(payload: { recipientId: string; projectId?: string; roleDescription?: string }) {       
     return apiFetch<{ message: any }>(`/api/auditions/request`, {
       method: 'POST',
       body: JSON.stringify(payload),
     });
   },
-
+  async submitAudition(jobId: string, selfTapeUrl: string) {
+    return apiFetch<{ application: any }>(`/api/jobs/${jobId}/apply`, {
+      method: 'POST',
+      body: JSON.stringify({ selfTapeUrl }),
+    });
+  },
   // Uploads
   async signUpload(filename: string, contentType: string) {
     return apiFetch<{ url: string; fields?: Record<string, string> }>(`/api/uploads/sign`, {
