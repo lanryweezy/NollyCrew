@@ -43,7 +43,7 @@ export default function Auditions() {
     if (!selfTape || !selectedJobId) return;
     setSubmitting(true);
     try {
-      await api.submitAudition(selectedJobId, selfTape);
+      await api.requestAudition({ recipientId: selectedJobId });
       toast({
         title: "Audition Submitted!",
         description: "Your self-tape has been successfully sent to the production team.",

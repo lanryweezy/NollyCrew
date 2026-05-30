@@ -16,7 +16,8 @@ import {
   MessageSquare,
   CheckCheck,
   Clock,
-  UserPlus
+  UserPlus,
+  MessageSquare
 } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import PageHeader from '@/components/PageHeader';

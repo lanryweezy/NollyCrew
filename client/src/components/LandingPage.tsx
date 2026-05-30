@@ -22,7 +22,8 @@ import {
   CheckCircle,
   Star,
   Quote,
-  Play
+  Play,
+  MessageSquare
 } from "lucide-react";
 import ResponsiveSection from "@/components/ResponsiveSection";
 import ResponsiveTypography from "@/components/ResponsiveTypography";
