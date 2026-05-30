@@ -1621,13 +1621,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
 
     app.post("/api/projects/:projectId/dprs", authenticateToken, async (req: any, res) => {
-    const { projectId } = req.params;
-    // Require 'producer', 'director', or 'edit_schedule' permission (reuse for simplicity)
-    const members = await storage.getProjectMembers(projectId);
-    const member = members.find(m => m.userId === req.user.id);
-    if (!member || !(['producer', 'director'].includes(member.role) || (member.permissions as string[])?.includes('edit_schedule'))) {
-      return res.status(403).json({ error: "Insufficient permissions to create DPR" });
-    }
+    try {
+      const { projectId } = req.params;
+      // Require 'producer', 'director', or 'edit_schedule' permission (reuse for simplicity)
+      const members = await storage.getProjectMembers(projectId);
+      const member = members.find(m => m.userId === req.user.id);
+      if (!member || !(['producer', 'director'].includes(member.role) || (member.permissions as string[])?.includes('edit_schedule'))) {
+        return res.status(403).json({ error: "Insufficient permissions to create DPR" });
+      }
 
     try {
       // SENTINEL SECURITY FIX: Prevent mass assignment by validating inputs
