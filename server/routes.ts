@@ -16,7 +16,7 @@ import {
   calculateServiceFee 
 } from "./utils/paystack.js";
 import crypto from "node:crypto";
-import { insertUserSchema, insertUserRoleSchema, insertJobSchema, insertProjectSchema, insertJobApplicationSchema, insertWaitlistSchema, insertMessageSchema, insertReviewSchema, insertSupportTicketSchema } from "../shared/schema.js";
+import { insertUserSchema, insertUserRoleSchema, insertJobSchema, insertProjectSchema, insertJobApplicationSchema, insertWaitlistSchema, insertMessageSchema, insertReviewSchema, insertSupportTicketSchema, insertDailyProgressReportSchema, insertReferralSchema } from "../shared/schema.js";
 import { z } from "zod";
 import paystackapi from 'paystack-api';
 // AWS SDK imports - conditional based on environment
@@ -1609,22 +1609,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
 
     app.post("/api/projects/:projectId/dprs", authenticateToken, async (req: any, res) => {
-    const { projectId } = req.params;
-    // Require 'producer', 'director', or 'edit_schedule' permission (reuse for simplicity)
-    const members = await storage.getProjectMembers(projectId);
-    const member = members.find(m => m.userId === req.user.id);
-    if (!member || !(['producer', 'director'].includes(member.role) || (member.permissions as string[])?.includes('edit_schedule'))) {
-      return res.status(403).json({ error: "Insufficient permissions to create DPR" });
+    try {
+      const { projectId } = req.params;
+      // Require 'producer', 'director', or 'edit_schedule' permission (reuse for simplicity)
+      const members = await storage.getProjectMembers(projectId);
+      const member = members.find(m => m.userId === req.user.id);
+      if (!member || !(['producer', 'director'].includes(member.role) || (member.permissions as string[])?.includes('edit_schedule'))) {
+        return res.status(403).json({ error: "Insufficient permissions to create DPR" });
+      }
+
+      const dprData = insertDailyProgressReportSchema.parse({
+        ...req.body,
+        projectId,
+        reportDate: new Date(req.body.reportDate),
+      });
+
+      const dpr = await storage.createDPR(dprData as any);
+
+      await logAction(req, { action: 'CREATE', entityType: 'daily_progress_reports', entityId: dpr.id });
+      res.status(201).json(dpr);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid input data", details: error.errors });
+      }
+      logger.error('Create DPR error', { error: (error as Error).message });
+      res.status(500).json({ error: "Internal server error" });
     }
-
-    const dpr = await storage.createDPR({
-      ...req.body,
-      projectId,
-      reportDate: new Date(req.body.reportDate),
-    });
-
-    await logAction(req, { action: 'CREATE', entityType: 'daily_progress_reports', entityId: dpr.id });
-    res.status(201).json(dpr);
     });
 
     // Support Tickets / Dispute Resolution (Task 66, 77)
@@ -1638,13 +1648,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
 
     app.post("/api/support/tickets", authenticateToken, async (req: any, res) => {
-    const ticket = await storage.createSupportTicket({
-      ...req.body,
-      userId: req.user.id,
-    });
+    try {
+      const ticketData = insertSupportTicketSchema.parse({
+        ...req.body,
+        userId: req.user.id,
+      });
 
-    await logAction(req, { action: 'CREATE', entityType: 'support_tickets', entityId: ticket.id });
-    res.status(201).json(ticket);
+      const ticket = await storage.createSupportTicket(ticketData as any);
+
+      await logAction(req, { action: 'CREATE', entityType: 'support_tickets', entityId: ticket.id });
+      res.status(201).json(ticket);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid input data", details: error.errors });
+      }
+      logger.error('Create support ticket error', { error: (error as Error).message });
+      res.status(500).json({ error: "Internal server error" });
+    }
     });
 
     app.patch("/api/support/tickets/:id", authenticateToken, async (req: any, res) => {
@@ -1678,15 +1698,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
 
     app.post("/api/referrals", authenticateToken, async (req: any, res) => {
-    const referral = await storage.createReferral({
-      referrerId: req.user.id,
-      referredEmail: req.body.referredEmail,
-      status: 'pending',
-      rewardStatus: 'none'
-    });
+    try {
+      const referralData = insertReferralSchema.parse({
+        referrerId: req.user.id,
+        referredEmail: req.body.referredEmail,
+        status: 'pending',
+        rewardStatus: 'none'
+      });
 
-    await logAction(req, { action: 'CREATE', entityType: 'referrals', entityId: referral.id });
-    res.status(201).json(referral);
+      const referral = await storage.createReferral(referralData as any);
+
+      await logAction(req, { action: 'CREATE', entityType: 'referrals', entityId: referral.id });
+      res.status(201).json(referral);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid input data", details: error.errors });
+      }
+      logger.error('Create referral error', { error: (error as Error).message });
+      res.status(500).json({ error: "Internal server error" });
+    }
     });
 
     return createServer(app);
