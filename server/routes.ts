@@ -1621,7 +1621,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
 
     app.post("/api/projects/:projectId/dprs", authenticateToken, async (req: any, res) => {
-    try {
       const { projectId } = req.params;
       // Require 'producer', 'director', or 'edit_schedule' permission (reuse for simplicity)
       const members = await storage.getProjectMembers(projectId);
@@ -1633,7 +1632,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // SENTINEL SECURITY FIX: Prevent mass assignment by validating inputs
       // Use .safeParse() and explicit type extraction where possible to avoid `as any` issues
-      const validatedData = insertDailyProgressReportSchema.omit({ projectId: true } as any).parse(req.body);
+      const validatedData: any = insertDailyProgressReportSchema.omit({ projectId: true } as any).parse(req.body);
 
       const dpr = await storage.createDPR({
         ...validatedData,
@@ -1719,7 +1718,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     app.post("/api/referrals", authenticateToken, async (req: any, res) => {
     try {
       // SENTINEL SECURITY FIX: Prevent mass assignment by validating inputs
-      const validatedData = insertReferralSchema.pick({ referredEmail: true } as any).parse(req.body);
+      const validatedData: any = insertReferralSchema.pick({ referredEmail: true } as any).parse(req.body);
 
       const referral = await storage.createReferral({
         referrerId: req.user.id,
