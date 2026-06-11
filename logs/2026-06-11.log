@@ -1,0 +1,8 @@
+{"timestamp":"2026-06-11T11:35:35.310Z","level":"info","message":"Using MemStorage (In-memory storage)"}
+{"timestamp":"2026-06-11T11:35:38.217Z","level":"error","message":"Registration error","meta":{"error":"[\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"email\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"firstName\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"lastName\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"password\"\n    ],\n    \"message\": \"Required\"\n  }\n]"}}
+{"timestamp":"2026-06-11T11:35:38.236Z","level":"info","message":"User registered successfully","meta":{"userId":"1","email":"test@example.com"}}
+{"timestamp":"2026-06-11T11:35:38.244Z","level":"warn","message":"Registration attempt with existing email","meta":{"email":"existing@example.com"}}
+{"timestamp":"2026-06-11T11:35:38.252Z","level":"info","message":"User logged in successfully","meta":{"email":"test@example.com"}}
+{"timestamp":"2026-06-11T11:35:38.260Z","level":"warn","message":"Login attempt with non-existent email","meta":{"email":"wrong@example.com"}}
+{"timestamp":"2026-06-11T11:35:38.461Z","level":"info","message":"Using MemStorage (In-memory storage)"}
+{"timestamp":"2026-06-11T11:35:40.538Z","level":"info","message":"Using MemStorage (In-memory storage)"}
