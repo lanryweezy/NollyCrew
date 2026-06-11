@@ -1632,7 +1632,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // SENTINEL SECURITY FIX: Prevent mass assignment by validating inputs
       // Use .safeParse() and explicit type extraction where possible to avoid `as any` issues
-      const validatedData: any = insertDailyProgressReportSchema.omit({ projectId: true } as any).parse(req.body);
+      const validatedData = (insertDailyProgressReportSchema as any).omit({ projectId: true }).parse(req.body) as any;
 
       const dpr = await storage.createDPR({
         ...validatedData,
@@ -1718,7 +1718,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     app.post("/api/referrals", authenticateToken, async (req: any, res) => {
     try {
       // SENTINEL SECURITY FIX: Prevent mass assignment by validating inputs
-      const validatedData: any = insertReferralSchema.pick({ referredEmail: true } as any).parse(req.body);
+      const validatedData = (insertReferralSchema as any).pick({ referredEmail: true }).parse(req.body) as any;
 
       const referral = await storage.createReferral({
         referrerId: req.user.id,
