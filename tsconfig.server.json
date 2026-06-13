@@ -18,7 +18,7 @@
     },
     "resolveJsonModule": true
   },
-  "include": ["server", "shared", "types"],
+  "include": ["server", "shared", "types", "api"],
   "exclude": [
     "node_modules",
     "dist",
