@@ -1637,7 +1637,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const dpr = await storage.createDPR({
         ...(validatedData as any),
         projectId,
-        reportDate: new Date((validatedData as any).reportDate),
+        reportDate: new Date(((validatedData as unknown) as Record<string, any>).reportDate),
       });
 
       await logAction(req, { action: 'CREATE', entityType: 'daily_progress_reports', entityId: dpr.id });
@@ -1722,7 +1722,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const referral = await storage.createReferral({
         referrerId: req.user.id,
-        referredEmail: (validatedData as any).referredEmail,
+        referredEmail: ((validatedData as unknown) as Record<string, any>).referredEmail,
         status: 'pending',
         rewardStatus: 'none'
       });
