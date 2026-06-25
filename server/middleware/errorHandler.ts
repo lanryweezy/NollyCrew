@@ -73,19 +73,6 @@ export const errorHandler = (
     });
   }
 
-  // Handle JWT errors
-  if (err.name === 'JsonWebTokenError') {
-    return res.status(401).json({
-      error: 'Invalid token'
-    });
-  }
-
-  if (err.name === 'TokenExpiredError') {
-    return res.status(401).json({
-      error: 'Token expired'
-    });
-  }
-
   // Default error response
   const statusCode = (err as any).statusCode || 500;
   const message = (err as any).message || 'Internal Server Error';

@@ -36,16 +36,8 @@ export interface AuthResponse {
 }
 
 class AuthService {
-  private token: string | null = null;
   private user: User | null = null;
   private roles: UserRole[] = [];
-
-  constructor() {
-    // Load token from localStorage on initialization
-    if (typeof window !== 'undefined') {
-      this.token = localStorage.getItem('auth_token');
-    }
-  }
 
   async register(userData: {
     email: string;
@@ -60,9 +52,7 @@ class AuthService {
   }): Promise<AuthResponse> {
     const response = await fetch('/api/auth/register', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(userData),
     });
 
@@ -77,26 +67,15 @@ class AuthService {
   }
 
   async login(email: string, password: string): Promise<AuthResponse> {
-    console.log('Attempting login with:', { email, password });
     const response = await fetch('/api/auth/login', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
-    console.log('Login response:', response.status, response.statusText);
 
     if (!response.ok) {
-      console.error('Login failed with status:', response.status);
-      const errorText = await response.text();
-      console.error('Error response body:', errorText);
-      try {
-        const error = JSON.parse(errorText);
-        throw new Error(error.error || 'Login failed');
-      } catch (e) {
-        throw new Error('Login failed with status ' + response.status);
-      }
+      const error = await response.json();
+      throw new Error(error.error || 'Login failed');
     }
 
     const authData: AuthResponse = await response.json();
@@ -105,16 +84,8 @@ class AuthService {
   }
 
   async getCurrentUser(): Promise<{ user: User; roles: UserRole[] } | null> {
-    // Original authentication logic
-    if (!this.token) return null;
-
     try {
-      const response = await fetch('/api/auth/me', {
-        headers: {
-          'Authorization': `Bearer ${this.token}`,
-        },
-      });
-
+      const response = await fetch('/api/auth/me');
       if (!response.ok) {
         this.logout();
         return null;
@@ -125,29 +96,9 @@ class AuthService {
       this.roles = data.roles || [];
       return { user: data.user, roles: data.roles };
     } catch (error) {
-      console.error('Get current user error:', error);
       this.logout();
       return null;
     }
-  }
-
-  async refreshToken(): Promise<string | null> {
-    try {
-      const res = await fetch('/api/auth/refresh', {
-        method: 'POST',
-        credentials: 'include',
-      });
-      if (!res.ok) return null;
-      const data = await res.json();
-      if (data.token) {
-        this.token = data.token;
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('auth_token', data.token);
-        }
-        return data.token;
-      }
-    } catch {}
-    return null;
   }
 
   async addUserRole(roleData: {
@@ -160,16 +111,13 @@ class AuthService {
     skills?: string[];
     languages?: string[];
   }): Promise<UserRole> {
-    if (!this.token || !this.user) {
+    if (!this.user) {
       throw new Error('Not authenticated');
     }
 
     const response = await fetch(`/api/users/${this.user.id}/roles`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.token}`,
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(roleData),
     });
 
@@ -184,20 +132,11 @@ class AuthService {
   }
 
   logout(): void {
-    // Clear server refresh cookie (best-effort)
     try {
-      fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => {});
+      fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
     } catch {}
-    this.token = null;
     this.user = null;
     this.roles = [];
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('auth_token');
-    }
-  }
-
-  getToken(): string | null {
-    return this.token;
   }
 
   getUser(): User | null {
@@ -209,7 +148,7 @@ class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return !!this.token;
+    return !!this.user;
   }
 
   hasRole(role: 'actor' | 'crew' | 'producer'): boolean {
@@ -217,24 +156,18 @@ class AuthService {
   }
 
   private setAuthData(authData: AuthResponse): void {
-    this.token = authData.token;
     this.user = authData.user;
     this.roles = authData.roles || [];
-    
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('auth_token', authData.token);
-    }
   }
 }
 
 export const authService = new AuthService();
 
-// Custom hook for using auth in components
 export function useAuth() {
-  const [user, setUser] = useState<User | null>({ id: '1', role: 'admin', firstName: 'Admin', lastName: 'User', email: 'admin@example.com' } as unknown as User);
+  const [user, setUser] = useState<User | null>(null);
   const [roles, setRoles] = useState<UserRole[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -244,12 +177,9 @@ export function useAuth() {
           setUser(authData.user);
           setRoles(authData.roles);
           setIsAuthenticated(true);
-        } else {
-          setIsAuthenticated(false);
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
-        setIsAuthenticated(false);
       } finally {
         setLoading(false);
       }
@@ -259,27 +189,19 @@ export function useAuth() {
   }, []);
 
   const login = async (email: string, password: string) => {
-    try {
-      const authData = await authService.login(email, password);
-      setUser(authData.user);
-      setRoles(authData.roles || []);
-      setIsAuthenticated(true);
-      return authData;
-    } catch (error) {
-      throw error;
-    }
+    const authData = await authService.login(email, password);
+    setUser(authData.user);
+    setRoles(authData.roles || []);
+    setIsAuthenticated(true);
+    return authData;
   };
 
   const register = async (userData: Parameters<typeof authService.register>[0]) => {
-    try {
-      const authData = await authService.register(userData);
-      setUser(authData.user);
-      setRoles(authData.roles || []);
-      setIsAuthenticated(true);
-      return authData;
-    } catch (error) {
-      throw error;
-    }
+    const authData = await authService.register(userData);
+    setUser(authData.user);
+    setRoles(authData.roles || []);
+    setIsAuthenticated(true);
+    return authData;
   };
 
   const logout = () => {
@@ -290,13 +212,9 @@ export function useAuth() {
   };
 
   const addRole = async (roleData: Parameters<typeof authService.addUserRole>[0]) => {
-    try {
-      const newRole = await authService.addUserRole(roleData);
-      setRoles(prev => [...prev, newRole]);
-      return newRole;
-    } catch (error) {
-      throw error;
-    }
+    const newRole = await authService.addUserRole(roleData);
+    setRoles(prev => [...prev, newRole]);
+    return newRole;
   };
 
   return {

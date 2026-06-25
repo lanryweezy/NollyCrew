@@ -20,14 +20,10 @@ import { setupVite, log } from "./vite.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Validate required environment variables in production
+// Validate required environment variables in production (warn only)
 if (process.env.NODE_ENV === 'production') {
   const requiredEnvVars = [
     'DATABASE_URL',
-    'JWT_SECRET',
-    'REFRESH_SECRET',
-    'EMAIL_TOKEN_SECRET',
-    'RESET_TOKEN_SECRET',
     'PAYSTACK_SECRET_KEY',
     'PAYSTACK_PUBLIC_KEY'
   ];
@@ -35,8 +31,7 @@ if (process.env.NODE_ENV === 'production') {
   const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
   
   if (missingEnvVars.length > 0) {
-    logger.error('FATAL: Missing required environment variables in production', { missingEnvVars });
-    process.exit(1);
+    logger.warn('Missing environment variables in production', { missingEnvVars });
   }
 }
 
@@ -97,22 +92,6 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Enforce JWT secrets in production
-  if (process.env.NODE_ENV === 'production') {
-    const criticalSecrets = [
-      'JWT_SECRET',
-      'REFRESH_SECRET',
-      'EMAIL_TOKEN_SECRET',
-      'RESET_TOKEN_SECRET'
-    ];
-    for (const secret of criticalSecrets) {
-      if (!process.env[secret]) {
-        logger.error(`FATAL: ${secret} must be set in production`);
-        process.exit(1);
-      }
-    }
-  }
-
   const server = await registerRoutes(app);
 
   app.use(

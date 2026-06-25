@@ -2,12 +2,17 @@
   "version": 2,
   "functions": {
     "api/index.ts": {
-      "includeFiles": "dist/**, public/**"
+      "includeFiles": "dist/**",
+      "maxDuration": 30
+    },
+    "api/cron/escrow.ts": {
+      "includeFiles": "dist/**",
+      "maxDuration": 30
     }
   },
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!api/).*)",
       "destination": "/api/index.ts"
     }
   ],

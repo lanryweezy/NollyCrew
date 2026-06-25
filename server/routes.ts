@@ -4,7 +4,6 @@ dotenv.config();
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import bcrypt from "bcryptjs";
-import { sign as jwtSign, verify as jwtVerify } from "./utils/jwt.js";
 import { storage } from "./storage.js";
 import { logAction } from "./utils/audit.js";
 import { openai } from "./ai.js";
@@ -62,23 +61,9 @@ import { logger } from './utils/logger.js';
 import { HealthChecker } from './utils/monitoring.js';
 import { exportToCSV } from './utils/export.js';
 
-// JWT secrets
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
-  throw new Error("JWT_SECRET environment variable is required");
-}
-const REFRESH_SECRET = process.env.REFRESH_SECRET;
-if (!REFRESH_SECRET) {
-  throw new Error("REFRESH_SECRET environment variable is required");
-}
-const EMAIL_TOKEN_SECRET = process.env.EMAIL_TOKEN_SECRET;
-if (!EMAIL_TOKEN_SECRET) {
-  throw new Error("EMAIL_TOKEN_SECRET environment variable is required");
-}
-const RESET_TOKEN_SECRET = process.env.RESET_TOKEN_SECRET;
-if (!RESET_TOKEN_SECRET) {
-  throw new Error("RESET_TOKEN_SECRET environment variable is required");
-}
+// Auth disabled - no JWT secrets needed
+let paystackapi: any;
+try { paystackapi = await import('paystack-api'); } catch {}
 
 // Configure multer for file uploads
 const upload = multer({ 
@@ -195,17 +180,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         passwordHash
       });
 
-      // Generate JWT token
-      const token = jwtSign(
-        { userId: user.id, email: user.email }, 
-        JWT_SECRET as string, 
-        { expiresIn: '7d' }
-      );
-
       // Return user without password
       const { passwordHash: _, ...userWithoutPassword } = user;
       logger.info('User registered successfully', { userId: user.id, email: user.email });
-      res.status(201).json({ user: userWithoutPassword, token });
+      res.status(201).json({ user: userWithoutPassword, token: 'no-auth' });
     } catch (error) {
       logger.error('Registration error', { error: (error as Error).message });
       if (error instanceof z.ZodError) {
@@ -215,132 +193,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Request email verification (sends a signed token; integrate email provider later)
-  app.post('/api/auth/request-verify', authRateLimiter, authenticateToken, async (req: any, res) => {
-    try {
-      const token = jwtSign({ userId: req.user.id }, EMAIL_TOKEN_SECRET as string, { expiresIn: '1d' });
-      // In a real system, send via email. For MVP, log token and return a hint.
-      logger.info('[email-verify] token generated', { userId: req.user.id, email: req.user.email });
-      res.json({ ok: true });
-    } catch (error) {
-      logger.error('Email verification request error', { error: (error as Error).message });
-      res.status(500).json({ error: 'Internal server error' });
-    }
+  // Email verification - disabled
+  app.post('/api/auth/request-verify', authRateLimiter, async (req: any, res) => {
+    res.json({ ok: true, message: 'Email verification disabled' });
   });
 
-  // Verify email using token
-  app.post('/api/auth/verify', authRateLimiter, async (req, res) => {
-    try {
-      const { token } = req.body as any;
-      if (!token) return res.status(400).json({ error: 'token required' });
-      const payload = jwtVerify(token, EMAIL_TOKEN_SECRET as string) as any;
-      const user = await storage.getUser(payload.userId);
-      if (!user) return res.status(400).json({ error: 'Invalid token' });
-      const updated = await storage.updateUser(user.id, { isVerified: true } as any);
-      const { passwordHash: _ph, ...userWithoutPassword } = updated as any;
-      logger.info('Email verified', { userId: user.id });
-      res.json({ user: userWithoutPassword });
-    } catch (error) {
-      logger.warn('Email verification failed', { error: (error as Error).message });
-      return res.status(400).json({ error: 'Invalid token' });
-    }
+  app.post('/api/auth/verify', authRateLimiter, async (req: any, res) => {
+    res.json({ ok: true, message: 'Email verification disabled' });
   });
 
-  // Request password reset (logs token; integrate email later)
-  app.post('/api/auth/request-password-reset', authRateLimiter, async (req, res) => {
-    try {
-      const { email } = req.body as any;
-      if (!email) return res.status(400).json({ error: 'email required' });
-      
-      if (!isValidEmail(email)) {
-        return res.status(400).json({ error: 'Invalid email format' });
-      }
-      
-      const user = await storage.getUserByEmail(email);
-      if (user) {
-        const token = jwtSign({ userId: user.id }, RESET_TOKEN_SECRET as string, { expiresIn: '1h' });
-        logger.info('[password-reset] token generated', { email });
-      }
-      // Always respond ok to avoid user enumeration
-      res.json({ ok: true });
-    } catch (error) {
-      logger.error('Password reset request error', { error: (error as Error).message });
-      res.status(500).json({ error: 'Internal server error' });
-    }
+  // Password reset - disabled
+  app.post('/api/auth/request-password-reset', authRateLimiter, async (req: any, res) => {
+    res.json({ ok: true, message: 'Password reset disabled' });
   });
 
-  // Reset password with token
-  app.post('/api/auth/reset-password', authRateLimiter, async (req, res) => {
-    try {
-      const { token, password } = req.body as any;
-      if (!token || !password) return res.status(400).json({ error: 'token and password required' });
-      
-      if (!isValidPassword(password)) {
-        return res.status(400).json({ 
-          error: 'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number' 
-        });
-      }
-      
-      const payload = jwtVerify(token, RESET_TOKEN_SECRET as string) as any;
-      const user = await storage.getUser(payload.userId);
-      if (!user) return res.status(400).json({ error: 'Invalid token' });
-      
-      const saltRounds = 10;
-      const passwordHash = await bcrypt.hash(password, saltRounds);
-      const updated = await storage.updateUser(user.id, { passwordHash } as any);
-      
-      const { passwordHash: _ph, ...userWithoutPassword } = updated as any;
-      logger.info('Password reset successful', { userId: user.id });
-      res.json({ user: userWithoutPassword });
-    } catch (error) {
-      logger.warn('Password reset failed', { error: (error as Error).message });
-      return res.status(400).json({ error: 'Invalid token' });
-    }
+  app.post('/api/auth/reset-password', authRateLimiter, async (req: any, res) => {
+    res.json({ ok: true, message: 'Password reset disabled' });
   });
 
-  // Google OAuth login
+  // Google OAuth - mock
   app.get('/api/auth/google', (req, res) => {
-    // In a real implementation, redirect to Google OAuth
-    // For MVP, just return a mock URL
-    const mockAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${process.env.CLIENT_URL}/auth/callback&response_type=code&scope=openid%20email%20profile`;
-    res.redirect(mockAuthUrl);
+    res.redirect(process.env.CLIENT_URL || '/');
   });
 
-  // Google OAuth callback
   app.get('/api/auth/google/callback', async (req, res) => {
-    try {
-      // In a real implementation, exchange code for tokens and fetch user info
-      // For MVP, create a mock user
-      const mockUser = {
-        email: 'google.user@example.com',
-        firstName: 'Google',
-        lastName: 'User',
-        isVerified: true,
-      };
-      
-      // Check if user exists, create if not
-      let user = await storage.getUserByEmail(mockUser.email);
-      if (!user) {
-        user = await storage.createUser({
-          ...mockUser,
-          passwordHash: 'mock-google-password-hash'
-        });
-      }
-      
-      // Generate JWT token
-      const token = jwtSign(
-        { userId: user.id, email: user.email }, 
-        JWT_SECRET as string, 
-        { expiresIn: '7d' }
-      );
-      
-      const { passwordHash: _, ...userWithoutPassword } = user;
-      logger.info('Google OAuth login successful', { userId: user.id, email: user.email });
-      res.json({ user: userWithoutPassword, token });
-    } catch (error) {
-      logger.error('Google OAuth error', { error: (error as Error).message });
-      res.status(500).json({ error: 'Internal server error' });
-    }
+    res.redirect(process.env.CLIENT_URL || '/');
   });
 
   // Login route
@@ -366,25 +243,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: 'Invalid credentials' });
       }
 
-      // Generate JWT token
-      const token = jwtSign(
-        { userId: user.id, email: user.email }, 
-        JWT_SECRET as string, 
-        { expiresIn: '7d' }
-      );
-      const refreshToken = jwtSign({ userId: user.id }, REFRESH_SECRET as string, { expiresIn: '30d' });
-      res.cookie('refresh_token', refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 30 * 24 * 60 * 60 * 1000,
-        path: '/api/auth',
-      });
-
-      // Return user without password
+      // Return user without password (no token)
       const { passwordHash: _, ...userWithoutPassword } = user;
       logger.info('User logged in successfully', { userId: user.id, email: user.email });
-      res.json({ user: userWithoutPassword, token });
+      res.json({ user: userWithoutPassword, token: 'no-auth' });
     } catch (error) {
       logger.error('Login error', { error: (error as Error).message });
       res.status(500).json({ error: 'Internal server error' });
@@ -402,26 +264,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Refresh token
   app.post('/api/auth/refresh', async (req: any, res) => {
-    try {
-      const token = req.cookies?.refresh_token;
-      if (!token) return res.status(401).json({ error: 'No refresh token' });
-      const payload = jwtVerify(token, REFRESH_SECRET as string) as any;
-      const user = await storage.getUser(payload.userId);
-      if (!user) return res.status(401).json({ error: 'Invalid refresh token' });
-      const accessToken = jwtSign({ userId: user.id, email: user.email }, JWT_SECRET as string, { expiresIn: '7d' });
-      res.json({ token: accessToken });
-    } catch (error) {
-      logger.warn('Invalid refresh token', { error: (error as Error).message });
-      return res.status(401).json({ error: 'Invalid refresh token' });
-    }
+    res.json({ token: 'no-auth' });
   });
 
-  // Auth logout clears refresh cookie
   app.post('/api/auth/logout', authenticateToken, async (req: any, res) => {
-    res.clearCookie('refresh_token', { path: '/api/auth' });
-    logger.info('User logged out', { userId: req.user.id });
+    logger.info('User logged out', { userId: req.user?.id });
     res.json({ ok: true });
   });
 

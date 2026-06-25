@@ -1,30 +1,12 @@
 import { createUploadthing, type FileRouter } from "uploadthing/express";
-import { verify as jwtVerify } from "../utils/jwt.js";
 
 const f = createUploadthing();
-
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
-  throw new Error("JWT_SECRET environment variable is required");
-}
-
-const auth = async (req: any) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) return null;
-  try {
-    const decoded: any = jwtVerify(token, JWT_SECRET);
-    return { id: decoded.userId };
-  } catch {
-    return null;
-  }
-};
 
 export const ourFileRouter = {
   scriptUploader: f({ pdf: { maxFileSize: "16MB" } })
     .middleware(async ({ req }) => {
-      const user = await auth(req);
-      if (!user) throw new Error("Unauthorized");
-      return { userId: user.id };
+      const userId = (req as any).user?.id || 'anonymous';
+      return { userId };
     })
     .onUploadComplete(async ({ metadata, file }) => {
       console.log("Upload complete for userId:", metadata.userId);
@@ -34,9 +16,8 @@ export const ourFileRouter = {
     
   mediaUploader: f({ image: { maxFileSize: "4MB" }, video: { maxFileSize: "32MB" } })
     .middleware(async ({ req }) => {
-      const user = await auth(req);
-      if (!user) throw new Error("Unauthorized");
-      return { userId: user.id };
+      const userId = (req as any).user?.id || 'anonymous';
+      return { userId };
     })
     .onUploadComplete(async ({ metadata, file }) => {
       return { uploadedBy: metadata.userId };
