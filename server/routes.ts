@@ -17,7 +17,6 @@ import {
 import crypto from "node:crypto";
 import { insertUserSchema, insertUserRoleSchema, insertJobSchema, insertProjectSchema, insertJobApplicationSchema, insertWaitlistSchema, insertMessageSchema, insertReviewSchema, insertSupportTicketSchema, insertDailyProgressReportSchema, insertReferralSchema } from "../shared/schema.js";
 import { z } from "zod";
-import paystackapi from 'paystack-api';
 // AWS SDK imports - conditional based on environment
 let S3Client: any, PutObjectCommand: any, getSignedUrl: any;
 if (process.env.AWS_ACCESS_KEY_ID) {
@@ -61,9 +60,9 @@ import { logger } from './utils/logger.js';
 import { HealthChecker } from './utils/monitoring.js';
 import { exportToCSV } from './utils/export.js';
 
-// Auth disabled - no JWT secrets needed
-let paystackapi: any;
-try { paystackapi = await import('paystack-api'); } catch {}
+// Paystack - loaded dynamically
+let paystack: any = null;
+try { paystack = (await import('paystack-api')).default; } catch { console.warn('Paystack not available'); }
 
 // Configure multer for file uploads
 const upload = multer({ 
@@ -285,17 +284,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Paystack Payment Routes
-  const paystack = process.env.PAYSTACK_SECRET_KEY ? paystackapi(process.env.PAYSTACK_SECRET_KEY!) : null;
+  const paystackClient = process.env.PAYSTACK_SECRET_KEY && paystack ? paystack(process.env.PAYSTACK_SECRET_KEY) : null;
 
   app.post('/api/payment/paystack/initialize', authenticateToken, async (req: any, res) => {
     try {
-      if (!paystack) {
+      if (!paystackClient) {
         return res.status(500).json({ error: 'Payment system not configured' });
       }
       
       const { amount, email } = req.body;
       
-      const response = await paystack.transaction.initialize({
+      const response = await paystackClient.transaction.initialize({
         email,
         amount: amount * 100, // Convert to kobo
         callback_url: `${process.env.CLIENT_URL}/payment/callback`,
