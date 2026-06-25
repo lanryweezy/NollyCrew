@@ -1,11 +1,16 @@
 import OpenAI from 'openai';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 }) : null;
 
-const genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
+let GoogleGenerativeAI: any = null;
+let genAI: any = null;
+try {
+  const mod = await import('@google/generative-ai');
+  GoogleGenerativeAI = mod.GoogleGenerativeAI;
+  genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
+} catch {}
 
 // 17. Video Analysis using Gemini 1.5 Pro
 export async function analyzeAuditionVideo(videoUri: string, mimeType: string): Promise<any> {
