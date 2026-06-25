@@ -164,29 +164,24 @@ class AuthService {
 export const authService = new AuthService();
 
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(null);
-  const [roles, setRoles] = useState<UserRole[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<User | null>({
+    id: 'demo-user',
+    email: 'demo@nollycrew.com',
+    firstName: 'Demo',
+    lastName: 'User',
+    isVerified: true,
+  });
+  const [roles, setRoles] = useState<UserRole[]>([{
+    id: 'demo-role',
+    userId: 'demo-user',
+    role: 'producer',
+    isActive: true,
+  }]);
+  const [loading, setLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
 
-  useEffect(() => {
-    const initAuth = async () => {
-      try {
-        const authData = await authService.getCurrentUser();
-        if (authData) {
-          setUser(authData.user);
-          setRoles(authData.roles);
-          setIsAuthenticated(true);
-        }
-      } catch (error) {
-        console.error('Auth initialization error:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initAuth();
-  }, []);
+  // Demo mode: skip server auth check
+  // useEffect(() => { ... }, []);
 
   const login = async (email: string, password: string) => {
     const authData = await authService.login(email, password);
