@@ -1,10 +1,9 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
-import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "@/lib/auth";
-import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/auth-context";
+import { jobs } from "@/lib/api";
+import { isSupabaseConfigured } from "@/lib/supabase";
 import Navigation from "@/components/Navigation";
-import ThemeToggle from "@/components/ThemeToggle";
 import SearchFilters from "@/components/SearchFilters";
 import JobCard from "@/components/JobCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,361 +12,269 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
+import {
   Search,
-  Filter,
   MapPin,
   Clock,
   Users,
-  Star,
-  Bookmark,
-  Plus,
   Briefcase,
   Film,
-  Camera
+  Camera,
+  Plus,
+  Loader2
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
-import ListSkeleton from "@/components/ListSkeleton";
+import type { Job } from "@/types/database";
+
+// Demo data for when Supabase is not configured
+const DEMO_JOBS: Job[] = [
+  {
+    id: "demo-1",
+    title: "Lead Actor - Romantic Drama",
+    type: "casting",
+    category: "lead-actor",
+    description: "We are seeking a talented lead actor for our upcoming romantic drama series.",
+    location: "Lagos, Nigeria",
+    budget: 3500000,
+    currency: "NGN",
+    duration: "6 weeks",
+    deadline: "2026-12-30",
+    is_urgent: true,
+    is_active: true,
+    posted_by_id: "demo-user",
+    project_id: null,
+    payment_type: "project",
+    requirements: ["5+ years experience", "Age 25-35", "Lagos based"],
+    skills: ["Acting", "Drama"],
+    experience: "senior",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: "demo-2",
+    title: "Cinematographer - Action Film",
+    type: "crew",
+    category: "cinematographer",
+    description: "Looking for an experienced cinematographer for a high-budget action film.",
+    location: "Abuja, Nigeria",
+    budget: 2000000,
+    currency: "NGN",
+    duration: "8 weeks",
+    deadline: "2026-01-15",
+    is_urgent: false,
+    is_active: true,
+    posted_by_id: "demo-user",
+    project_id: null,
+    payment_type: "project",
+    requirements: ["8+ years experience", "Action film portfolio"],
+    skills: ["Cinematography", "Drone"],
+    experience: "expert",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: "demo-3",
+    title: "Sound Engineer - Documentary",
+    type: "crew",
+    category: "sound-engineer",
+    description: "Experienced sound engineer needed for documentary production.",
+    location: "Port Harcourt, Nigeria",
+    budget: 800000,
+    currency: "NGN",
+    duration: "3 weeks",
+    deadline: "2026-01-10",
+    is_urgent: false,
+    is_active: true,
+    posted_by_id: "demo-user",
+    project_id: null,
+    payment_type: "project",
+    requirements: ["5+ years experience", "Documentary experience"],
+    skills: ["Sound Engineering", "Field Recording"],
+    experience: "mid",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  }
+];
 
 export default function Jobs() {
   const [, setLocation] = useLocation();
-  const { user, roles } = useAuth();
-  const { toast } = useToast();
+  const { profile, isAuthenticated } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("all");
   const [selectedLocation, setSelectedLocation] = useState("all");
   const [activeTab, setActiveTab] = useState("browse");
-  const [loadingList, setLoadingList] = useState(false);
+  const [loadingList, setLoadingList] = useState(true);
+  const [jobList, setJobList] = useState<Job[]>([]);
 
-  // Mock job data
-  const mockJobs = [
-    {
-      id: "1",
-      title: "Lead Actor - Romantic Drama",
-      type: "casting" as const,
-      company: "Trino Studios",
-      location: "Lagos, Nigeria",
-      budget: "₦2M - ₦5M",
-      duration: "6 weeks",
-      deadline: "Apply by Dec 30",
-      description: "We are seeking a talented lead actor for our upcoming romantic drama series. The role requires strong emotional range and chemistry with co-stars.",
-      requirements: ["5+ years experience", "Age 25-35", "Lagos based", "Previous drama experience"],
-      applicants: 45,
-      isUrgent: true,
-      isBookmarked: false,
-      postedDate: "2 days ago",
-      category: "lead-actor"
-    },
-    {
-      id: "2",
-      title: "Cinematographer - Action Film",
-      type: "crew" as const,
-      company: "FilmOne Productions",
-      location: "Abuja, Nigeria", 
-      budget: "₦1.5M - ₦3M",
-      duration: "8 weeks",
-      deadline: "Apply by Jan 15",
-      description: "Looking for an experienced cinematographer for a high-budget action film. Must have experience with action sequences and drone cinematography.",
-      requirements: ["8+ years experience", "Action film portfolio", "Drone license", "Equipment ownership"],
-      applicants: 23,
-      isUrgent: false,
-      isBookmarked: true,
-      postedDate: "1 week ago",
-      category: "cinematographer"
-    },
-    {
-      id: "3",
-      title: "Supporting Actor - Comedy Series",
-      type: "casting" as const,
-      company: "EbonyLife Studios",
-      location: "Lagos, Nigeria",
-      budget: "₦800K - ₦1.2M",
-      duration: "4 weeks",
-      deadline: "Apply by Jan 5",
-      description: "Seeking a charismatic supporting actor for a comedy series. Must have excellent comedic timing and improvisation skills.",
-      requirements: ["3+ years experience", "Comedy background", "Improv skills", "Lagos based"],
-      applicants: 67,
-      isUrgent: false,
-      isBookmarked: false,
-      postedDate: "3 days ago",
-      category: "supporting-actor"
-    },
-    {
-      id: "4",
-      title: "Sound Engineer - Documentary",
-      type: "crew" as const,
-      company: "Documentary Films Ltd",
-      location: "Port Harcourt, Nigeria",
-      budget: "₦600K - ₦1M",
-      duration: "3 weeks",
-      deadline: "Apply by Jan 10",
-      description: "Experienced sound engineer needed for documentary production. Must have experience with field recording and post-production.",
-      requirements: ["5+ years experience", "Documentary experience", "Field recording skills", "Post-production knowledge"],
-      applicants: 12,
-      isUrgent: false,
-      isBookmarked: false,
-      postedDate: "5 days ago",
-      category: "sound-engineer"
+  useEffect(() => {
+    loadJobs();
+  }, []);
+
+  async function loadJobs() {
+    setLoadingList(true);
+    if (isSupabaseConfigured()) {
+      const data = await jobs.list({
+        type: selectedType !== 'all' ? selectedType : undefined,
+        location: selectedLocation !== 'all' ? selectedLocation : undefined,
+      });
+      setJobList(data);
+    } else {
+      // Demo mode
+      setJobList(DEMO_JOBS);
     }
-  ];
+    setLoadingList(false);
+  }
 
-  // Optimization: Memoize the filtered jobs list to prevent O(N) recalculation
-  // on every render, improving performance when users interact with non-filter UI elements.
-  // Impact: O(N) array filtering is now only executed when search terms or filters change,
-  // reducing unnecessary render time by 100% for unrelated state updates.
   const filteredJobs = useMemo(() => {
-    return mockJobs.filter(job => {
-      const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           job.description.toLowerCase().includes(searchTerm.toLowerCase());
-
+    return jobList.filter(job => {
+      const matchesSearch = !searchTerm ||
+        job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        job.description.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesType = selectedType === "all" || job.type === selectedType;
       const matchesLocation = selectedLocation === "all" || job.location.includes(selectedLocation);
-
       return matchesSearch && matchesType && matchesLocation;
     });
-  }, [searchTerm, selectedType, selectedLocation]); // mockJobs is static here
+  }, [jobList, searchTerm, selectedType, selectedLocation]);
 
-  // Optimization: useCallback prevents recreating these functions on every render.
-  // This is crucial for React.memo on JobCard to actually work.
-  const handleApply = useCallback(async (jobId: string) => {
-    try {
-      // Mock application submission
-      toast({
-        title: "Application submitted!",
-        description: "Your application has been sent to the hiring team.",
-      });
-    } catch (error) {
-      toast({
-        title: "Application failed",
-        description: "There was an error submitting your application.",
-        variant: "destructive"
-      });
-    }
-  }, [toast]);
-
-  const handleBookmark = useCallback((jobId: string) => {
-    toast({
-      title: "Job bookmarked",
-      description: "This job has been saved to your bookmarks.",
-    });
-  }, [toast]);
-
-  const getPrimaryRole = () => {
-    if (roles.length === 0) return "actor";
-    return roles[0].role;
-  };
-
-  const getRoleBasedActions = () => {
-    const primaryRole = getPrimaryRole();
-    
-    if (primaryRole === "producer") {
-      return (
-        <Button onClick={() => setLocation("/jobs/post")} className="flex items-center gap-2">
-          <Plus className="w-4 h-4" />
-          Post a Job
-        </Button>
-      );
-    }
-    
-    return null;
-  };
+  const castingJobs = filteredJobs.filter(j => j.type === "casting");
+  const crewJobs = filteredJobs.filter(j => j.type === "crew");
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="min-h-screen bg-background"
-    >
-      {/* Navigation */}
-      <div className="relative">
-        <Navigation 
-          isAuthenticated={true}
-          userRole={getPrimaryRole()}
-          userName={`${user?.firstName} ${user?.lastName}`}
+    <div className="min-h-screen bg-background">
+      <Navigation isAuthenticated={isAuthenticated} />
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <PageHeader
+          title="Jobs & Casting Calls"
+          description="Find your next role or hire talented professionals"
+          actions={
+            <Button onClick={() => setLocation("/jobs/new")}>
+              <Plus className="w-4 h-4 mr-2" />
+              Post a Job
+            </Button>
+          }
         />
-        <div className="absolute top-4 right-4 z-50">
-          <ThemeToggle />
+
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Input
+              placeholder="Search jobs..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Select value={selectedType} onValueChange={setSelectedType}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Job Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value="casting">Casting Calls</SelectItem>
+              <SelectItem value="crew">Crew Positions</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Location" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Locations</SelectItem>
+              <SelectItem value="Lagos">Lagos</SelectItem>
+              <SelectItem value="Abuja">Abuja</SelectItem>
+              <SelectItem value="Port Harcourt">Port Harcourt</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <PageHeader 
-          title="Find Opportunities"
-          subtitle="Discover casting calls, crew positions, and production opportunities"
-          rightActions={getRoleBasedActions()}
-        />
-
-        {/* Search and Filters */}
-        <Card className="mb-8">
-          <CardContent className="pt-6">
-            <div className="flex flex-col lg:flex-row gap-4">
-              {/* Search */}
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search jobs, companies, or keywords..."
-                    value={searchTerm}
-                    onChange={(e) => {
-                      setSearchTerm(e.target.value);
-                      setLoadingList(true);
-                      setTimeout(() => setLoadingList(false), 350);
-                    }}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-
-              {/* Filters */}
-              <div className="flex gap-4">
-                <Select value={selectedType} onValueChange={setSelectedType}>
-                  <SelectTrigger className="w-40">
-                    <SelectValue placeholder="Job Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
-                    <SelectItem value="casting">Casting</SelectItem>
-                    <SelectItem value="crew">Crew</SelectItem>
-                    <SelectItem value="project">Project</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-                  <SelectTrigger className="w-40">
-                    <SelectValue placeholder="Location" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Locations</SelectItem>
-                    <SelectItem value="Lagos">Lagos</SelectItem>
-                    <SelectItem value="Abuja">Abuja</SelectItem>
-                    <SelectItem value="Port Harcourt">Port Harcourt</SelectItem>
-                    <SelectItem value="Remote">Remote</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Tabs */}
+        {/* Job Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="browse">Browse Jobs</TabsTrigger>
-            <TabsTrigger value="applications">My Applications</TabsTrigger>
-            <TabsTrigger value="bookmarks">Bookmarks</TabsTrigger>
+          <TabsList>
+            <TabsTrigger value="browse" className="flex items-center gap-2">
+              <Briefcase className="w-4 h-4" />
+              All Jobs ({filteredJobs.length})
+            </TabsTrigger>
+            <TabsTrigger value="casting" className="flex items-center gap-2">
+              <Film className="w-4 h-4" />
+              Casting ({castingJobs.length})
+            </TabsTrigger>
+            <TabsTrigger value="crew" className="flex items-center gap-2">
+              <Camera className="w-4 h-4" />
+              Crew ({crewJobs.length})
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="browse" className="space-y-6">
-            {/* Results Summary */}
-            <div className="flex items-center justify-between">
-              <p className="text-muted-foreground">
-                {filteredJobs.length} job{filteredJobs.length !== 1 ? 's' : ''} found
-              </p>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Sort by:</span>
-                <Select defaultValue="recent">
-                  <SelectTrigger className="w-32">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="recent">Most Recent</SelectItem>
-                    <SelectItem value="deadline">Deadline</SelectItem>
-                    <SelectItem value="budget">Budget</SelectItem>
-                    <SelectItem value="applicants">Applicants</SelectItem>
-                  </SelectContent>
-                </Select>
+          <TabsContent value="browse" className="mt-6">
+            {loadingList ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
               </div>
-            </div>
-
-            {/* Job Listings */}
-            <AnimatePresence mode="popLayout">
-              {loadingList ? (
-                <motion.div
-                  key="skeleton"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  <ListSkeleton rows={6} />
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="results"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="grid grid-cols-1 lg:grid-cols-2 gap-6"
-                >
-                  {filteredJobs.map((job, index) => (
-                    <motion.div
-                      key={job.id}
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: index * 0.05 }}
-                    >
-                      <JobCard
-                        {...job}
-                        onApply={handleApply}
-                        onBookmark={handleBookmark}
-                      />
-                    </motion.div>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {filteredJobs.length === 0 && (
+            ) : filteredJobs.length === 0 ? (
               <Card>
-                <CardContent className="pt-6 text-center">
-                  <Briefcase className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No jobs found</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Try adjusting your search criteria or check back later for new opportunities.
+                <CardContent className="py-12 text-center">
+                  <Briefcase className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold">No jobs found</h3>
+                  <p className="text-muted-foreground mt-1">
+                    {searchTerm ? "Try adjusting your search" : "Be the first to post a job!"}
                   </p>
-                  <Button variant="outline" onClick={() => {
-                    setSearchTerm("");
-                    setSelectedType("all");
-                    setSelectedLocation("all");
-                  }}>
-                    Clear Filters
-                  </Button>
                 </CardContent>
               </Card>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {filteredJobs.map(job => (
+                  <JobCard key={job.id} job={job} />
+                ))}
+              </div>
             )}
           </TabsContent>
 
-          <TabsContent value="applications" className="space-y-6">
-            <Card>
-              <CardContent className="pt-6 text-center">
-                <Film className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Your Applications</h3>
-                <p className="text-muted-foreground mb-4">
-                  Track the status of your job applications here.
-                </p>
-                <Button variant="outline" onClick={() => setActiveTab("browse")}>
-                  Browse Jobs
-                </Button>
-              </CardContent>
-            </Card>
+          <TabsContent value="casting" className="mt-6">
+            {loadingList ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            ) : castingJobs.length === 0 ? (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <Film className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold">No casting calls</h3>
+                  <p className="text-muted-foreground mt-1">Check back later</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {castingJobs.map(job => (
+                  <JobCard key={job.id} job={job} />
+                ))}
+              </div>
+            )}
           </TabsContent>
 
-          <TabsContent value="bookmarks" className="space-y-6">
-            <Card>
-              <CardContent className="pt-6 text-center">
-                <Bookmark className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Bookmarked Jobs</h3>
-                <p className="text-muted-foreground mb-4">
-                  Your saved job opportunities will appear here.
-                </p>
-                <Button variant="outline" onClick={() => setActiveTab("browse")}>
-                  Browse Jobs
-                </Button>
-              </CardContent>
-            </Card>
+          <TabsContent value="crew" className="mt-6">
+            {loadingList ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            ) : crewJobs.length === 0 ? (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <Camera className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold">No crew positions</h3>
+                  <p className="text-muted-foreground mt-1">Check back later</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {crewJobs.map(job => (
+                  <JobCard key={job.id} job={job} />
+                ))}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
-      </div>
-    </motion.div>
+      </main>
+    </div>
   );
 }

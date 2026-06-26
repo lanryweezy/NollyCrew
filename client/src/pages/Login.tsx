@@ -1,180 +1,83 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useAuth } from "@/lib/auth-context";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useToast } from "@/hooks/use-toast";
-import { Film, Mail, Lock, Eye, EyeOff } from "lucide-react";
-import { useAuth } from "@/lib/auth";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-
-const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(1, "Password is required"),
-});
-
-type LoginForm = z.infer<typeof loginSchema>;
+import { Label } from "@/components/ui/label";
+import { Film, Loader2 } from "lucide-react";
 
 export default function Login() {
   const [, setLocation] = useLocation();
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
-  const { toast } = useToast();
+  const { signIn } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const form = useForm<LoginForm>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
 
-  const onSubmit = async (data: LoginForm) => {
-    setIsLoading(true);
-    try {
-      await login(data.email, data.password);
-      toast({
-        title: "Welcome back!",
-        description: "You have successfully logged in.",
-      });
+    const { error } = await signIn(email, password);
+    if (error) {
+      setError(error.message || "Login failed");
+      setLoading(false);
+    } else {
       setLocation("/dashboard");
-    } catch (error) {
-      toast({
-        title: "Login failed",
-        description: error instanceof Error ? error.message : "An error occurred during login",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
     }
-  };
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/30 px-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="text-center space-y-4">
-          <div className="flex justify-center">
-            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-              <Film className="w-8 h-8 text-primary" />
-            </div>
+        <CardHeader className="text-center">
+          <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+            <Film className="w-6 h-6 text-primary" />
           </div>
-          <div>
-            <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
-            <p className="text-muted-foreground mt-2">
-              Sign in to your NollyCrew account
-            </p>
-          </div>
+          <CardTitle className="text-2xl">Welcome Back</CardTitle>
+          <CardDescription>Sign in to your NollyCrew account</CardDescription>
         </CardHeader>
-
-        <CardContent className="space-y-6">
-          <Button variant="outline" className="w-full" onClick={() => window.location.href = '/api/auth/google'}>
-            <svg className="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48px" height="48px"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.222,0-9.655-3.108-11.28-7.481l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571l6.19,5.238C42.021,35.596,44,30.138,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>
-            Sign in with Google
-          </Button>
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">
-                Or continue with
-              </span>
-            </div>
-          </div>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          placeholder="your@email.com"
-                          className="pl-10"
-                          data-testid="input-email"
-                          {...field}
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md">
+                {error}
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
-
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          type={showPassword ? "text" : "password"}
-                          placeholder="Enter your password"
-                          className="pl-10 pr-10"
-                          data-testid="input-password"
-                          {...field}
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8"
-                          onClick={() => setShowPassword(!showPassword)}
-                          data-testid="button-toggle-password"
-                        >
-                          {showPassword ? (
-                            <EyeOff className="w-4 h-4" />
-                          ) : (
-                            <Eye className="w-4 h-4" />
-                          )}
-                        </Button>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
               />
-
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isLoading}
-                data-testid="button-login"
-              >
-                {isLoading ? "Signing in..." : "Sign In"}
-              </Button>
-            </form>
-          </Form>
-
-          <div className="text-center space-y-4">
-            <Button
-              variant="ghost"
-              className="text-sm"
-              onClick={() => setLocation("/register")}
-              data-testid="button-register-link"
-            >
-              Don't have an account? Sign up
+            </div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+              Sign In
             </Button>
-            
-            <Button
-              variant="ghost"
-              className="text-sm"
-              onClick={() => setLocation("/")}
-              data-testid="button-home-link"
-            >
-              ← Back to Home
-            </Button>
+          </form>
+          <div className="mt-6 text-center text-sm text-muted-foreground">
+            Don't have an account?{" "}
+            <a href="/register" className="text-primary hover:underline">
+              Sign up
+            </a>
           </div>
         </CardContent>
       </Card>
