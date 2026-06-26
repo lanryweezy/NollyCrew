@@ -1,257 +1,153 @@
-import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { api } from '@/lib/api';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuth } from '@/lib/auth';
-import PageHeader from '@/components/PageHeader';
-import ListSkeleton from '@/components/ListSkeleton';
+import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
+import { useAuth } from "@/lib/auth-context";
+import { profiles } from "@/lib/api";
+import { isSupabaseConfigured } from "@/lib/supabase";
+import Navigation from "@/components/Navigation";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Search, MapPin, Star, Users, Loader2 } from "lucide-react";
+import PageHeader from "@/components/PageHeader";
+
+const DEMO_TALENT = [
+  { id: "t1", first_name: "Adaeze", last_name: "Obi", location: "Lagos", avatar: null, user_roles: [{ role: "actor", skills: ["Drama", "Comedy"] }] },
+  { id: "t2", first_name: "Chidi", last_name: "Okoro", location: "Abuja", avatar: null, user_roles: [{ role: "crew", skills: ["Cinematography"] }] },
+  { id: "t3", first_name: "Funke", last_name: "Adeyemi", location: "Lagos", avatar: null, user_roles: [{ role: "actor", skills: ["Action", "Stunts"] }] },
+  { id: "t4", first_name: "Emeka", last_name: "Nwosu", location: "Port Harcourt", avatar: null, user_roles: [{ role: "crew", skills: ["Sound Engineering"] }] },
+  { id: "t5", first_name: "Ngozi", last_name: "Eze", location: "Lagos", avatar: null, user_roles: [{ role: "producer", skills: ["Project Management"] }] },
+];
 
 export default function TalentSearch() {
-  const { user } = useAuth();
-  const [role, setRole] = useState<string>('crew');
-  const [location, setLocation] = useState<string>('');
-  const [skills, setSkills] = useState<string>('');
-  const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<any[]>([]);
-  const [aiLoading, setAiLoading] = useState(false);
-  const [recommendations, setRecommendations] = useState<any[]>([]);
-  const [selectedProjectId, setSelectedProjectId] = useState<string>('');
-  const [projects, setProjects] = useState<any[]>([]);
-
-  const performSearch = async () => {
-    setLoading(true);
-    try {
-      const { results } = await api.searchTalent({
-        role,
-        location: location || undefined,
-        skills: skills ? skills.split(',').map(s => s.trim()).filter(Boolean) : undefined,
-        limit: 50,
-      });
-      setResults(results);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [, setLocation] = useLocation();
+  const { isAuthenticated } = useAuth();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRole, setSelectedRole] = useState("all");
+  const [loading, setLoading] = useState(true);
+  const [talentList, setTalentList] = useState<any[]>([]);
 
   useEffect(() => {
-    performSearch();
-    // Load user's projects for hire target
-    (async () => {
-      try {
-        const { projects } = await api.listProjects({ createdById: user?.id });
-        setProjects(projects || []);
-        if (projects?.length) setSelectedProjectId(projects[0].id);
-      } catch (e) {
-        console.error(e);
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    searchTalent();
+  }, [selectedRole]);
 
-  const runCastingAI = async () => {
-    setAiLoading(true);
-    try {
-      const skillsArr = skills ? skills.split(',').map(s => s.trim()).filter(Boolean) : undefined;
-      const { jobId } = await api.aiCastingStart({ role, location: location || undefined, skills: skillsArr, limit: 20 });
-      // Poll until completion
-      try {
-        // naive inline polling for this page
-        let attempts = 0;
-        while (attempts < 120) { // up to ~3 minutes at 1.5s
-          const status = await api.getJobStatus(jobId);
-          if (status.status === 'completed') {
-            const result = status.result || {} as any;
-            setRecommendations(result.recommendations || result.data || []);
-            break;
-          }
-          if (status.status === 'failed') {
-            break;
-          }
-          await new Promise(r => setTimeout(r, 1500));
-          attempts++;
-        }
-      } catch {}
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setAiLoading(false);
+  async function searchTalent() {
+    setLoading(true);
+    if (isSupabaseConfigured()) {
+      const data = await profiles.search(searchTerm, selectedRole !== "all" ? selectedRole : undefined);
+      setTalentList(data);
+    } else {
+      setTalentList(DEMO_TALENT);
     }
-  };
+    setLoading(false);
+  }
 
-  const hireToProject = async (candidate: any) => {
-    try {
-      if (!selectedProjectId) return;
-      await api.addProjectMember(selectedProjectId, { userId: (candidate.userId || candidate.user_id) ?? candidate.userId, role: candidate.role });
-      alert('Added to project');
-    } catch (e) {
-      console.error(e);
-    }
-  };
+  const filteredTalent = talentList.filter(t => {
+    if (!searchTerm) return true;
+    const name = `${t.first_name} ${t.last_name}`.toLowerCase();
+    return name.includes(searchTerm.toLowerCase());
+  });
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="p-6 max-w-5xl mx-auto"
-    >
-      <PageHeader 
-        title="Talent Search"
-        subtitle="Find the perfect cast and crew for your projects"
-      />
-      <Card>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-4">
-            <select className="border rounded px-3 py-2" value={role} onChange={e => setRole(e.target.value)}>
-              <option value="actor">Actor</option>
-              <option value="crew">Crew</option>
-              <option value="producer">Producer</option>
-            </select>
-            <Input placeholder="Location (e.g., Lagos)" value={location} onChange={e => setLocation(e.target.value)} />
-            <Input placeholder="Skills (comma separated)" value={skills} onChange={e => setSkills(e.target.value)} />
-            <select className="border rounded px-3 py-2" value={selectedProjectId} onChange={e => setSelectedProjectId(e.target.value)}>
-              <option value="">Select project</option>
-              {projects.map(p => (
-                <option key={p.id} value={p.id}>{p.title}</option>
-              ))}
-            </select>
-            <Button onClick={performSearch} disabled={loading}>{loading ? 'Searching...' : 'Search'}</Button>
-            <Button variant="outline" onClick={runCastingAI} disabled={aiLoading}>{aiLoading ? 'Ranking...' : 'Casting AI'}</Button>
+    <div className="min-h-screen bg-background">
+      <Navigation isAuthenticated={isAuthenticated} />
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <PageHeader
+          title="Find Talent"
+          description="Discover actors, crew, and producers"
+        />
+
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Input
+              placeholder="Search by name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && searchTalent()}
+              className="pl-10"
+            />
           </div>
+          <Select value={selectedRole} onValueChange={setSelectedRole}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Role" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Roles</SelectItem>
+              <SelectItem value="actor">Actors</SelectItem>
+              <SelectItem value="crew">Crew</SelectItem>
+              <SelectItem value="producer">Producers</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button onClick={searchTalent}>Search</Button>
+        </div>
 
-          <AnimatePresence mode="wait">
-            {loading ? (
-              <motion.div
-                key="skeleton"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+        {/* Results */}
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        ) : filteredTalent.length === 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold">No talent found</h3>
+              <p className="text-muted-foreground mt-1">Try adjusting your search</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {filteredTalent.map((person) => (
+              <Card
+                key={person.id}
+                className="cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => setLocation(`/talent/${person.id}`)}
               >
-                <ListSkeleton rows={4} />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="results"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="grid grid-cols-1 md:grid-cols-2 gap-4"
-              >
-                {results.map((r, index) => (
-                <motion.div
-                  key={r.id}
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <Card className="border cursor-pointer hover:shadow-md transition-shadow" onClick={() => window.location.href = `/talent/${r.userId || r.user_id || r.id}` }>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-semibold capitalize">{r.role}</div>
-                          {r.specialties?.length ? (
-                            <div className="text-sm text-muted-foreground">{r.specialties.join(', ')}</div>
-                          ) : null}
-                          {r.skills?.length ? (
-                            <div className="text-sm text-muted-foreground">Skills: {r.skills.join(', ')}</div>
-                          ) : null}
-                          {r.hourlyRate ? (
-                            <div className="text-sm">Rate: ₦{r.hourlyRate}</div>
-                          ) : null}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
-                            {r.isActive ? 'Active' : 'Inactive'}
-                          </div>
-                          {selectedProjectId && (
-                            <Button size="sm" onClick={(e) => { e.stopPropagation(); hireToProject(r); }}>Hire</Button>
-                          )}
-                        </div>
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      {person.avatar ? (
+                        <img src={person.avatar} alt="" className="w-12 h-12 rounded-full object-cover" />
+                      ) : (
+                        <span className="text-lg font-semibold text-primary">
+                          {person.first_name?.[0]}{person.last_name?.[0]}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold truncate">{person.first_name} {person.last_name}</h3>
+                      {person.location && (
+                        <p className="text-sm text-muted-foreground flex items-center gap-1">
+                          <MapPin className="w-3 h-3" /> {person.location}
+                        </p>
+                      )}
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {person.user_roles?.map((r: any, i: number) => (
+                          <Badge key={i} variant="secondary" className="text-xs">
+                            {r.role}
+                          </Badge>
+                        ))}
                       </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {recommendations.length > 0 && (
-            <div className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Casting AI Recommendations</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {recommendations.map((r, idx) => (
-                      <div key={r.id || idx} className="border rounded p-3">
-                        <div className="flex items-center justify-between mb-2">
-                          <div>
-                            <div className="font-medium capitalize">{r.role}</div>
-                            <div className="text-xs text-muted-foreground">Score: {(r.score?.toFixed?.(2)) || r.score}</div>
-                            {r.skills?.length ? <div className="text-xs text-muted-foreground">Skills: {r.skills.join(', ')}</div> : null}
-                          </div>
-                          {selectedProjectId && (
-                            <Button size="sm" onClick={() => hireToProject(r)}>Hire</Button>
-                          )}
+                      {person.user_roles?.[0]?.skills && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {person.user_roles[0].skills.slice(0, 3).map((s: string, i: number) => (
+                            <Badge key={i} variant="outline" className="text-xs">
+                              {s}
+                            </Badge>
+                          ))}
                         </div>
-                        
-                        {/* Bias Check Display */}
-                        {r.biasCheck && (
-                          <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-medium">Diversity Score:</span>
-                              <span className={`px-2 py-1 rounded text-xs ${
-                                r.biasCheck.diversityScore > 0.8 ? 'bg-green-100 text-green-700' :
-                                r.biasCheck.diversityScore > 0.6 ? 'bg-yellow-100 text-yellow-700' :
-                                'bg-red-100 text-red-700'
-                              }`}>
-                                {(r.biasCheck.diversityScore * 100).toFixed(0)}%
-                              </span>
-                            </div>
-                            
-                            {r.biasCheck.fairnessFlags?.length > 0 && (
-                              <div className="mb-1">
-                                <span className="font-medium text-orange-600">⚠️ Fairness Flags:</span>
-                                <div className="text-orange-600">{r.biasCheck.fairnessFlags.join(', ')}</div>
-                              </div>
-                            )}
-                            
-                            {/* Audit Trail (collapsible) */}
-                            <details className="mt-1">
-                              <summary className="cursor-pointer font-medium text-blue-600">View Audit Trail</summary>
-                              <div className="mt-1 text-gray-600">
-                                {r.biasCheck.auditTrail?.map((line: string, i: number) => (
-                                  <div key={i}>{line}</div>
-                                ))}
-                              </div>
-                            </details>
-                          </div>
-                        )}
-                        
-                        {/* Match Factors */}
-                        {r.matchFactors && (
-                          <div className="mt-2 text-xs text-muted-foreground">
-                            <div>Experience: {(r.matchFactors.experience * 100).toFixed(0)}% | 
-                                 Skills: {(r.matchFactors.skills * 100).toFixed(0)}% | 
-                                 Location: {(r.matchFactors.location * 100).toFixed(0)}%</div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </motion.div>
+            ))}
+          </div>
+        )}
+      </main>
+    </div>
   );
 }
-
-
