@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/lib/auth-context";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
 import ThemeToggle from "@/components/ThemeToggle";

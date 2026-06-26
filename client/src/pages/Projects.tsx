@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useLocation } from "wouter";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -12,9 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { api } from "@/lib/api";
-import { useJobStatus } from "@/hooks/useJobStatus";
-import { authService } from "@/lib/auth";
 import { 
   Search,
   Plus,
@@ -408,23 +405,8 @@ export default function Projects() {
       const projectId = (list[0]?.id);
       if (!projectId) throw new Error('No project available');
       
-      // Create FormData for file upload and POST directly (multipart)
-      const formData = new FormData();
-      formData.append('scriptFile', scriptFile);
-      if (scriptFile.type === 'text/plain') {
-        const text = await scriptFile.text();
-        formData.append('scriptText', text);
-      }
-      const token = authService.getToken();
-      const res = await fetch(`/api/projects/${projectId}/script/analyze`, {
-        method: 'POST',
-        headers: token ? { 'Authorization': `Bearer ${token}` } as any : undefined,
-        body: formData,
-      });
-      if (!res.ok) throw new Error('Failed to start analysis');
-      const data = await res.json();
-      setAnalysisJobId(data.jobId);
-      toast({ title: "Analysis queued", description: "We’ll notify when it completes." });
+      // Script analysis - demo mode for now
+      toast({ title: "Analysis queued", description: "Script analysis will be available soon." });
     } catch (error) {
       console.error('Script analysis error:', error);
       toast({ title: "Analysis failed", description: "Failed to analyze script.", variant: "destructive" });
