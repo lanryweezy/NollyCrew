@@ -1,0 +1,12 @@
+{
+  "name": "nollycrew-scraper",
+  "type": "module",
+  "scripts": {
+    "scrape:imdb": "node scripts/scrape_imdb.mjs",
+    "seed:db": "node scripts/seed_from_json.mjs"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "node-fetch": "^3.3.2"
+  }
+}
