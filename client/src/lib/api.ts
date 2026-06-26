@@ -1,199 +1,314 @@
-import { authService } from './auth';
+import { supabase, isSupabaseConfigured } from './supabase';
+import type { Profile, UserRole, Job, Message, Project } from '@/types/database';
 
-export async function apiFetch<T>(url: string, options: RequestInit = {}): Promise<T> {
-  const token = authService.getToken();
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-    ...(options.headers || {}),
-  };
-  if (token) (headers as any)['Authorization'] = `Bearer ${token}`;
+// ============================================
+// AUTH
+// ============================================
+export const auth = {
+  async signUp(email: string, password: string, firstName: string, lastName: string) {
+    if (!isSupabaseConfigured()) return { user: null, error: 'Supabase not configured' };
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { first_name: firstName, last_name: lastName } }
+    });
+    return { user: data.user, error };
+  },
 
-  let res = await fetch(url, { ...options, headers, credentials: 'include' });
-  if (!res.ok) {
-    let message = 'Request failed';
-    try {
-      const err = await res.json();
-      message = err.error || message;
-    } catch {}
-    // Attempt refresh on 401 and retry once
-    if (res.status === 401) {
-      try {
-        const refreshed = await authService.refreshToken();
-        if (refreshed) {
-          const retryHeaders: HeadersInit = { ...headers, 'Authorization': `Bearer ${refreshed}` };
-          res = await fetch(url, { ...options, headers: retryHeaders, credentials: 'include' });
-          if (res.ok) return res.json();
-        }
-      } catch {}
-    }
-    throw new Error(message);
+  async signIn(email: string, password: string) {
+    if (!isSupabaseConfigured()) return { user: null, error: 'Supabase not configured' };
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    return { user: data.user, error };
+  },
+
+  async signOut() {
+    if (!isSupabaseConfigured()) return;
+    await supabase.auth.signOut();
+  },
+
+  async getUser() {
+    if (!isSupabaseConfigured()) return null;
+    const { data: { user } } = await supabase.auth.getUser();
+    return user;
+  },
+
+  async getSession() {
+    if (!isSupabaseConfigured()) return null;
+    const { data: { session } } = await supabase.auth.getSession();
+    return session;
   }
-  return res.json();
-}
-
-export const api = {
-  // Projects
-  async listProjects(params?: { status?: string; createdById?: string; limit?: number }) {
-    const query = new URLSearchParams();
-    if (params?.status) query.set('status', params.status);
-    if (params?.createdById) query.set('createdById', params.createdById);
-    if (params?.limit) query.set('limit', String(params.limit));
-    const qs = query.toString();
-    return apiFetch<{ projects: any[] }>(`/api/projects${qs ? `?${qs}` : ''}`);
-  },
-  async uploadProjectScript(projectId: string, scriptUrl: string) {
-    return apiFetch<{ project: any }>(`/api/projects/${projectId}/script`, {
-      method: 'POST',
-      body: JSON.stringify({ scriptUrl }),
-    });
-  },
-  // Async job starters (script analysis)
-  async analyzeProjectScriptStart(projectId: string, payload: { scriptUrl?: string; scriptText?: string }) {
-    return apiFetch<{ jobId: string; status: string; message: string }>(`/api/projects/${projectId}/script/analyze`, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
-  },
-  async getScriptVersions(projectId: string) {
-    return apiFetch<{ versions: any[] }>(`/api/projects/${projectId}/script/versions`);
-  },
-  // Project members
-  async getProjectMembers(projectId: string) {
-    return apiFetch<{ members: any[] }>(`/api/projects/${projectId}/members`);
-  },
-  async addProjectMember(projectId: string, payload: { userId: string; role: string; character?: string; department?: string; isLead?: boolean; }) {
-    return apiFetch<{ member: any }>(`/api/projects/${projectId}/members`, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
-  },
-
-  // Messaging
-  async listMessages(otherUserId?: string) {
-    const qs = otherUserId ? `?otherUserId=${encodeURIComponent(otherUserId)}` : '';
-    return apiFetch<{ messages: any[] }>(`/api/messages${qs}`);
-  },
-  async sendMessage(payload: { recipientId: string; content: string; subject?: string; attachments?: any }) {
-    return apiFetch<{ message: any }>(`/api/messages`, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
-  },
-
-  // Reviews
-  async listUserReviews(userId: string) {
-    return apiFetch<{ reviews: any[] }>(`/api/users/${userId}/reviews`);
-  },
-  async createUserReview(userId: string, payload: { rating: number; comment?: string; projectId?: string; isPublic?: boolean }) {
-    return apiFetch<{ review: any }>(`/api/users/${userId}/reviews`, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
-  },
-
-  // Talent search
-  async searchTalent(params: { role?: string; location?: string; skills?: string[]; limit?: number }) {
-    const query = new URLSearchParams();
-    if (params.role) query.set('role', params.role);
-    if (params.location) query.set('location', params.location);
-    if (params.skills && params.skills.length) query.set('skills', params.skills.join(','));
-    if (params.limit) query.set('limit', String(params.limit));
-    const qs = query.toString();
-    return apiFetch<{ results: any[] }>(`/api/talent/search${qs ? `?${qs}` : ''}`);
-  },
-
-  // AI
-  // Async job starters (AI services)
-  async aiCastingStart(payload: { role: string; location?: string; skills?: string[]; limit?: number }) {
-    return apiFetch<{ jobId: string; status: string; message: string }>(`/api/ai/casting`, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
-  },
-  async aiOptimizeScheduleStart(payload: { projectId?: string; scenes: any[]; maxDailyScenes?: number; maxDays?: number; maxHoursPerDay?: number; locationCosts?: Record<string, number>; daylightHours?: { start: string; end: string }; crewAvailability?: Record<string, any> }) {
-    return apiFetch<{ jobId: string; status: string; message: string }>(`/api/ai/schedule/optimize`, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
-  },
-
-  // Profiles and auditions
-  async getUserProfile(userId: string) {
-    return apiFetch<{ user: any; roles: any[] }>(`/api/users/${userId}/profile`);
-  },
-  async requestAudition(payload: { recipientId: string; projectId?: string; roleDescription?: string }) {       
-    return apiFetch<{ message: any }>(`/api/auditions/request`, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
-  },
-  async submitAudition(jobId: string, selfTapeUrl: string) {
-    return apiFetch<{ application: any }>(`/api/jobs/${jobId}/apply`, {
-      method: 'POST',
-      body: JSON.stringify({ selfTapeUrl }),
-    });
-  },
-  // Uploads
-  async signUpload(filename: string, contentType: string) {
-    return apiFetch<{ url: string; fields?: Record<string, string> }>(`/api/uploads/sign`, {
-      method: 'POST',
-      body: JSON.stringify({ filename, contentType }),
-    });
-  },
-
-  // AI endpoints
-  async generateMarketingContent(projectTitle: string, genre: string, synopsis: string, targetAudience?: string) {
-    return apiFetch<{ jobId: string; status: string; message: string }>('/api/ai/marketing/generate', {
-      method: 'POST',
-      body: JSON.stringify({ projectTitle, genre, synopsis, targetAudience }),
-    });
-  },
-
-  // Job status endpoints
-  async getJobStatus(jobId: string) {
-    return apiFetch<{
-      id: string;
-      type: string;
-      status: 'waiting' | 'active' | 'completed' | 'failed';
-      progress: number;
-      result?: any;
-      error?: string;
-      createdAt: string;
-      completedAt?: string;
-    }>(`/api/jobs/${jobId}/status`);
-  },
-
-  // Advanced AI endpoints
-  async analyzeAuditionVideo(videoUri: string, mimeType?: string) {
-    return apiFetch<{ primaryEmotion: string; emotionalArc: string[]; energyLevel: number; authenticityScore: number; dictionClarity: number; strengths: string[]; weaknesses: string[]; overallNotes: string; }>('/api/ai/video-analysis', {
-      method: 'POST',
-      body: JSON.stringify({ videoUri, mimeType }),
-    });
-  },
-  async translateScript(scriptText: string, targetLanguage: string) {
-    return apiFetch<{ translation: string }>('/api/ai/translate', {
-      method: 'POST',
-      body: JSON.stringify({ scriptText, targetLanguage }),
-    });
-  },
-  async analyzeSentiment(scriptText: string) {
-    return apiFetch<{ arc: Array<{ beat: string; tension: number; primaryEmotion: string }> }>('/api/ai/sentiment', {
-      method: 'POST',
-      body: JSON.stringify({ scriptText }),
-    });
-  },
-  async generateReleaseForm(talentName: string, roleName: string, projectName: string, rate?: string) {
-    return apiFetch<{ document: string }>('/api/ai/legal/release-form', {
-      method: 'POST',
-      body: JSON.stringify({ talentName, roleName, projectName, rate }),
-    });
-  },
-  async predictFatigue(scheduleDays: any[]) {
-    return apiFetch<{ warnings: Array<{ day: number; issue: string; severity: string; suggestion: string }> }>('/api/ai/predict-fatigue', {
-      method: 'POST',
-      body: JSON.stringify({ scheduleDays }),
-    });
-  },
 };
 
+// ============================================
+// PROFILES
+// ============================================
+export const profiles = {
+  async get(userId: string): Promise<Profile | null> {
+    if (!isSupabaseConfigured()) return null;
+    const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
+    return data;
+  },
 
+  async getByEmail(email: string): Promise<Profile | null> {
+    if (!isSupabaseConfigured()) return null;
+    const { data } = await supabase.from('profiles').select('*').eq('email', email).single();
+    return data;
+  },
+
+  async update(userId: string, updates: Partial<Profile>): Promise<Profile | null> {
+    if (!isSupabaseConfigured()) return null;
+    const { data } = await supabase.from('profiles').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', userId).select().single();
+    return data;
+  },
+
+  async search(query: string, role?: string): Promise<(Profile & { user_roles: UserRole[] })[]> {
+    if (!isSupabaseConfigured()) return [];
+    let queryBuilder = supabase
+      .from('profiles')
+      .select('*, user_roles(*)')
+      .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,email.ilike.%${query}%`)
+      .limit(20);
+    if (role) {
+      queryBuilder = queryBuilder.eq('user_roles.role', role);
+    }
+    const { data } = await queryBuilder;
+    return data || [];
+  }
+};
+
+// ============================================
+// USER ROLES
+// ============================================
+export const userRoles = {
+  async get(userId: string): Promise<UserRole[]> {
+    if (!isSupabaseConfigured()) return [];
+    const { data } = await supabase.from('user_roles').select('*').eq('user_id', userId);
+    return data || [];
+  },
+
+  async create(role: Omit<UserRole, 'id' | 'created_at'>): Promise<UserRole | null> {
+    if (!isSupabaseConfigured()) return null;
+    const { data } = await supabase.from('user_roles').insert(role).select().single();
+    return data;
+  },
+
+  async update(id: string, updates: Partial<UserRole>): Promise<UserRole | null> {
+    if (!isSupabaseConfigured()) return null;
+    const { data } = await supabase.from('user_roles').update(updates).eq('id', id).select().single();
+    return data;
+  }
+};
+
+// ============================================
+// JOBS
+// ============================================
+export const jobs = {
+  async list(filters?: { type?: string; location?: string; limit?: number }): Promise<Job[]> {
+    if (!isSupabaseConfigured()) return [];
+    let query = supabase
+      .from('jobs')
+      .select('*, poster:profiles!posted_by_id(id, first_name, last_name, avatar)')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+    if (filters?.type && filters.type !== 'all') {
+      query = query.eq('type', filters.type);
+    }
+    if (filters?.location && filters.location !== 'all') {
+      query = query.ilike('location', `%${filters.location}%`);
+    }
+    if (filters?.limit) {
+      query = query.limit(filters.limit);
+    }
+    const { data } = await query;
+    return data || [];
+  },
+
+  async get(jobId: string): Promise<Job | null> {
+    if (!isSupabaseConfigured()) return null;
+    const { data } = await supabase
+      .from('jobs')
+      .select('*, poster:profiles!posted_by_id(id, first_name, last_name, avatar, bio)')
+      .eq('id', jobId)
+      .single();
+    return data;
+  },
+
+  async create(job: Omit<Job, 'id' | 'created_at' | 'updated_at'>): Promise<Job | null> {
+    if (!isSupabaseConfigured()) return null;
+    const { data } = await supabase.from('jobs').insert(job).select().single();
+    return data;
+  },
+
+  async update(id: string, updates: Partial<Job>): Promise<Job | null> {
+    if (!isSupabaseConfigured()) return null;
+    const { data } = await supabase.from('jobs').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id).select().single();
+    return data;
+  },
+
+  async getApplications(jobId: string) {
+    if (!isSupabaseConfigured()) return [];
+    const { data } = await supabase
+      .from('job_applications')
+      .select('*, applicant:profiles(id, first_name, last_name, avatar)')
+      .eq('job_id', jobId);
+    return data || [];
+  },
+
+  async apply(jobId: string, applicantId: string, coverLetter?: string, proposedRate?: number) {
+    if (!isSupabaseConfigured()) return null;
+    const { data } = await supabase
+      .from('job_applications')
+      .insert({ job_id: jobId, applicant_id: applicantId, cover_letter: coverLetter, proposed_rate: proposedRate })
+      .select()
+      .single();
+    return data;
+  },
+
+  async getMyApplications(userId: string) {
+    if (!isSupabaseConfigured()) return [];
+    const { data } = await supabase
+      .from('job_applications')
+      .select('*, job:jobs(id, title, type, location, posted_by_id)')
+      .eq('applicant_id', userId)
+      .order('applied_at', { ascending: false });
+    return data || [];
+  },
+
+  async getMyPostedJobs(userId: string) {
+    if (!isSupabaseConfigured()) return [];
+    const { data } = await supabase
+      .from('jobs')
+      .select('*')
+      .eq('posted_by_id', userId)
+      .order('created_at', { ascending: false });
+    return data || [];
+  }
+};
+
+// ============================================
+// MESSAGES
+// ============================================
+export const messages = {
+  async getInbox(userId: string): Promise<Message[]> {
+    if (!isSupabaseConfigured()) return [];
+    const { data } = await supabase
+      .from('messages')
+      .select('*, sender:profiles!sender_id(id, first_name, last_name, avatar)')
+      .eq('recipient_id', userId)
+      .order('sent_at', { ascending: false });
+    return data || [];
+  },
+
+  async getThread(userId: string, otherUserId: string): Promise<Message[]> {
+    if (!isSupabaseConfigured()) return [];
+    const { data } = await supabase
+      .from('messages')
+      .select('*')
+      .or(`and(sender_id.eq.${userId},recipient_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},recipient_id.eq.${userId})`)
+      .order('sent_at', { ascending: true });
+    return data || [];
+  },
+
+  async send(senderId: string, recipientId: string, content: string, subject?: string): Promise<Message | null> {
+    if (!isSupabaseConfigured()) return null;
+    const { data } = await supabase
+      .from('messages')
+      .insert({ sender_id: senderId, recipient_id: recipientId, content, subject })
+      .select()
+      .single();
+    return data;
+  },
+
+  async markAsRead(id: string) {
+    if (!isSupabaseConfigured()) return;
+    await supabase.from('messages').update({ is_read: true }).eq('id', id);
+  },
+
+  async getUnreadCount(userId: string): Promise<number> {
+    if (!isSupabaseConfigured()) return 0;
+    const { count } = await supabase
+      .from('messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('recipient_id', userId)
+      .eq('is_read', false);
+    return count || 0;
+  }
+};
+
+// ============================================
+// PROJECTS
+// ============================================
+export const projects = {
+  async list(filters?: { createdById?: string; status?: string; limit?: number }): Promise<Project[]> {
+    if (!isSupabaseConfigured()) return [];
+    let query = supabase
+      .from('projects')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (filters?.createdById) {
+      query = query.eq('created_by_id', filters.createdById);
+    }
+    if (filters?.status) {
+      query = query.eq('status', filters.status);
+    }
+    if (filters?.limit) {
+      query = query.limit(filters.limit);
+    }
+    const { data } = await query;
+    return data || [];
+  },
+
+  async get(projectId: string): Promise<Project | null> {
+    if (!isSupabaseConfigured()) return null;
+    const { data } = await supabase.from('projects').select('*').eq('id', projectId).single();
+    return data;
+  },
+
+  async create(project: Omit<Project, 'id' | 'created_at' | 'updated_at'>): Promise<Project | null> {
+    if (!isSupabaseConfigured()) return null;
+    const { data } = await supabase.from('projects').insert(project).select().single();
+    return data;
+  },
+
+  async getMembers(projectId: string) {
+    if (!isSupabaseConfigured()) return [];
+    const { data } = await supabase
+      .from('project_members')
+      .select('*, user:profiles(id, first_name, last_name, avatar)')
+      .eq('project_id', projectId);
+    return data || [];
+  }
+};
+
+// ============================================
+// REVIEWS
+// ============================================
+export const reviews = {
+  async getForUser(userId: string) {
+    if (!isSupabaseConfigured()) return [];
+    const { data } = await supabase
+      .from('reviews')
+      .select('*, reviewer:profiles(id, first_name, last_name, avatar)')
+      .eq('reviewee_id', userId)
+      .eq('is_public', true)
+      .order('created_at', { ascending: false });
+    return data || [];
+  },
+
+  async create(review: { reviewer_id: string; reviewee_id: string; project_id?: string; rating: number; comment?: string }) {
+    if (!isSupabaseConfigured()) return null;
+    const { data } = await supabase.from('reviews').insert(review).select().single();
+    return data;
+  }
+};
+
+// ============================================
+// WAITLIST
+// ============================================
+export const waitlist = {
+  async join(email: string, name?: string, source?: string) {
+    if (!isSupabaseConfigured()) return { success: false, error: 'Supabase not configured' };
+    const { error } = await supabase.from('waitlist').insert({ email, name, source });
+    return { success: !error, error };
+  }
+};
