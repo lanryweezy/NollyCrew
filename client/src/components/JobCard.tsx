@@ -1,203 +1,105 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { 
-  MapPin, 
-  Clock, 
-  DollarSign, 
-  Users, 
-  Calendar,
-  Bookmark,
-  Share2,
-  AlertCircle
-} from "lucide-react";
+import { MapPin, Clock, DollarSign, Users, Calendar, Bookmark, Share2, AlertCircle } from "lucide-react";
+import ApplyModal from "./ApplyModal";
+import type { Job } from "@/types/database";
 
-export interface JobCardProps {
-  id: string;
-  title: string;
-  type: "casting" | "crew" | "project";
-  company: string;
-  companyLogo?: string;
-  location: string;
-  budget: string;
-  duration: string;
-  deadline: string;
-  description: string;
-  requirements: string[];
-  applicants: number;
-  isUrgent?: boolean;
-  isBookmarked?: boolean;
-  onApply?: (id: string) => void;
-  onBookmark?: (id: string) => void;
-  onShare?: (id: string) => void;
+interface JobCardProps {
+  job: Job;
 }
 
-// Optimization: React.memo prevents unnecessary re-renders of list items when
-// unrelated parent state (like search filters) changes.
-const JobCard = React.memo(function JobCard({
-  id,
-  title,
-  type,
-  company,
-  companyLogo,
-  location,
-  budget,
-  duration,
-  deadline,
-  description,
-  requirements,
-  applicants,
-  isUrgent = false,
-  isBookmarked = false,
-  onApply = (id) => console.log(`Apply to ${title} with id ${id}`),
-  onBookmark = (id) => console.log(`Bookmark ${title} with id ${id}`),
-  onShare = (id) => console.log(`Share ${title} with id ${id}`)
-}: JobCardProps) {
-  const [showFullDescription, setShowFullDescription] = useState(false);
+export default function JobCard({ job }: JobCardProps) {
+  const [showApply, setShowApply] = useState(false);
+  const [showFull, setShowFull] = useState(false);
 
   const typeColors = {
     casting: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
     crew: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-    project: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+    project: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
   };
 
-  const truncatedDescription = description.length > 120 
-    ? `${description.substring(0, 120)}...` 
-    : description;
+  const truncated = job.description.length > 120
+    ? `${job.description.substring(0, 120)}...`
+    : job.description;
+
+  const budgetFormatted = job.budget
+    ? `₦${(job.budget / 1000).toFixed(0)}K`
+    : "Negotiable";
+
+  const deadlineFormatted = job.deadline
+    ? new Date(job.deadline).toLocaleDateString("en-NG", { month: "short", day: "numeric" })
+    : "Open";
 
   return (
-    <Card className="w-full hover-elevate transition-all duration-200" data-testid={`card-job-${id}`}>
-      <CardHeader>
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-3 flex-1 min-w-0">
-            <Avatar className="w-10 h-10 flex-shrink-0">
-              <AvatarImage src={companyLogo} alt={company} />
-              <AvatarFallback>
-                {company.split(' ').map(word => word[0]).join('').slice(0, 2)}
-              </AvatarFallback>
-            </Avatar>
+    <>
+      <Card className="w-full hover:shadow-md transition-shadow">
+        <CardHeader>
+          <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <Badge className={`text-xs ${typeColors[type]}`}>
-                  {type.charAt(0).toUpperCase() + type.slice(1)}
+              <div className="flex items-center gap-2 flex-wrap mb-1">
+                <Badge className={`text-xs ${typeColors[job.type]}`}>
+                  {job.type.charAt(0).toUpperCase() + job.type.slice(1)}
                 </Badge>
-                {isUrgent && (
+                {job.is_urgent && (
                   <Badge variant="destructive" className="text-xs">
-                    <AlertCircle className="w-3 h-3 mr-1" />
-                    Urgent
+                    <AlertCircle className="w-3 h-3 mr-1" /> Urgent
                   </Badge>
                 )}
               </div>
-              <CardTitle className="text-lg mt-1" data-testid={`text-title-${id}`}>
-                {title}
-              </CardTitle>
-              <p className="text-sm text-muted-foreground" data-testid={`text-company-${id}`}>
-                {company}
-              </p>
+              <CardTitle className="text-lg">{job.title}</CardTitle>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onBookmark(id)}
-            className={isBookmarked ? "text-yellow-500" : ""}
-            data-testid={`button-bookmark-${id}`}
-            aria-label={isBookmarked ? "Remove bookmark" : "Bookmark job"}
-          >
-            <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
-          </Button>
-        </div>
-      </CardHeader>
+        </CardHeader>
 
-      <CardContent className="space-y-4">
-        {/* Job Details */}
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <MapPin className="w-4 h-4" />
-            <span data-testid={`text-location-${id}`}>{location}</span>
+        <CardContent className="space-y-3">
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <MapPin className="w-4 h-4" /> {job.location}
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <DollarSign className="w-4 h-4" /> {budgetFormatted}
+            </div>
+            {job.duration && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Clock className="w-4 h-4" /> {job.duration}
+              </div>
+            )}
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Calendar className="w-4 h-4" /> {deadlineFormatted}
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <DollarSign className="w-4 h-4" />
-            <span data-testid={`text-budget-${id}`}>{budget}</span>
-          </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Clock className="w-4 h-4" />
-            <span data-testid={`text-duration-${id}`}>{duration}</span>
-          </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Calendar className="w-4 h-4" />
-            <span data-testid={`text-deadline-${id}`}>{deadline}</span>
-          </div>
-        </div>
 
-        {/* Description */}
-        <div className="text-sm">
-          <p className={showFullDescription ? '' : 'line-clamp-3'}>
-            {showFullDescription ? description : truncatedDescription}
+          <p className="text-sm text-muted-foreground">
+            {showFull ? job.description : truncated}
           </p>
-          {description.length > 120 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="p-0 h-auto text-primary hover:text-primary/80 mt-1"
-              onClick={() => setShowFullDescription(!showFullDescription)}
-              data-testid={`button-expand-${id}`}
-            >
-              {showFullDescription ? 'Show less' : 'Show more'}
+          {job.description.length > 120 && (
+            <Button variant="ghost" size="sm" className="p-0 h-auto text-primary" onClick={() => setShowFull(!showFull)}>
+              {showFull ? "Show less" : "Show more"}
             </Button>
           )}
-        </div>
 
-        {/* Requirements */}
-        <div className="flex flex-wrap gap-1">
-          {requirements.slice(0, 3).map((req, index) => (
-            <Badge 
-              key={index} 
-              variant="outline" 
-              className="text-xs"
-              data-testid={`badge-requirement-${id}-${index}`}
-            >
-              {req}
-            </Badge>
-          ))}
-          {requirements.length > 3 && (
-            <Badge variant="outline" className="text-xs">
-              +{requirements.length - 3} more
-            </Badge>
+          {job.skills && job.skills.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {job.skills.slice(0, 4).map((skill, i) => (
+                <Badge key={i} variant="outline" className="text-xs">{skill}</Badge>
+              ))}
+            </div>
           )}
-        </div>
+        </CardContent>
 
-        {/* Applicants */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Users className="w-4 h-4" />
-          <span data-testid={`text-applicants-${id}`}>
-            {applicants} applicant{applicants !== 1 ? 's' : ''}
-          </span>
-        </div>
-      </CardContent>
+        <CardFooter className="flex gap-2 pt-2">
+          <Button className="flex-1" onClick={() => setShowApply(true)}>
+            Apply Now
+          </Button>
+          <Button variant="outline" size="icon">
+            <Bookmark className="w-4 h-4" />
+          </Button>
+        </CardFooter>
+      </Card>
 
-      <CardFooter className="flex gap-2 pt-4">
-        <Button 
-          className="flex-1"
-          onClick={() => onApply(id)}
-          data-testid={`button-apply-${id}`}
-        >
-          Apply Now
-        </Button>
-        <Button 
-          variant="outline" 
-          size="icon"
-          onClick={() => onShare(id)}
-          data-testid={`button-share-${id}`}
-          aria-label="Share job"
-        >
-          <Share2 className="w-4 h-4" />
-        </Button>
-      </CardFooter>
-    </Card>
+      <ApplyModal job={job} open={showApply} onOpenChange={setShowApply} />
+    </>
   );
-});
-
-export default JobCard;
+}

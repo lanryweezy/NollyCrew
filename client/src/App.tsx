@@ -29,6 +29,7 @@ import Collaboration from "@/pages/Collaboration";
 import EnhancedAnalytics from "@/pages/EnhancedAnalytics";
 import EnhancedCollaboration from "@/pages/EnhancedCollaboration";
 import BossDashboard from "@/pages/BossDashboard";
+import PostJob from "@/pages/jobs/New";
 import TestProxy from "./test-proxy";
 import { ResponsiveToastProvider } from "@/components/ResponsiveToast";
 
@@ -67,6 +68,11 @@ function Router() {
           <Route path="/jobs">
             <ProtectedRoute>
               <Jobs />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/jobs/new">
+            <ProtectedRoute>
+              <PostJob />
             </ProtectedRoute>
           </Route>
           <Route path="/talent">

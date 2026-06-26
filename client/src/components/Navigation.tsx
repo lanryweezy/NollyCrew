@@ -60,7 +60,7 @@ export default function Navigation({
 }: NavigationProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [path, setLocation] = useLocation();
-  const { logout } = useAuth();
+  const { signOut, profile } = useAuth();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -300,7 +300,7 @@ export default function Navigation({
                     <DropdownMenuItem 
                       data-testid="menu-logout"
                       onClick={() => {
-                        logout();
+                        signOut();
                         setLocation("/");
                       }}
                     >

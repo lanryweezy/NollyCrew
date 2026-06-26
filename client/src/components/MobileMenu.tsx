@@ -32,7 +32,7 @@ export default function MobileMenu({
   userName = "John Doe"
 }: MobileMenuProps) {
   const [, setLocation] = useLocation();
-  const { logout } = useAuth();
+  const { signOut } = useAuth();
   
   const roleColor = {
     actor: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
@@ -126,7 +126,7 @@ export default function MobileMenu({
                     variant="ghost"
                     className="w-full justify-start h-12 text-destructive hover:text-destructive hover:bg-destructive/10"
                     onClick={() => {
-                      logout();
+                      signOut();
                       setLocation("/");
                       onClose();
                     }}

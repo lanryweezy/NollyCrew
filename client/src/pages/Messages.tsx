@@ -3,31 +3,34 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
 import { messages as messagesApi } from "@/lib/api";
 import { isSupabaseConfigured } from "@/lib/supabase";
+import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
+import ComposeMessage from "@/components/ComposeMessage";
+import EmptyState from "@/components/EmptyState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Send, Inbox, Loader2 } from "lucide-react";
+import { MessageSquare, Send, Inbox, Loader2, PenSquare } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 
 const DEMO_MESSAGES = [
   { id: "m1", sender_id: "user1", subject: "Casting Call: Lead Role", content: "Hi, we'd love to audition you for our upcoming film...", is_read: false, sent_at: new Date().toISOString(), sender: { first_name: "Chidi", last_name: "Okoro", avatar: null } },
-  { id: "m2", sender_id: "user2", subject: "Project Collaboration", content: "Interested in working together on the documentary project?", is_read: true, sent_at: new Date(Date.now() - 86400000).toISOString(), sender: { first_name: "Ngozi", last_name: "Eze", avatar: null } },
+  { id: "m2", sender_id: "user2", subject: "Project Collaboration", content: "Interested in working together on the documentary?", is_read: true, sent_at: new Date(Date.now() - 86400000).toISOString(), sender: { first_name: "Ngozi", last_name: "Eze", avatar: null } },
   { id: "m3", sender_id: "user3", subject: "Job Application Update", content: "Your application has been shortlisted!", is_read: false, sent_at: new Date(Date.now() - 172800000).toISOString(), sender: { first_name: "Funke", last_name: "Adeyemi", avatar: null } },
 ];
 
 export default function Messages() {
   const [, setLocation] = useLocation();
   const { profile, isAuthenticated } = useAuth();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [messageList, setMessageList] = useState<any[]>([]);
   const [selectedMessage, setSelectedMessage] = useState<any>(null);
   const [replyText, setReplyText] = useState("");
+  const [showCompose, setShowCompose] = useState(false);
 
-  useEffect(() => {
-    loadMessages();
-  }, []);
+  useEffect(() => { loadMessages(); }, []);
 
   async function loadMessages() {
     setLoading(true);
@@ -40,14 +43,27 @@ export default function Messages() {
     setLoading(false);
   }
 
+  async function handleSendReply() {
+    if (!selectedMessage || !profile || !replyText.trim()) return;
+    if (isSupabaseConfigured()) {
+      await messagesApi.send(profile.id, selectedMessage.sender_id, replyText);
+    }
+    setReplyText("");
+    toast({ title: "Reply sent!" });
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation isAuthenticated={isAuthenticated} />
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <PageHeader
           title="Messages"
           description="Your conversations"
+          actions={
+            <Button onClick={() => setShowCompose(true)}>
+              <PenSquare className="w-4 h-4 mr-2" /> Compose
+            </Button>
+          }
         />
 
         {loading ? (
@@ -55,16 +71,14 @@ export default function Messages() {
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         ) : messageList.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <Inbox className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold">No messages yet</h3>
-              <p className="text-muted-foreground mt-1">Start a conversation from a talent profile</p>
-            </CardContent>
-          </Card>
+          <EmptyState
+            icon={<Inbox className="w-full h-full" />}
+            title="No messages yet"
+            description="Start a conversation from a talent profile or job posting"
+            action={<Button onClick={() => setShowCompose(true)}>Send a Message</Button>}
+          />
         ) : (
           <div className="grid md:grid-cols-3 gap-6">
-            {/* Message List */}
             <div className="md:col-span-1 space-y-2">
               {messageList.map((msg) => (
                 <Card
@@ -81,9 +95,7 @@ export default function Messages() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <p className="font-medium text-sm truncate">
-                            {msg.sender?.first_name} {msg.sender?.last_name}
-                          </p>
+                          <p className="font-medium text-sm truncate">{msg.sender?.first_name} {msg.sender?.last_name}</p>
                           {!msg.is_read && <Badge className="w-2 h-2 p-0 rounded-full" />}
                         </div>
                         <p className="text-sm font-medium truncate">{msg.subject}</p>
@@ -95,7 +107,6 @@ export default function Messages() {
               ))}
             </div>
 
-            {/* Message Detail */}
             <div className="md:col-span-2">
               {selectedMessage ? (
                 <Card className="h-full">
@@ -109,14 +120,8 @@ export default function Messages() {
                   <CardContent>
                     <p className="whitespace-pre-wrap">{selectedMessage.content}</p>
                     <div className="mt-6 flex gap-2">
-                      <Input
-                        placeholder="Type a reply..."
-                        value={replyText}
-                        onChange={(e) => setReplyText(e.target.value)}
-                      />
-                      <Button size="icon">
-                        <Send className="w-4 h-4" />
-                      </Button>
+                      <Input placeholder="Type a reply..." value={replyText} onChange={(e) => setReplyText(e.target.value)} />
+                      <Button size="icon" onClick={handleSendReply}><Send className="w-4 h-4" /></Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -132,6 +137,8 @@ export default function Messages() {
           </div>
         )}
       </main>
+
+      <ComposeMessage open={showCompose} onOpenChange={setShowCompose} />
     </div>
   );
 }
