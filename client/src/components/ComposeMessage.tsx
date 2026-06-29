@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { messages as messagesApi, profiles } from "@/lib/api";
-import { isSupabaseConfigured } from "@/lib/supabase";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +28,7 @@ export default function ComposeMessage({ open, onOpenChange, recipientId, recipi
 
   async function searchUsers(query: string) {
     setToSearch(query);
-    if (!query || query.length < 2 || !isSupabaseConfigured()) return;
+    if (!query || query.length < 2) return;
     const results = await profiles.search(query);
     setSearchResults(results.filter(r => r.id !== profile?.id));
   }
@@ -38,7 +37,7 @@ export default function ComposeMessage({ open, onOpenChange, recipientId, recipi
     if (!profile || !toId) return;
     setLoading(true);
 
-    if (isSupabaseConfigured()) {
+    try {
       const msg = await messagesApi.send(profile.id, toId, content, subject || undefined);
       if (msg) {
         toast({ title: "Message sent!" });
@@ -50,7 +49,7 @@ export default function ComposeMessage({ open, onOpenChange, recipientId, recipi
       } else {
         toast({ title: "Failed to send", variant: "destructive" });
       }
-    } else {
+    } catch {
       toast({ title: "Sent! (Demo)" });
       onOpenChange(false);
     }

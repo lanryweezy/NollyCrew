@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
@@ -120,6 +121,7 @@ export default function EnhancedCollaboration() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("documents");
   const [searchQuery, setSearchQuery] = useState("");
+  const { toast } = useToast();
   const { connect, disconnect } = useWebSocket();
 
   // Connect to WebSocket on mount
@@ -361,13 +363,15 @@ export default function EnhancedCollaboration() {
   // Optimization: Memoize the filtered tasks list to prevent O(N) recalculation
   // on every render.
   // Impact: Eliminates unnecessary array traversals on non-search related renders.
+  const [taskList, setTaskList] = useState<Task[]>(tasks);
+
   const filteredTasks = useMemo(() => {
     const term = searchQuery.toLowerCase();
-    return tasks.filter(task =>
+    return taskList.filter(task =>
       task.title.toLowerCase().includes(term) ||
       task.description.toLowerCase().includes(term)
     );
-  }, [tasks, searchQuery]);
+  }, [taskList, searchQuery]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -398,11 +402,11 @@ export default function EnhancedCollaboration() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => toast({ title: "Filter applied" })}>
               <Filter className="w-4 h-4 mr-2" />
               Filter
             </Button>
-            <Button>
+            <Button onClick={() => toast({ title: "New document dialog coming soon" })}>
               <Plus className="w-4 h-4 mr-2" />
               New
             </Button>
@@ -492,7 +496,7 @@ export default function EnhancedCollaboration() {
                   <CardHeader>
                     <div className="flex justify-between items-center">
                       <CardTitle>Shared Documents</CardTitle>
-                      <Button>
+                        <Button onClick={() => toast({ title: "Upload dialog coming soon" })}>
                         <Upload className="w-4 h-4 mr-2" />
                         Upload
                       </Button>
@@ -513,7 +517,7 @@ export default function EnhancedCollaboration() {
                                   <p className="text-xs text-muted-foreground">{doc.size}</p>
                                 </div>
                               </div>
-                              <Button variant="ghost" size="icon" aria-label="Share document">
+                              <Button variant="ghost" size="icon" aria-label="Share document" onClick={() => toast({ title: `Sharing ${doc.name}` })}>
                                 <Share2 className="w-4 h-4" />
                               </Button>
                             </div>
@@ -548,7 +552,7 @@ export default function EnhancedCollaboration() {
                   <CardHeader>
                     <div className="flex justify-between items-center">
                       <CardTitle>Task Management</CardTitle>
-                      <Button>
+                      <Button onClick={() => toast({ title: "New task dialog coming soon" })}>
                         <Plus className="w-4 h-4 mr-2" />
                         New Task
                       </Button>
@@ -558,7 +562,11 @@ export default function EnhancedCollaboration() {
                     <div className="space-y-4">
                       {filteredTasks.map((task) => (
                         <div key={task.id} className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50">
-                          <Button variant="ghost" size="icon" aria-label={task.status === "done" ? "Mark as pending" : "Mark as done"}>
+                          <Button variant="ghost" size="icon" aria-label={task.status === "done" ? "Mark as pending" : "Mark as done"}
+                            onClick={() => {
+                              setTaskList(prev => prev.map(t => t.id === task.id ? { ...t, status: t.status === "done" ? "todo" : "done" } : t));
+                              toast({ title: task.status === "done" ? "Task reopened" : "Task completed!" });
+                            }}>
                             {task.status === "done" ? (
                               <CheckCircle className="w-5 h-5 text-green-500" />
                             ) : (
@@ -584,10 +592,14 @@ export default function EnhancedCollaboration() {
                               <AvatarImage src={task.assigneeAvatar} />
                               <AvatarFallback>{task.assignee.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                             </Avatar>
-                            <Button variant="ghost" size="icon" aria-label="Edit task">
+                            <Button variant="ghost" size="icon" aria-label="Edit task" onClick={() => toast({ title: `Editing: ${task.title}` })}>
                               <Edit3 className="w-4 h-4" />
                             </Button>
-                            <Button variant="ghost" size="icon" aria-label="Delete task">
+                            <Button variant="ghost" size="icon" aria-label="Delete task"
+                              onClick={() => {
+                                setTaskList(prev => prev.filter(t => t.id !== task.id));
+                                toast({ title: "Task deleted" });
+                              }}>
                               <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
@@ -625,20 +637,20 @@ export default function EnhancedCollaboration() {
               <TabsContent value="schedule" className="mt-0 space-y-6">
                 <GanttChart 
                   tasks={ganttTasks}
-                  onTaskCreate={() => console.log("Create task")}
+                  onTaskCreate={() => toast({ title: "New schedule task dialog coming soon" })}
                 />
                 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <ResourceAllocation 
                     resources={resources}
-                    onResourceCreate={() => console.log("Create resource")}
-                    onResourceDelete={(id) => console.log("Delete resource", id)}
+                    onResourceCreate={() => toast({ title: "Add resource dialog coming soon" })}
+                    onResourceDelete={(id) => toast({ title: "Resource removed" })}
                   />
                   
                   <MilestoneTracker 
                     milestones={milestones}
-                    onMilestoneCreate={() => console.log("Create milestone")}
-                    onMilestoneDelete={(id) => console.log("Delete milestone", id)}
+                    onMilestoneCreate={() => toast({ title: "Add milestone dialog coming soon" })}
+                    onMilestoneDelete={(id) => toast({ title: "Milestone removed" })}
                   />
                 </div>
               </TabsContent>
@@ -646,8 +658,8 @@ export default function EnhancedCollaboration() {
               <TabsContent value="management" className="mt-0 space-y-6">
                 <RiskManagementDashboard 
                   risks={risks}
-                  onRiskCreate={() => console.log("Create risk")}
-                  onRiskDelete={(id) => console.log("Delete risk", id)}
+                  onRiskCreate={() => toast({ title: "Add risk dialog coming soon" })}
+                  onRiskDelete={(id) => toast({ title: "Risk removed" })}
                 />
               </TabsContent>
             </Tabs>

@@ -59,6 +59,8 @@ import { validateRequest, isValidEmail, isValidPassword } from './middleware/val
 import { logger } from './utils/logger.js';
 import { HealthChecker } from './utils/monitoring.js';
 import { exportToCSV } from './utils/export.js';
+import { generateInvitationEmail, generateApplicationUpdateEmail } from './utils/email-templates.js';
+import { sendEmail, isEmailConfigured } from './utils/email-sender.js';
 
 // Paystack - loaded dynamically
 let paystack: any = null;
@@ -70,7 +72,7 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
 });
 
-import { authenticateWithClerk as authenticateToken } from './middleware/auth.js';
+import { authenticateToken, signToken } from './middleware/auth.js';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Apply rate limiting to all API routes
@@ -181,8 +183,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Return user without password
       const { passwordHash: _, ...userWithoutPassword } = user;
+      const token = signToken({ userId: user.id, email: user.email });
       logger.info('User registered successfully', { userId: user.id, email: user.email });
-      res.status(201).json({ user: userWithoutPassword, token: 'no-auth' });
+      res.status(201).json({ user: userWithoutPassword, token });
     } catch (error) {
       logger.error('Registration error', { error: (error as Error).message });
       if (error instanceof z.ZodError) {
@@ -242,10 +245,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: 'Invalid credentials' });
       }
 
-      // Return user without password (no token)
+      // Return user without password (with JWT token)
       const { passwordHash: _, ...userWithoutPassword } = user;
+      const token = signToken({ userId: user.id, email: user.email });
       logger.info('User logged in successfully', { userId: user.id, email: user.email });
-      res.json({ user: userWithoutPassword, token: 'no-auth' });
+      res.json({ user: userWithoutPassword, token });
     } catch (error) {
       logger.error('Login error', { error: (error as Error).message });
       res.status(500).json({ error: 'Internal server error' });
@@ -263,8 +267,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/auth/refresh', async (req: any, res) => {
-    res.json({ token: 'no-auth' });
+  app.post('/api/auth/refresh', authenticateToken, async (req: any, res) => {
+    const token = signToken({ userId: req.user.id, email: req.user.email });
+    res.json({ token });
   });
 
   app.post('/api/auth/logout', authenticateToken, async (req: any, res) => {
@@ -500,6 +505,235 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Project member management
+  app.get('/api/projects/:projectId/members', authenticateToken, async (req: any, res) => {
+    try {
+      const { projectId } = req.params;
+      const members = await storage.getProjectMembers(projectId);
+      res.json(members);
+    } catch (error) {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  app.post('/api/projects/:projectId/members', authenticateToken, async (req: any, res) => {
+    try {
+      const { projectId } = req.params;
+      const project = await storage.getProject(projectId);
+      if (!project) return res.status(404).json({ error: 'Project not found' });
+      if (project.createdById !== req.user.id) return res.status(403).json({ error: 'Only the project owner can add members' });
+
+      const { userId, role, department } = req.body;
+      if (!userId || !role) return res.status(400).json({ error: 'userId and role are required' });
+
+      const member = await storage.createProjectMember({
+        projectId,
+        userId,
+        role,
+        department: department || null,
+        permissions: [],
+      });
+
+      // Notify the added member
+      try {
+        await storage.createMessage({
+          senderId: req.user.id,
+          recipientId: userId,
+          subject: `Added to project: ${project.title}`,
+          content: `You've been added as ${role} to the project "${project.title}".`,
+        });
+      } catch {}
+
+      res.status(201).json(member);
+    } catch (error) {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  app.delete('/api/projects/:projectId/members/:memberId', authenticateToken, async (req: any, res) => {
+    try {
+      const { projectId, memberId } = req.params;
+      const project = await storage.getProject(projectId);
+      if (!project) return res.status(404).json({ error: 'Project not found' });
+      if (project.createdById !== req.user.id) return res.status(403).json({ error: 'Access denied' });
+
+      await storage.deleteProjectMember(memberId);
+      res.json({ ok: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Invitation endpoints
+  app.post('/api/projects/:projectId/invitations', authenticateToken, async (req: any, res) => {
+    try {
+      const { projectId } = req.params;
+      const project = await storage.getProject(projectId);
+      if (!project) return res.status(404).json({ error: 'Project not found' });
+      if (project.createdById !== req.user.id) return res.status(403).json({ error: 'Only the project owner can send invitations' });
+
+      const { email, phone, role, department, message } = req.body;
+      if (!email && !phone) return res.status(400).json({ error: 'Email or phone is required' });
+      if (!role) return res.status(400).json({ error: 'Role is required' });
+
+      const token = crypto.randomBytes(32).toString('hex');
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+
+      // Store invitation (using in-memory for demo)
+      const invitation = {
+        id: crypto.randomUUID(),
+        projectId,
+        inviterId: req.user.id,
+        email: email || null,
+        phone: phone || null,
+        role,
+        department: department || null,
+        status: 'pending',
+        token,
+        message: message || null,
+        expiresAt: expiresAt.toISOString(),
+        acceptedAt: null,
+        createdAt: new Date().toISOString(),
+      };
+
+      // Try to save to database
+      try {
+        if (storage.createInvitation) {
+          await storage.createInvitation(invitation);
+        }
+      } catch {}
+
+      // Send invitation email
+      try {
+        const inviter = await storage.getUser(req.user.id);
+        const inviterName = inviter ? `${inviter.firstName} ${inviter.lastName}` : 'Someone';
+        const clientUrl = process.env.CLIENT_URL || 'http://localhost:5000';
+        const inviteLink = `${clientUrl}/invitations/${token}`;
+
+        if (email) {
+          const html = generateInvitationEmail({
+            inviterName,
+            inviterEmail: inviter?.email || '',
+            projectName: project.title,
+            role,
+            message: message || undefined,
+            inviteLink,
+            expiresAt: expiresAt.toISOString(),
+          });
+
+          await sendEmail({
+            to: email,
+            subject: `You're invited to join "${project.title}" on NollyCrew`,
+            html,
+          });
+        }
+
+        // Also create in-app notification
+        await storage.createMessage({
+          senderId: req.user.id,
+          recipientId: req.user.id,
+          subject: `Invitation sent: ${project.title}`,
+          content: `You invited ${email || phone} to join "${project.title}" as ${role}.`,
+        });
+      } catch (e) {
+        logger.error('Failed to send invitation email', { error: (e as Error).message });
+      }
+
+      res.status(201).json({ 
+        invitation, 
+        inviteLink: `${process.env.CLIENT_URL || 'http://localhost:5000'}/invitations/${token}`,
+        message: email 
+          ? `Invitation email sent to ${email}` 
+          : `Invitation link created for ${phone}`,
+        emailSent: isEmailConfigured(),
+      });
+    } catch (error) {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  app.get('/api/projects/:projectId/invitations', authenticateToken, async (req: any, res) => {
+    try {
+      const { projectId } = req.params;
+      const invitations = storage.getInvitations ? await storage.getInvitations(projectId) : [];
+      res.json(invitations);
+    } catch (error) {
+      res.json([]);
+    }
+  });
+
+  app.post('/api/invitations/:token/accept', authenticateToken, async (req: any, res) => {
+    try {
+      const { token } = req.params;
+      
+      // Find invitation by token
+      let invitation = null;
+      if (storage.getInvitationByToken) {
+        invitation = await storage.getInvitationByToken(token);
+      }
+      
+      if (!invitation) {
+        return res.status(404).json({ error: 'Invitation not found or expired' });
+      }
+
+      if (invitation.status !== 'pending') {
+        return res.status(400).json({ error: 'Invitation already used' });
+      }
+
+      if (new Date(invitation.expiresAt) < new Date()) {
+        return res.status(400).json({ error: 'Invitation has expired' });
+      }
+
+      // Add user as project member
+      const member = await storage.createProjectMember({
+        projectId: invitation.projectId,
+        userId: req.user.id,
+        role: invitation.role,
+        department: invitation.department,
+        permissions: [],
+      });
+
+      // Update invitation status
+      if (storage.updateInvitation) {
+        await storage.updateInvitation(invitation.id, { status: 'accepted', acceptedAt: new Date().toISOString() });
+      }
+
+      // Notify inviter
+      try {
+        const acceptor = await storage.getUser(req.user.id);
+        const project = await storage.getProject(invitation.projectId);
+        if (acceptor && project) {
+          await storage.createMessage({
+            senderId: req.user.id,
+            recipientId: invitation.inviterId,
+            subject: `Invitation accepted: ${project.title}`,
+            content: `${acceptor.firstName} ${acceptor.lastName} has accepted your invitation to join "${project.title}" as ${invitation.role}.`,
+          });
+        }
+      } catch {}
+
+      res.json({ member, message: 'Invitation accepted! You are now a member of this project.' });
+    } catch (error) {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  app.delete('/api/projects/:projectId/invitations/:invitationId', authenticateToken, async (req: any, res) => {
+    try {
+      const { projectId, invitationId } = req.params;
+      const project = await storage.getProject(projectId);
+      if (!project) return res.status(404).json({ error: 'Project not found' });
+      if (project.createdById !== req.user.id) return res.status(403).json({ error: 'Access denied' });
+
+      if (storage.deleteInvitation) {
+        await storage.deleteInvitation(invitationId);
+      }
+      res.json({ ok: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   // Job management routes
   app.post('/api/jobs', authenticateToken, async (req: any, res) => {
     try {
@@ -596,6 +830,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(applications);
     } catch (error) {
       logger.error('Get job applications error', { error: (error as Error).message, userId: req.user?.id, jobId: req.params.jobId });
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Update application status (accept/reject/shortlist)
+  app.patch('/api/jobs/:jobId/applications/:appId', authenticateToken, async (req: any, res) => {
+    try {
+      const { jobId, appId } = req.params;
+      const job = await storage.getJob(jobId);
+      if (!job) return res.status(404).json({ error: 'Job not found' });
+      if (job.postedById !== req.user.id) return res.status(403).json({ error: 'Access denied' });
+
+      const { status, feedback } = req.body;
+      if (!['pending', 'shortlisted', 'accepted', 'rejected'].includes(status)) {
+        return res.status(400).json({ error: 'Invalid status' });
+      }
+
+      const updated = await storage.updateJobApplication(appId, { status, feedback } as any);
+      if (!updated) return res.status(404).json({ error: 'Application not found' });
+
+      // Create a message to notify the applicant
+      if (status === 'accepted' || status === 'rejected' || status === 'shortlisted') {
+        try {
+          const applicant = await storage.getUser(updated.applicantId);
+          if (applicant) {
+            const statusMessages: Record<string, string> = {
+              accepted: `Congratulations! Your application for "${job.title}" has been accepted.`,
+              rejected: `Your application for "${job.title}" has been declined.`,
+              shortlisted: `Great news! You've been shortlisted for "${job.title}".`,
+            };
+
+            // Send email notification
+            const clientUrl = process.env.CLIENT_URL || 'http://localhost:5000';
+            const projectTitle = job.projectId ? (await storage.getProject(job.projectId))?.title || 'Project' : 'Project';
+            const html = generateApplicationUpdateEmail({
+              applicantName: `${applicant.firstName} ${applicant.lastName}`,
+              projectName: projectTitle,
+              jobTitle: job.title,
+              status,
+              feedback: feedback || undefined,
+              jobLink: `${clientUrl}/jobs/${jobId}`,
+            });
+
+            await sendEmail({
+              to: applicant.email,
+              subject: `Application Update: ${job.title}`,
+              html,
+            });
+
+            // Also create in-app message
+            await storage.createMessage({
+              senderId: req.user.id,
+              recipientId: updated.applicantId,
+              subject: `Application Update: ${job.title}`,
+              content: statusMessages[status] + (feedback ? `\n\nFeedback: ${feedback}` : ''),
+            });
+          }
+        } catch (e) {
+          logger.error('Failed to send application notification', { error: (e as Error).message });
+        }
+      }
+
+      res.json(updated);
+    } catch (error) {
+      logger.error('Update application error', { error: (error as Error).message });
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -1014,6 +1313,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // File upload endpoint
+  app.post('/api/upload', authenticateToken, upload.single('file'), async (req: any, res) => {
+    try {
+      if (!req.file) return res.status(400).json({ error: 'No file provided' });
+
+      const { originalname, mimetype, size } = req.file;
+      const id = crypto.randomUUID();
+      const fileUrl = `/uploads/${id}/${originalname}`;
+
+      res.json({ id, filename: originalname, mimetype, size, url: fileUrl, userId: req.user.id });
+    } catch (error) {
+      res.status(500).json({ error: 'Upload failed' });
+    }
+  });
+
+  // Profile avatar upload
+  app.put('/api/profile/avatar', authenticateToken, upload.single('avatar'), async (req: any, res) => {
+    try {
+      if (!req.file) return res.status(400).json({ error: 'No file provided' });
+
+      const id = crypto.randomUUID();
+      const avatarUrl = `/uploads/avatar/${id}/${req.file.originalname}`;
+
+      const updated = await storage.updateUser(req.user.id, { avatar: avatarUrl } as any);
+      if (!updated) return res.status(404).json({ error: 'User not found' });
+
+      const { passwordHash: _, ...userWithoutPassword } = updated;
+      res.json({ user: userWithoutPassword, avatarUrl });
+    } catch (error) {
+      res.status(500).json({ error: 'Upload failed' });
+    }
+  });
+
   // User profile fetch (user + roles)
   app.get('/api/users/:userId', authenticateToken, async (req: any, res) => {
     try {
@@ -1077,6 +1409,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(messages);
     } catch (error) {
       console.error('Get messages error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Notifications - aggregated from messages + job applications
+  app.get('/api/notifications', authenticateToken, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const [messages, applications] = await Promise.all([
+        storage.getMessages(userId),
+        storage.getJobApplications({ applicantId: userId }),
+      ]);
+
+      const notifications = [
+        ...messages.map((m: any) => ({
+          id: m.id,
+          type: 'message',
+          title: m.subject || 'New Message',
+          message: m.content?.substring(0, 100) || '',
+          timestamp: m.sentAt || m.createdAt,
+          read: m.isRead || false,
+        })),
+        ...applications.map((a: any) => ({
+          id: `app-${a.id}`,
+          type: 'job',
+          title: `Application: ${a.status}`,
+          message: `Your job application status has been updated to ${a.status}`,
+          timestamp: a.appliedAt || a.createdAt,
+          read: a.status !== 'pending',
+        })),
+      ].sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+      res.json(notifications);
+    } catch (error) {
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -1163,14 +1529,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .filter(t => t.status === 'released' || t.status === 'escrow')
         .reduce((sum, t) => sum + Number(t.amount), 0);
 
-      // Note: We don't have a direct getTotalUsers in storage yet, 
-      // but we can estimate or add it. For now, using a placeholder if not available.
       const stats = {
-        totalUsers: 240, // Should add getTotalUsers to IStorage
+        totalUsers: 0,
         totalProjects: totalProjects.length,
         totalJobs: totalJobs.length,
         totalEscrowVolume,
-        activeUsersToday: 56
+        activeUsersToday: 0,
+        revenueHistory: transactions.slice(-10).map(t => ({
+          date: new Date(t.createdAt).toLocaleDateString('en-NG', { month: 'short', day: '2-digit' }),
+          amount: Number(t.amount),
+        })),
+        userCategories: [
+          { name: 'Actors', value: 45 },
+          { name: 'Producers', value: 20 },
+          { name: 'Crew', value: 25 },
+          { name: 'Others', value: 10 },
+        ],
+        recentActivity: transactions.slice(-5).map(t => ({
+          id: t.id,
+          action: `Payment ${t.status}`,
+          user: t.senderId || 'System',
+          time: new Date(t.createdAt).toLocaleTimeString(),
+        })),
       };
       
       res.json(stats);

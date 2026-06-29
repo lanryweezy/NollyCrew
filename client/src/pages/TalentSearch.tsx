@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
 import { profiles } from "@/lib/api";
-import { isSupabaseConfigured } from "@/lib/supabase";
 import Navigation from "@/components/Navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,10 +33,10 @@ export default function TalentSearch() {
 
   async function searchTalent() {
     setLoading(true);
-    if (isSupabaseConfigured()) {
+    try {
       const data = await profiles.search(searchTerm, selectedRole !== "all" ? selectedRole : undefined);
-      setTalentList(data);
-    } else {
+      setTalentList(data.length > 0 ? data : DEMO_TALENT);
+    } catch {
       setTalentList(DEMO_TALENT);
     }
     setLoading(false);

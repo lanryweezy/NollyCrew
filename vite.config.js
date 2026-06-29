@@ -32,21 +32,10 @@ export default defineConfig({
         },
         proxy: {
             '/api': {
-                target: 'http://localhost:3000',
+                target: 'http://localhost:5000',
                 changeOrigin: true,
                 secure: false,
                 ws: true,
-                configure: (proxy, options) => {
-                    proxy.on('error', (err, req, res) => {
-                        console.log('Proxy error:', err);
-                    });
-                    proxy.on('proxyReq', (proxyReq, req, res) => {
-                        console.log('Proxy request:', req.method, req.url);
-                    });
-                    proxy.on('proxyRes', (proxyRes, req, res) => {
-                        console.log('Proxy response:', proxyRes.statusCode, req.url);
-                    });
-                }
             }
         }
     },

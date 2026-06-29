@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
 import { jobs, projects, messages } from "@/lib/api";
-import { isSupabaseConfigured } from "@/lib/supabase";
 import Navigation from "@/components/Navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,6 +21,7 @@ import {
   Loader2
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import { DashboardSkeleton } from "@/components/PageSkeletons";
 
 // Demo data for when Supabase is not configured
 const DEMO_STATS = {
@@ -58,25 +58,20 @@ export default function Dashboard() {
 
   async function loadDashboardData() {
     setLoading(true);
-    if (isSupabaseConfigured() && profile) {
-      try {
-        const [jobsData, appsData, msgsUnread] = await Promise.all([
-          jobs.list({ limit: 5 }),
-          jobs.getMyApplications(profile.id),
-          messages.getUnreadCount(profile.id),
-        ]);
-        setRecentJobs(jobsData);
-        setRecentApps(appsData);
-        setStats({
-          totalJobs: jobsData.length,
-          totalApplications: appsData.length,
-          totalProjects: 0,
-          unreadMessages: msgsUnread,
-        });
-      } catch (e) {
-        console.error("Dashboard load error:", e);
-      }
-    } else {
+    try {
+      const [jobsData, appsData] = await Promise.all([
+        jobs.list({ limit: 5 }),
+        profile ? jobs.getMyApplications(profile.id) : Promise.resolve([]),
+      ]);
+      setRecentJobs(jobsData.length > 0 ? jobsData : DEMO_RECENT_JOBS);
+      setRecentApps(appsData.length > 0 ? appsData : DEMO_RECENT_APPLICATIONS);
+      setStats({
+        totalJobs: jobsData.length || DEMO_STATS.totalJobs,
+        totalApplications: appsData.length || DEMO_STATS.totalApplications,
+        totalProjects: DEMO_STATS.totalProjects,
+        unreadMessages: DEMO_STATS.unreadMessages,
+      });
+    } catch (e) {
       setRecentJobs(DEMO_RECENT_JOBS);
       setRecentApps(DEMO_RECENT_APPLICATIONS);
     }
@@ -119,7 +114,7 @@ export default function Dashboard() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Card>
+          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setLocation("/jobs")}>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -130,7 +125,7 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setLocation("/jobs")}>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -141,7 +136,7 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setLocation("/projects")}>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -152,7 +147,7 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setLocation("/messages")}>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -175,9 +170,7 @@ export default function Dashboard() {
 
           <TabsContent value="overview" className="mt-6">
             {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              </div>
+              <DashboardSkeleton />
             ) : (
               <div className="grid md:grid-cols-2 gap-6">
                 <Card>
@@ -195,7 +188,7 @@ export default function Dashboard() {
                     ) : (
                       <div className="space-y-3">
                         {recentJobs.map((job: any) => (
-                          <div key={job.id} className="flex items-center justify-between p-3 rounded-lg border">
+                          <div key={job.id} className="flex items-center justify-between p-3 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => setLocation("/jobs")}>
                             <div>
                               <p className="font-medium">{job.title}</p>
                               <p className="text-sm text-muted-foreground flex items-center gap-1">
@@ -227,7 +220,7 @@ export default function Dashboard() {
                     ) : (
                       <div className="space-y-3">
                         {recentApps.map((app: any) => (
-                          <div key={app.id} className="flex items-center justify-between p-3 rounded-lg border">
+                          <div key={app.id} className="flex items-center justify-between p-3 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => setLocation("/jobs")}>
                             <div>
                               <p className="font-medium">{app.job_title || app.job?.title || "Job"}</p>
                               <p className="text-sm text-muted-foreground">

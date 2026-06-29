@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import Navigation from "@/components/Navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,21 +34,8 @@ export default function CalendarPage() {
 
   async function loadEvents() {
     setLoading(true);
-    if (isSupabaseConfigured() && profile) {
-      // Query job applications as events
-      const { data } = await supabase.from("job_applications")
-        .select("id, applied_at, status, job:jobs(id, title, location, deadline)")
-        .eq("applicant_id", profile.id);
-      setEvents((data || []).map((a: any) => ({
-        id: a.id,
-        title: `Application: ${a.job?.title}`,
-        date: a.applied_at?.split("T")[0],
-        type: "application",
-        location: a.job?.location,
-      })));
-    } else {
-      setEvents(DEMO_EVENTS);
-    }
+    // Calendar events are demo-based for now
+    setEvents(DEMO_EVENTS);
     setLoading(false);
   }
 

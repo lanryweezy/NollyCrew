@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { api } from '@/lib/api';
+import { apiFetch } from '@/lib/api';
 
 export type JobStatus = 'waiting' | 'active' | 'completed' | 'failed';
 
@@ -31,7 +31,7 @@ export function useJobStatus<T = any>(jobId: string | null | undefined, options:
 
     const fetchStatus = async () => {
       try {
-        const data = await api.getJobStatus(jobId);
+        const data = await apiFetch(`/jobs/${jobId}/status`);
         if (cancelled) return;
         const nextState: UseJobStatusState<T> = {
           status: data.status as JobStatus,
@@ -50,7 +50,6 @@ export function useJobStatus<T = any>(jobId: string | null | undefined, options:
       }
     };
 
-    // initial kick
     setState(prev => ({ ...prev, loading: true }));
     fetchStatus();
 
@@ -65,6 +64,3 @@ export function useJobStatus<T = any>(jobId: string | null | undefined, options:
 
   return state;
 }
-
-
-

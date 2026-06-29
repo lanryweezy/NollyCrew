@@ -4,13 +4,14 @@ interface PageHeaderProps {
   title: string;
   subtitle?: string;
   description?: string;
+  actions?: ReactNode;
   rightActions?: ReactNode;
   children?: ReactNode;
 }
 
-export default function PageHeader({ title, subtitle, description, rightActions, children }: PageHeaderProps) {
+export default function PageHeader({ title, subtitle, description, actions, rightActions, children }: PageHeaderProps) {
   const displaySubtitle = subtitle || description;
-  const actions = rightActions || children;
+  const actionContent = actions || rightActions || children;
 
   return (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
@@ -20,11 +21,9 @@ export default function PageHeader({ title, subtitle, description, rightActions,
           <p className="text-muted-foreground">{displaySubtitle}</p>
         ) : null}
       </div>
-      {actions ? (
-        <div className="flex items-center gap-2">{actions}</div>
+      {actionContent ? (
+        <div className="flex items-center gap-2">{actionContent}</div>
       ) : null}
     </div>
   );
 }
-
-

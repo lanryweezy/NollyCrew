@@ -26,7 +26,9 @@ import {
   Briefcase,
   Users,
   Command,
-  BarChart3
+  BarChart3,
+  Brain,
+  Calendar
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { 
@@ -62,6 +64,8 @@ export default function Navigation({
   const [path, setLocation] = useLocation();
   const { signOut, profile } = useAuth();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const roleColor = {
@@ -84,6 +88,8 @@ export default function Navigation({
     { label: "Find Talent", icon: Users, action: () => setLocation("/talent") },
     { label: "My Projects", icon: Film, action: () => setLocation("/projects") },
     { label: "Messages", icon: MessageCircle, action: () => setLocation("/messages") },
+    { label: "AI Tools", icon: Brain, action: () => setLocation("/ai-tools") },
+    { label: "Auditions", icon: Calendar, action: () => setLocation("/auditions") },
     { label: "Profile", icon: User, action: () => setLocation("/profile") },
   ];
 
@@ -91,6 +97,28 @@ export default function Navigation({
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [path]);
+
+  // Search function
+  async function handleSearch(query: string) {
+    setSearchQuery(query);
+    if (query.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    try {
+      const data = await fetch(`/api/talent/search?skills=${encodeURIComponent(query)}&limit=5`).then(r => r.json());
+      if (Array.isArray(data)) {
+        setSearchResults(data.map((u: any) => ({
+          id: u.id,
+          name: `${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim(),
+          type: 'talent',
+          role: u.role || 'user',
+        })));
+      }
+    } catch {
+      setSearchResults([]);
+    }
+  }
 
   return (
     <nav className="border-b bg-background/95 backdrop-blur-sm sticky top-0 z-50">
@@ -188,6 +216,24 @@ export default function Navigation({
                   <Users className="w-4 h-4 mr-1 sm:mr-2" />
                   <span className="hidden sm:inline">Collab</span>
                 </Button>
+                <Button 
+                  variant={path === "/ai-tools" ? "secondary" : "ghost"}
+                  onClick={() => setLocation("/ai-tools")}
+                  data-testid="nav-ai-tools"
+                  className="text-xs sm:text-sm"
+                >
+                  <Brain className="w-4 h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">AI Tools</span>
+                </Button>
+                <Button 
+                  variant={path === "/auditions" ? "secondary" : "ghost"}
+                  onClick={() => setLocation("/auditions")}
+                  data-testid="nav-auditions"
+                  className="text-xs sm:text-sm"
+                >
+                  <Calendar className="w-4 h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Auditions</span>
+                </Button>
               </div>
             )}
           </div>
@@ -245,6 +291,7 @@ export default function Navigation({
                   className="relative hidden sm:flex"
                   data-testid="button-messages"
                   aria-label="Messages"
+                  onClick={() => setLocation("/messages")}
                 >
                   <MessageCircle className="w-4 h-4" />
                   {messages > 0 && (
@@ -356,9 +403,30 @@ export default function Navigation({
 
       {/* Search Dialog */}
       <CommandDialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
-        <CommandInput placeholder="Search jobs, talent, projects..." />
+        <CommandInput placeholder="Search jobs, talent, projects..." value={searchQuery} onValueChange={handleSearch} />
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
+          
+          {searchResults.length > 0 && (
+            <CommandGroup heading="Talent">
+              {searchResults.map((result) => (
+                <CommandItem
+                  key={result.id}
+                  onSelect={() => {
+                    setLocation(`/talent/${result.id}`);
+                    setIsSearchOpen(false);
+                    setSearchQuery("");
+                    setSearchResults([]);
+                  }}
+                >
+                  <Users className="mr-2 h-4 w-4" />
+                  <span>{result.name}</span>
+                  <span className="ml-2 text-xs text-muted-foreground">{result.role}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
+
           <CommandGroup heading="Quick Actions">
             {quickActions.map((action) => (
               <CommandItem

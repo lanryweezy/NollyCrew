@@ -48,8 +48,8 @@ export default function ProjectCard({
   poster,
   description,
   isOwner = false,
-  onViewProject = () => console.log(`View project ${title}`),
-  onManage = () => console.log(`Manage project ${title}`)
+  onViewProject,
+  onManage,
 }: ProjectCardProps) {
   const statusColors = {
     "pre-production": "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
@@ -162,7 +162,7 @@ export default function ProjectCard({
         >
           View Details
         </Button>
-        {isOwner && (
+        {isOwner && onManage && (
           <Button 
             className="flex-1"
             onClick={onManage}

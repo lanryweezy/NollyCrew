@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import StarRating from "./StarRating";
 import { useToast } from "@/hooks/use-toast";
-import { api } from "@/lib/api";
+import { reviews } from "@/lib/api";
 
 interface ReviewFormProps {
   userId: string;
@@ -33,7 +33,13 @@ export default function ReviewForm({ userId, projectId, onSuccess }: ReviewFormP
   const onSubmit = async (values: any) => {
     setIsSubmitting(true);
     try {
-      await api.createUserReview(userId, values);
+      await reviews.create({
+        reviewer_id: values.reviewer_id || 'current-user',
+        reviewee_id: userId,
+        project_id: values.project_id,
+        rating: values.rating,
+        comment: values.comment,
+      });
       toast({
         title: "Review submitted",
         description: "Thank you for your feedback!"

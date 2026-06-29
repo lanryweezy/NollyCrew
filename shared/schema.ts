@@ -500,3 +500,30 @@ export type SupportTicket = typeof supportTickets.$inferSelect;
 export type InsertSupportTicket = z.infer<typeof insertSupportTicketSchema>;
 export type Referral = typeof referrals.$inferSelect;
 export type InsertReferral = z.infer<typeof insertReferralSchema>;
+
+// Invitations table for project member invites via email/phone
+export const invitations = pgTable("invitations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  inviterId: varchar("inviter_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  email: text("email"),
+  phone: text("phone"),
+  role: text("role").notNull(),
+  department: text("department"),
+  status: text("status").notNull().default("pending"), // pending, accepted, expired
+  token: text("token").notNull().unique(),
+  message: text("message"),
+  expiresAt: timestamp("expires_at").notNull(),
+  acceptedAt: timestamp("accepted_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => {
+  return {
+    tokenIdx: index("invitations_token_idx").on(table.token),
+    projectIdx: index("invitations_project_idx").on(table.projectId),
+    emailIdx: index("invitations_email_idx").on(table.email),
+  };
+});
+
+export const insertInvitationSchema = createInsertSchema(invitations as any);
+export type Invitation = typeof invitations.$inferSelect;
+export type InsertInvitation = z.infer<typeof insertInvitationSchema>;

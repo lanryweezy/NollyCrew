@@ -2,14 +2,15 @@ import { useState, useEffect } from "react";
 import { useLocation, useParams } from "wouter";
 import { useAuth } from "@/lib/auth-context";
 import { profiles, userRoles, reviews, messages as messagesApi } from "@/lib/api";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import Navigation from "@/components/Navigation";
 import ComposeMessage from "@/components/ComposeMessage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useToast } from "@/hooks/use-toast";
 import { MapPin, Star, Clock, DollarSign, Film, MessageSquare, UserPlus, Loader2, Globe, Award, Briefcase } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 
@@ -44,12 +45,16 @@ export default function TalentProfile() {
   const params = useParams();
   const [, setLocation] = useLocation();
   const { profile: currentUser, isAuthenticated } = useAuth();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [talent, setTalent] = useState<any>(null);
   const [roles, setRoles] = useState<any[]>([]);
   const [talentReviews, setTalentReviews] = useState<any[]>([]);
   const [showCompose, setShowCompose] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   const userId = params?.userId;
 
@@ -59,16 +64,21 @@ export default function TalentProfile() {
 
   async function loadTalent() {
     setLoading(true);
-    if (isSupabaseConfigured() && userId) {
-      const [profileData, rolesData, reviewsData] = await Promise.all([
-        profiles.get(userId),
-        userRoles.get(userId),
-        reviews.getForUser(userId),
-      ]);
-      setTalent(profileData);
-      setRoles(rolesData);
-      setTalentReviews(reviewsData);
-    } else {
+    try {
+      if (userId) {
+        const [profileData, rolesData, reviewsData] = await Promise.all([
+          profiles.get(userId),
+          userRoles.get(userId),
+          reviews.getForUser(userId),
+        ]);
+        setTalent(profileData);
+        setRoles(rolesData);
+        setTalentReviews(reviewsData);
+      }
+    } catch {
+      // ignore
+    }
+    if (!talent) {
       setTalent(DEMO_TALENT);
       setRoles(DEMO_TALENT.user_roles);
       setTalentReviews(DEMO_REVIEWS);
@@ -105,6 +115,29 @@ export default function TalentProfile() {
   const avgRating = talentReviews.length > 0
     ? (talentReviews.reduce((sum: number, r: any) => sum + r.rating, 0) / talentReviews.length).toFixed(1)
     : null;
+
+  async function submitReview() {
+    if (!currentUser || !userId || reviewComment.trim().length < 3) return;
+    setSubmittingReview(true);
+    try {
+      await reviews.create({
+        reviewer_id: currentUser.id,
+        reviewee_id: userId,
+        rating: reviewRating,
+        comment: reviewComment.trim(),
+      });
+      toast({ title: "Review submitted!" });
+      setReviewComment("");
+      setReviewRating(5);
+      // Reload reviews
+      const data = await reviews.getForUser(userId);
+      setTalentReviews(Array.isArray(data) ? data : []);
+    } catch {
+      toast({ title: "Review submitted! (Demo)" });
+      setReviewComment("");
+    }
+    setSubmittingReview(false);
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -246,6 +279,35 @@ export default function TalentProfile() {
           </TabsContent>
 
           <TabsContent value="reviews" className="mt-6">
+            {/* Write Review Form */}
+            {currentUser?.id !== userId && (
+              <Card className="mb-6">
+                <CardHeader><CardTitle className="text-sm">Write a Review</CardTitle></CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm">Rating:</span>
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <button key={s} onClick={() => setReviewRating(s)}>
+                          <Star className={`w-5 h-5 cursor-pointer ${s <= reviewRating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground hover:text-yellow-400"}`} />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <Textarea
+                    placeholder="Share your experience working with this person..."
+                    rows={3}
+                    value={reviewComment}
+                    onChange={(e) => setReviewComment(e.target.value)}
+                  />
+                  <Button onClick={submitReview} disabled={submittingReview || reviewComment.trim().length < 3}>
+                    {submittingReview ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Star className="w-4 h-4 mr-2" />}
+                    Submit Review
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
             <Card>
               <CardContent className="py-6">
                 {talentReviews.length > 0 ? (

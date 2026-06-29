@@ -175,7 +175,7 @@ describe('EnhancedDashboard', () => {
 
   it('should render different dashboard based on user role', async () => {
     // Mock a producer role
-    const auth = await import('../lib/auth');
+    const auth = await import('../lib/auth-context');
     vi.spyOn(auth, 'useAuth').mockReturnValue({
       user: {
         id: 'user-2',

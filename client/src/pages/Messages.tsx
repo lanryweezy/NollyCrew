@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
 import { messages as messagesApi } from "@/lib/api";
-import { isSupabaseConfigured } from "@/lib/supabase";
+import { useWebSocket } from "@/lib/websocket";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
 import ComposeMessage from "@/components/ComposeMessage";
@@ -11,8 +11,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Send, Inbox, Loader2, PenSquare } from "lucide-react";
+import { MessageSquare, Send, Inbox, Loader2, PenSquare, Wifi, WifiOff } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import { MessagesSkeleton } from "@/components/PageSkeletons";
 
 const DEMO_MESSAGES = [
   { id: "m1", sender_id: "user1", subject: "Casting Call: Lead Role", content: "Hi, we'd love to audition you for our upcoming film...", is_read: false, sent_at: new Date().toISOString(), sender: { first_name: "Chidi", last_name: "Okoro", avatar: null } },
@@ -24,20 +25,58 @@ export default function Messages() {
   const [, setLocation] = useLocation();
   const { profile, isAuthenticated } = useAuth();
   const { toast } = useToast();
+  const { connect, disconnect, addListener, removeListener } = useWebSocket();
   const [loading, setLoading] = useState(true);
   const [messageList, setMessageList] = useState<any[]>([]);
   const [selectedMessage, setSelectedMessage] = useState<any>(null);
   const [replyText, setReplyText] = useState("");
   const [showCompose, setShowCompose] = useState(false);
+  const [wsConnected, setWsConnected] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { loadMessages(); }, []);
+  useEffect(() => {
+    loadMessages();
+    // Connect WebSocket
+    connect();
+
+    // Listen for new messages
+    const handleNewMessage = (data: any) => {
+      if (data.recipientId === profile?.id) {
+        loadMessages(); // Refresh inbox
+        toast({ title: "New message!", description: `From ${data.senderName || 'someone'}` });
+      }
+    };
+
+    const handleConnected = () => setWsConnected(true);
+    const handleDisconnected = () => setWsConnected(false);
+    const handleTyping = (data: any) => {
+      if (data.userId !== profile?.id) {
+        setTyping(true);
+        setTimeout(() => setTyping(false), 3000);
+      }
+    };
+
+    addListener('new_message', handleNewMessage);
+    addListener('connected', handleConnected);
+    addListener('disconnected', handleDisconnected);
+    addListener('typing_indicator', handleTyping);
+
+    return () => {
+      disconnect();
+      removeListener('new_message', handleNewMessage);
+      removeListener('connected', handleConnected);
+      removeListener('disconnected', handleDisconnected);
+      removeListener('typing_indicator', handleTyping);
+    };
+  }, [profile?.id]);
 
   async function loadMessages() {
     setLoading(true);
-    if (isSupabaseConfigured() && profile) {
-      const data = await messagesApi.getInbox(profile.id);
-      setMessageList(data);
-    } else {
+    try {
+      const data = await messagesApi.getInbox(profile?.id || '');
+      setMessageList(data.length > 0 ? data : DEMO_MESSAGES);
+    } catch {
       setMessageList(DEMO_MESSAGES);
     }
     setLoading(false);
@@ -45,11 +84,32 @@ export default function Messages() {
 
   async function handleSendReply() {
     if (!selectedMessage || !profile || !replyText.trim()) return;
-    if (isSupabaseConfigured()) {
-      await messagesApi.send(profile.id, selectedMessage.sender_id, replyText);
-    }
+    const text = replyText.trim();
     setReplyText("");
-    toast({ title: "Reply sent!" });
+    try {
+      await messagesApi.send(profile.id, selectedMessage.sender_id, text);
+      // Add to local list immediately
+      setMessageList(prev => [{
+        id: `temp-${Date.now()}`,
+        sender_id: profile.id,
+        recipient_id: selectedMessage.sender_id,
+        subject: selectedMessage.subject,
+        content: text,
+        is_read: true,
+        sent_at: new Date().toISOString(),
+        sender: { first_name: profile.first_name, last_name: profile.last_name, avatar: profile.avatar },
+      }, ...prev]);
+    } catch {
+      toast({ title: "Reply sent! (Demo)" });
+    }
+  }
+
+  function formatTime(timestamp: string) {
+    const diff = Date.now() - new Date(timestamp).getTime();
+    if (diff < 60000) return "Just now";
+    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+    if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+    return new Date(timestamp).toLocaleDateString();
   }
 
   return (
@@ -67,9 +127,7 @@ export default function Messages() {
         />
 
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          </div>
+          <MessagesSkeleton />
         ) : messageList.length === 0 ? (
           <EmptyState
             icon={<Inbox className="w-full h-full" />}
@@ -79,7 +137,7 @@ export default function Messages() {
           />
         ) : (
           <div className="grid md:grid-cols-3 gap-6">
-            <div className="md:col-span-1 space-y-2">
+            <div className="md:col-span-1 space-y-2 max-h-[70vh] overflow-y-auto">
               {messageList.map((msg) => (
                 <Card
                   key={msg.id}
@@ -96,7 +154,7 @@ export default function Messages() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
                           <p className="font-medium text-sm truncate">{msg.sender?.first_name} {msg.sender?.last_name}</p>
-                          {!msg.is_read && <Badge className="w-2 h-2 p-0 rounded-full" />}
+                          <span className="text-xs text-muted-foreground">{formatTime(msg.sent_at)}</span>
                         </div>
                         <p className="text-sm font-medium truncate">{msg.subject}</p>
                         <p className="text-xs text-muted-foreground truncate">{msg.content}</p>
@@ -109,19 +167,35 @@ export default function Messages() {
 
             <div className="md:col-span-2">
               {selectedMessage ? (
-                <Card className="h-full">
-                  <CardHeader>
-                    <CardTitle className="text-lg">{selectedMessage.subject}</CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      From: {selectedMessage.sender?.first_name} {selectedMessage.sender?.last_name} •{" "}
-                      {new Date(selectedMessage.sent_at).toLocaleDateString()}
-                    </p>
+                <Card className="h-full flex flex-col">
+                  <CardHeader className="flex-shrink-0">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-lg">{selectedMessage.subject}</CardTitle>
+                        <p className="text-sm text-muted-foreground">
+                          From: {selectedMessage.sender?.first_name} {selectedMessage.sender?.last_name} •{" "}
+                          {formatTime(selectedMessage.sent_at)}
+                        </p>
+                      </div>
+                    </div>
                   </CardHeader>
-                  <CardContent>
-                    <p className="whitespace-pre-wrap">{selectedMessage.content}</p>
-                    <div className="mt-6 flex gap-2">
-                      <Input placeholder="Type a reply..." value={replyText} onChange={(e) => setReplyText(e.target.value)} />
-                      <Button size="icon" onClick={handleSendReply}><Send className="w-4 h-4" /></Button>
+                  <CardContent className="flex-1 flex flex-col min-h-0">
+                    <div className="flex-1 overflow-y-auto mb-4">
+                      <p className="whitespace-pre-wrap">{selectedMessage.content}</p>
+                    </div>
+                    {typing && (
+                      <p className="text-xs text-muted-foreground italic mb-2">Typing...</p>
+                    )}
+                    <div className="flex gap-2 flex-shrink-0">
+                      <Input 
+                        placeholder="Type a reply..." 
+                        value={replyText} 
+                        onChange={(e) => setReplyText(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleSendReply()}
+                      />
+                      <Button size="icon" onClick={handleSendReply} disabled={!replyText.trim()}>
+                        <Send className="w-4 h-4" />
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>

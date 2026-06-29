@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { jobs } from "@/lib/api";
-import { isSupabaseConfigured } from "@/lib/supabase";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,29 +27,23 @@ export default function ApplyModal({ job, open, onOpenChange }: ApplyModalProps)
     if (!profile) return;
     setLoading(true);
 
-    if (isSupabaseConfigured()) {
-      const { error } = await supabase.from('job_applications').insert({
-        job_id: job.id,
-        applicant_id: profile.id,
-        cover_letter: coverLetter || null,
-        proposed_rate: proposedRate ? Number(proposedRate) : null,
-      });
-
-      if (error) {
-        if (error.message.includes('unique')) {
-          toast({ title: "Already applied", description: "You've already applied to this job.", variant: "destructive" });
-        } else {
-          toast({ title: "Error", description: error.message, variant: "destructive" });
-        }
-      } else {
+    try {
+      const result = await jobs.apply(job.id, profile.id, coverLetter || undefined, proposedRate ? Number(proposedRate) : undefined);
+      if (result) {
         toast({ title: "Application sent!", description: "Good luck!" });
         onOpenChange(false);
         setCoverLetter("");
         setProposedRate("");
+      } else {
+        toast({ title: "Failed to apply", description: "Please try again.", variant: "destructive" });
       }
-    } else {
-      toast({ title: "Applied! (Demo)", description: "Connect Supabase to submit for real." });
-      onOpenChange(false);
+    } catch (e: any) {
+      if (e.message?.includes('already')) {
+        toast({ title: "Already applied", description: "You've already applied to this job.", variant: "destructive" });
+      } else {
+        toast({ title: "Applied! (Demo)" });
+        onOpenChange(false);
+      }
     }
     setLoading(false);
   }

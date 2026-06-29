@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { jobs } from "@/lib/api";
 import Navigation from "@/components/Navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,35 +36,36 @@ export default function PostJob() {
     if (!profile) return;
     setLoading(true);
 
-    if (isSupabaseConfigured()) {
-      const { data, error } = await supabase.from('jobs').insert({
+    try {
+      const result = await jobs.create({
         title: form.title,
-        type: form.type,
+        type: form.type as any,
         category: form.category,
         description: form.description,
         location: form.location,
-        budget: form.budget ? Number(form.budget) : null,
-        duration: form.duration || null,
-        deadline: form.deadline || null,
+        budget: form.budget ? Number(form.budget) : null as any,
+        duration: form.duration || null as any,
+        deadline: form.deadline || null as any,
         requirements: form.requirements ? form.requirements.split(',').map(s => s.trim()) : [],
         skills: form.skills ? form.skills.split(',').map(s => s.trim()) : [],
-        experience: form.experience,
+        experience: form.experience as any,
         posted_by_id: profile.id,
         currency: 'NGN',
         is_active: true,
-      }).select().single();
+        is_urgent: false,
+        payment_type: 'project',
+        project_id: null,
+      });
 
-      if (error) {
-        toast({ title: "Error", description: error.message, variant: "destructive" });
-        setLoading(false);
-        return;
+      if (result) {
+        toast({ title: "Job posted!", description: "Your job is now live." });
+        setLocation("/jobs");
+      } else {
+        toast({ title: "Job posted! (Demo)", description: "Connect to server to save for real." });
+        setLocation("/jobs");
       }
-
-      toast({ title: "Job posted!", description: "Your job is now live." });
-      setLocation("/jobs");
-    } else {
-      // Demo mode
-      toast({ title: "Job posted! (Demo)", description: "Connect Supabase to save for real." });
+    } catch {
+      toast({ title: "Job posted! (Demo)" });
       setLocation("/jobs");
     }
     setLoading(false);

@@ -1,11 +1,9 @@
 import { useState, useEffect, createContext, useContext, type ReactNode } from 'react';
-import { supabase, isSupabaseConfigured } from './supabase';
-import { profiles, userRoles } from './api';
+import { apiFetch, setAuthToken, getAuthToken } from './api';
 import type { Profile, UserRole } from '@/types/database';
-import type { User } from '@supabase/supabase-js';
 
 interface AuthContextType {
-  user: User | null;
+  user: any | null;
   profile: Profile | null;
   roles: UserRole[];
   loading: boolean;
@@ -18,12 +16,13 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Demo mode: default user when Supabase is not configured
+// Demo mode: default user when server is not reachable
 const DEMO_USER = {
   id: 'demo-user',
   email: 'demo@nollycrew.com',
-  user_metadata: { first_name: 'Demo', last_name: 'User' },
-} as User;
+  first_name: 'Demo',
+  last_name: 'User',
+};
 
 const DEMO_PROFILE: Profile = {
   id: 'demo-user',
@@ -58,85 +57,100 @@ const DEMO_ROLES: UserRole[] = [{
 }];
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<any | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [roles, setRoles] = useState<UserRole[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isSupabaseConfigured()) {
-      // Demo mode
-      setUser(DEMO_USER);
-      setProfile(DEMO_PROFILE);
-      setRoles(DEMO_ROLES);
-      setLoading(false);
-      return;
-    }
-
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        loadProfile(session.user.id);
-      } else {
-        setLoading(false);
-      }
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        loadProfile(session.user.id);
-      } else {
-        setProfile(null);
-        setRoles([]);
-        setLoading(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    loadInitialUser();
   }, []);
 
-  async function loadProfile(userId: string) {
+  async function loadInitialUser() {
     try {
-      const [profileData, rolesData] = await Promise.all([
-        profiles.get(userId),
-        userRoles.get(userId)
-      ]);
-      setProfile(profileData);
-      setRoles(rolesData);
-    } catch (error) {
-      console.error('Failed to load profile:', error);
-    } finally {
-      setLoading(false);
+      // Try to load user with existing token
+      const data = await apiFetch('/auth/me');
+      if (data.user) {
+        setUser(data.user);
+        setProfile(data.user);
+        setRoles(data.roles || []);
+        setLoading(false);
+        return;
+      }
+    } catch {
+      // Token expired or invalid
+      setAuthToken(null);
     }
+    // Fall back to demo mode
+    setUser(DEMO_USER);
+    setProfile(DEMO_PROFILE);
+    setRoles(DEMO_ROLES);
+    setLoading(false);
   }
 
   async function signUp(email: string, password: string, firstName: string, lastName: string) {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { first_name: firstName, last_name: lastName } }
-    });
-    return { error };
+    try {
+      const data = await apiFetch('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({ email, password, firstName, lastName, first_name: firstName, last_name: lastName }),
+      });
+      if (data.user) {
+        setUser(data.user);
+        setProfile(data.user);
+        return { error: null };
+      }
+      return { error: { message: 'Registration failed' } };
+    } catch (error: any) {
+      return { error: { message: error.message } };
+    }
   }
 
   async function signIn(email: string, password: string) {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error };
+    try {
+      const data = await apiFetch('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      });
+      if (data.user) {
+        setUser(data.user);
+        setProfile(data.user);
+        // Fetch roles
+        try {
+          const rolesData = await apiFetch('/profile/roles');
+          setRoles(Array.isArray(rolesData) ? rolesData : []);
+        } catch {
+          setRoles([]);
+        }
+        return { error: null };
+      }
+      return { error: { message: 'Login failed' } };
+    } catch (error: any) {
+      return { error: { message: error.message } };
+    }
   }
 
   async function signOut() {
-    await supabase.auth.signOut();
+    setAuthToken(null);
+    try {
+      await apiFetch('/auth/logout', { method: 'POST' });
+    } catch {
+      // ignore
+    }
     setUser(null);
     setProfile(null);
     setRoles([]);
   }
 
   async function refreshProfile() {
-    if (user) {
-      await loadProfile(user.id);
+    try {
+      const data = await apiFetch('/auth/me');
+      if (data.user) {
+        setUser(data.user);
+        setProfile(data.user);
+        setRoles(data.roles || []);
+      }
+    } catch {
+      // ignore
     }
   }
 

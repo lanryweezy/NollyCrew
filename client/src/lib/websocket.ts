@@ -1,4 +1,4 @@
-import { authService } from './auth';
+import { getAuthToken } from './api';
 
 // WebSocket connection state
 let ws: WebSocket | null = null;
@@ -23,7 +23,7 @@ export function connectWebSocket() {
   }
 
   // Get auth token
-  const token = authService.getToken();
+  const token = getAuthToken();
   if (!token) {
     console.warn('No auth token available, cannot connect to WebSocket');
     return;

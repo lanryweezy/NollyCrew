@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPin, Clock, DollarSign, Users, Calendar, Bookmark, Share2, AlertCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import ApplyModal from "./ApplyModal";
 import type { Job } from "@/types/database";
 
@@ -11,8 +13,11 @@ interface JobCardProps {
 }
 
 export default function JobCard({ job }: JobCardProps) {
+  const [, setLocation] = useLocation();
   const [showApply, setShowApply] = useState(false);
   const [showFull, setShowFull] = useState(false);
+  const [bookmarked, setBookmarked] = useState(false);
+  const { toast } = useToast();
 
   const typeColors = {
     casting: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
@@ -48,7 +53,7 @@ export default function JobCard({ job }: JobCardProps) {
                   </Badge>
                 )}
               </div>
-              <CardTitle className="text-lg">{job.title}</CardTitle>
+              <CardTitle className="text-lg cursor-pointer hover:text-primary transition-colors" onClick={() => setLocation(`/jobs/${job.id}`)}>{job.title}</CardTitle>
             </div>
           </div>
         </CardHeader>
@@ -93,8 +98,8 @@ export default function JobCard({ job }: JobCardProps) {
           <Button className="flex-1" onClick={() => setShowApply(true)}>
             Apply Now
           </Button>
-          <Button variant="outline" size="icon">
-            <Bookmark className="w-4 h-4" />
+          <Button variant="outline" size="icon" onClick={() => { setBookmarked(!bookmarked); toast({ title: bookmarked ? "Removed from bookmarks" : "Bookmarked!" }); }}>
+            <Bookmark className={`w-4 h-4 ${bookmarked ? "fill-primary" : ""}`} />
           </Button>
         </CardFooter>
       </Card>

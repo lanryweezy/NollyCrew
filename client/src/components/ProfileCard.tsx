@@ -35,9 +35,9 @@ export default function ProfileCard({
   recentProject,
   isVerified = false,
   isFollowing = false,
-  onMessage = () => console.log(`Message ${name}`),
-  onFollow = () => console.log(`Follow ${name}`),
-  onViewProfile = () => console.log(`View ${name}'s profile`)
+  onMessage,
+  onFollow,
+  onViewProfile,
 }: ProfileCardProps) {
   const roleColors = {
     actor: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",

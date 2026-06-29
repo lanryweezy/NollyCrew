@@ -30,8 +30,18 @@ import EnhancedAnalytics from "@/pages/EnhancedAnalytics";
 import EnhancedCollaboration from "@/pages/EnhancedCollaboration";
 import BossDashboard from "@/pages/BossDashboard";
 import PostJob from "@/pages/jobs/New";
+import ProjectDetail from "@/pages/ProjectDetail";
+import JobDetail from "@/pages/JobDetail";
+import JobApplications from "@/pages/JobApplications";
+import AcceptInvitation from "@/pages/AcceptInvitation";
+import KYC from "@/pages/KYC";
+import SubscriptionsPage from "@/pages/Subscriptions";
+import Support from "@/pages/Support";
+import DailyProgressReport from "@/pages/DailyProgressReport";
+import CallSheetsPage from "@/pages/CallSheets";
 import TestProxy from "./test-proxy";
 import { ResponsiveToastProvider } from "@/components/ResponsiveToast";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 function Router() {
   const [location] = useLocation();
@@ -53,6 +63,7 @@ function Router() {
           <Route path="/payment" component={Payment} />
           <Route path="/payment/success" component={PaymentSuccess} />
           <Route path="/payment/error" component={PaymentError} />
+          <Route path="/invitations/:token" component={AcceptInvitation} />
           
           {/* Protected Routes */}
           <Route path="/onboarding">
@@ -73,6 +84,16 @@ function Router() {
           <Route path="/jobs/new">
             <ProtectedRoute>
               <PostJob />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/jobs/:id">
+            <ProtectedRoute>
+              <JobDetail />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/jobs/:jobId/applications">
+            <ProtectedRoute>
+              <JobApplications />
             </ProtectedRoute>
           </Route>
           <Route path="/talent">
@@ -100,9 +121,39 @@ function Router() {
               <Projects />
             </ProtectedRoute>
           </Route>
+          <Route path="/projects/:id">
+            <ProtectedRoute>
+              <ProjectDetail />
+            </ProtectedRoute>
+          </Route>
           <Route path="/profile">
             <ProtectedRoute>
               <Profile />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/kyc">
+            <ProtectedRoute>
+              <KYC />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/subscriptions">
+            <ProtectedRoute>
+              <SubscriptionsPage />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/support">
+            <ProtectedRoute>
+              <Support />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/dpr">
+            <ProtectedRoute>
+              <DailyProgressReport />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/call-sheets">
+            <ProtectedRoute>
+              <CallSheetsPage />
             </ProtectedRoute>
           </Route>
           <Route path="/ai-tools">
@@ -155,7 +206,9 @@ function App() {
       <AuthProvider>
         <TooltipProvider>
           <ResponsiveToastProvider />
-          <Router />
+          <ErrorBoundary>
+            <Router />
+          </ErrorBoundary>
         </TooltipProvider>
       </AuthProvider>
     </QueryClientProvider>

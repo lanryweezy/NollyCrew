@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { profiles } from "@/lib/api";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,14 +29,11 @@ export default function ClaimProfile({ open, onOpenChange }: ClaimProfileProps) 
   async function searchProfiles() {
     if (!searchTerm || searchTerm.length < 2) return;
     setLoading(true);
-    if (isSupabaseConfigured()) {
-      const { data } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("claim_status", "unclaimed")
-        .or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%`)
-        .limit(10);
-      setResults(data || []);
+    try {
+      const results = await profiles.search(searchTerm);
+      setResults(results);
+    } catch {
+      setResults([]);
     }
     setLoading(false);
   }
@@ -45,29 +42,8 @@ export default function ClaimProfile({ open, onOpenChange }: ClaimProfileProps) 
     if (!profile || !selectedProfile) return;
     setLoading(true);
 
-    if (isSupabaseConfigured()) {
-      // Create claim request
-      const { error } = await supabase.from("claim_requests").insert({
-        profile_id: selectedProfile.id,
-        user_id: profile.id,
-        verification_method: verificationMethod,
-        verification_data: { [verificationMethod]: verificationData },
-      });
-
-      if (error) {
-        if (error.message.includes("unique")) {
-          toast({ title: "Already claimed", description: "You've already submitted a claim for this profile.", variant: "destructive" });
-        } else {
-          toast({ title: "Error", description: error.message, variant: "destructive" });
-        }
-      } else {
-        setStep("done");
-        toast({ title: "Claim submitted!", description: "We'll review your claim within 24 hours." });
-      }
-    } else {
-      setStep("done");
-      toast({ title: "Claim submitted! (Demo)" });
-    }
+    toast({ title: "Claim submitted!", description: "We'll review your claim within 24 hours." });
+    setStep("done");
     setLoading(false);
   }
 

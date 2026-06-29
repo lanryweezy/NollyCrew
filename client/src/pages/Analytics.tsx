@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import Navigation from "@/components/Navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Briefcase, Users, TrendingUp, Eye, Clock, Loader2 } from "lucide-react";
@@ -26,19 +25,7 @@ export default function Analytics() {
 
   async function loadStats() {
     setLoading(true);
-    if (isSupabaseConfigured() && profile) {
-      // Query real data
-      const [apps, views] = await Promise.all([
-        supabase.from("job_applications").select("*", { count: "exact", head: true }).eq("applicant_id", profile.id),
-        supabase.from("profiles").select("profile_views, search_appearances").eq("id", profile.id).single(),
-      ]);
-      setStats({
-        ...DEMO_STATS,
-        applicationViews: apps.count || 0,
-        profileViews: views.data?.profile_views || 0,
-        searchAppearances: views.data?.search_appearances || 0,
-      });
-    }
+    // Stats are demo-based for now; server analytics endpoints exist but require data
     setLoading(false);
   }
 

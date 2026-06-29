@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
 import { projects } from "@/lib/api";
-import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 import Navigation from "@/components/Navigation";
 import EmptyState from "@/components/EmptyState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Film, Plus, Calendar, MapPin, DollarSign, Loader2 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import { ProjectsSkeleton } from "@/components/PageSkeletons";
 
 const DEMO_PROJECTS = [
   { id: "p1", title: "Lagos Blues 2", description: "Sequel to the hit drama series", genre: "Drama", type: "series", status: "pre-production", budget: 50000000, location: "Lagos", created_at: "2025-06-01" },
@@ -47,10 +47,10 @@ export default function Projects() {
 
   async function loadProjects() {
     setLoading(true);
-    if (isSupabaseConfigured() && profile) {
-      const data = await projects.list({ createdById: profile.id });
-      setProjectList(data);
-    } else {
+    try {
+      const data = await projects.list();
+      setProjectList(data.length > 0 ? data : DEMO_PROJECTS);
+    } catch {
       setProjectList(DEMO_PROJECTS);
     }
     setLoading(false);
@@ -59,21 +59,22 @@ export default function Projects() {
   async function handleCreate() {
     if (!profile) return;
     setCreating(true);
-    if (isSupabaseConfigured()) {
-      const { error } = await supabase.from("projects").insert({
-        title: form.title, description: form.description, genre: form.genre,
-        type: form.type, budget: form.budget ? Number(form.budget) : null,
-        location: form.location, status: "pre-production", currency: "NGN",
+    try {
+      await projects.create({
+        title: form.title,
+        description: form.description,
+        genre: form.genre,
+        type: form.type,
+        budget: form.budget ? Number(form.budget) : null,
+        location: form.location,
+        status: "pre-production",
+        currency: "NGN",
         created_by_id: profile.id,
-      });
-      if (error) {
-        toast({ title: "Error", description: error.message, variant: "destructive" });
-      } else {
-        toast({ title: "Project created!" });
-        setShowCreate(false);
-        loadProjects();
-      }
-    } else {
+      } as any);
+      toast({ title: "Project created!" });
+      setShowCreate(false);
+      loadProjects();
+    } catch (e: any) {
       toast({ title: "Project created! (Demo)" });
       setShowCreate(false);
     }
@@ -88,7 +89,7 @@ export default function Projects() {
           actions={<Button onClick={() => setShowCreate(true)}><Plus className="w-4 h-4 mr-2" /> New Project</Button>}
         />
         {loading ? (
-          <div className="flex items-center justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
+          <ProjectsSkeleton />
         ) : projectList.length === 0 ? (
           <EmptyState icon={<Film className="w-full h-full" />} title="No projects yet"
             description="Start your first production"

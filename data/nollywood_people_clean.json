@@ -2957,7 +2957,9 @@
     "last": "",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Hallucination_(artificial_intelligence)"
+    "wiki_url": "https://en.wikipedia.org/wiki/Hallucination_(artificial_intelligence)",
+    "website": "https://eprints.gla.ac.uk/327588/1/327588.pdf",
+    "enriched": true
   },
   {
     "name": "Ghana",
@@ -2965,7 +2967,11 @@
     "last": "",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Ghana"
+    "wiki_url": "https://en.wikipedia.org/wiki/Ghana",
+    "twitter": "node",
+    "website": "https://en.wikinews.org/wiki/Category:Ghana",
+    "born_info": "Accra.mw-parser-output .geo-default,.mw-parser-output .geo-dms,.mw-parser-output .geo-dec{display:inline}.mw-parser-output .geo-nondefault,.mw-parser-output .geo-multi-punct,.mw-parser-output .geo-inline-hidden{display:none}.mw-parser-output .longitude,.mw-parser-output .latitude{white-space:nowrap}05°33′18″N 00°11′33″W﻿ / ﻿5.55500°N 0.19250°W﻿ / 5.55500; -0.19250",
+    "enriched": true
   },
   {
     "name": "Bedford buses",
@@ -2973,7 +2979,10 @@
     "last": "buses",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Bedford_vehicles"
+    "wiki_url": "https://en.wikipedia.org/wiki/Bedford_vehicles",
+    "website": "https://www.google.com/search?&q=%22Bedford+Vehicles%22&tbs=bkt:s&tbm=bks",
+    "born_info": "Division",
+    "enriched": true
   },
   {
     "name": "documentary films",
@@ -2981,7 +2990,9 @@
     "last": "films",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Documentary_film"
+    "wiki_url": "https://en.wikipedia.org/wiki/Documentary_film",
+    "website": "https://www.google.com/search?&q=%22Documentary+film%22&tbs=bkt:s&tbm=bks",
+    "enriched": true
   },
   {
     "name": "newsreels",
@@ -2989,7 +3000,10 @@
     "last": "",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Newsreel"
+    "wiki_url": "https://en.wikipedia.org/wiki/Newsreel",
+    "youtube": "newsreelarchive",
+    "website": "https://web.archive.org/web/20220315140512/http://wwwmcc.murdoch.edu.au/ReadingRoom/film/image/King.html",
+    "enriched": true
   },
   {
     "name": "propaganda",
@@ -2997,7 +3011,9 @@
     "last": "",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Propaganda"
+    "wiki_url": "https://en.wikipedia.org/wiki/Propaganda",
+    "website": "https://en.wikiquote.org/wiki/Propaganda",
+    "enriched": true
   },
   {
     "name": "World War II",
@@ -3005,7 +3021,9 @@
     "last": "War II",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/World_War_II"
+    "wiki_url": "https://en.wikipedia.org/wiki/World_War_II",
+    "website": "https://en.wikinews.org/wiki/Category:World_War_II",
+    "enriched": true
   },
   {
     "name": "superstitious",
@@ -3013,7 +3031,9 @@
     "last": "",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Superstition"
+    "wiki_url": "https://en.wikipedia.org/wiki/Superstition",
+    "website": "https://en.wikiquote.org/wiki/Superstition",
+    "enriched": true
   },
   {
     "name": "Kwame Nkrumah",
@@ -3021,7 +3041,11 @@
     "last": "Nkrumah",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Kwame_Nkrumah"
+    "wiki_url": "https://en.wikipedia.org/wiki/Kwame_Nkrumah",
+    "twitter": "aha",
+    "website": "https://en.wikiquote.org/wiki/Kwame_Nkrumah",
+    "born_info": "Office established",
+    "enriched": true
   },
   {
     "name": "Chris Tsui Hesse",
@@ -3029,7 +3053,10 @@
     "last": "Tsui Hesse",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Chris_Tsui_Hesse"
+    "wiki_url": "https://en.wikipedia.org/wiki/Chris_Tsui_Hesse",
+    "website": "https://www.myjoyonline.com/news/2016/March-7th/video-nkrumahs-photographer-tells-his-story-on-pm-express-personality-profile.php",
+    "born_info": "Christian Tsui Hesse (1932-08-29) 29 August 1932 (age 93)Osu, Accra",
+    "enriched": true
   },
   {
     "name": "Ernest Abbeyquaye",
@@ -3037,7 +3064,11 @@
     "last": "Abbeyquaye",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Ernest_Abbeyquaye"
+    "wiki_url": "https://en.wikipedia.org/wiki/Ernest_Abbeyquaye",
+    "imdb_id": "nm0007887",
+    "website": "https://www.nytimes.com/1995/04/23/arts/film-move-over-forrest-gump-in-ghana-its-sugar-daddy.html",
+    "born_info": "Ernest Kofi Abbeyquaye",
+    "enriched": true
   },
   {
     "name": "Kwaw Ansah",
@@ -3045,7 +3076,11 @@
     "last": "Ansah",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Kwaw_Ansah"
+    "wiki_url": "https://en.wikipedia.org/wiki/Kwaw_Ansah",
+    "imdb_id": "nm0030503",
+    "website": "http://www.modernghana.com/music/23255/3/kufuor-raises-thumb-for-kwaw-ansah.html",
+    "born_info": "Kwaw Paintsil Ansah1941 (age 84–85)Agona Swedru, Ghana",
+    "enriched": true
   },
   {
     "name": "Kukurantumi",
@@ -3053,7 +3088,10 @@
     "last": "",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Kukurantumi:_Road_to_Accra"
+    "wiki_url": "https://en.wikipedia.org/wiki/Kukurantumi:_Road_to_Accra",
+    "website": "https://www.ghanaweb.com/GhanaHomePage/features/Kukurantumi-The-Road-To-Accra-Ghana-Movies-So-Far-199766",
+    "born_info": "King Ampaw",
+    "enriched": true
   },
   {
     "name": "direct-to-video",
@@ -3061,7 +3099,11 @@
     "last": "",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Direct-to-video"
+    "wiki_url": "https://en.wikipedia.org/wiki/Direct-to-video",
+    "twitter": "news",
+    "youtube": "UCU5qmd5NvJljDBeM1sD-D1A",
+    "website": "https://www.chicagotribune.com/1994/12/30/big-names-look-for-bright-lights-in-videoland/",
+    "enriched": true
   },
   {
     "name": "VHS",
@@ -3069,7 +3111,11 @@
     "last": "",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/VHS"
+    "wiki_url": "https://en.wikipedia.org/wiki/VHS",
+    "twitter": "IMPACTWRESTLING",
+    "website": "https://en.wikiquote.org/wiki/VHS",
+    "born_info": "Magnetic cassette tape, ½-inch (12.7mm)",
+    "enriched": true
   },
   {
     "name": "Accra",
@@ -3077,7 +3123,11 @@
     "last": "",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Accra"
+    "wiki_url": "https://en.wikipedia.org/wiki/Accra",
+    "twitter": "cache",
+    "website": "https://en.wikinews.org/wiki/Category:Accra",
+    "born_info": "Ghana",
+    "enriched": true
   },
   {
     "name": "filmmakers",
@@ -3085,7 +3135,9 @@
     "last": "",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Filmmakers"
+    "wiki_url": "https://en.wikipedia.org/wiki/Filmmakers",
+    "website": "https://www.google.com/search?&q=%22Filmmaking%22&tbs=bkt:s&tbm=bks",
+    "enriched": true
   },
   {
     "name": "Malaysian",
@@ -3093,7 +3145,10 @@
     "last": "",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Malaysia"
+    "wiki_url": "https://en.wikipedia.org/wiki/Malaysia",
+    "website": "https://en.wikinews.org/wiki/Category:Malaysia",
+    "born_info": "Kuala Lumpur[fn 1].mw-parser-output .geo-default,.mw-parser-output .geo-dms,.mw-parser-output .geo-dec{display:inline}.mw-parser-output .geo-nondefault,.mw-parser-output .geo-multi-punct,.mw-parser-output .geo-inline-hidden{display:none}.mw-parser-output .longitude,.mw-parser-output .latitude{white-space:nowrap}3°8′N 101°41′E﻿ / ﻿3.133°N 101.683°E﻿ / 3.133; 101.683",
+    "enriched": true
   },
   {
     "name": "Christian",
@@ -3101,7 +3156,11 @@
     "last": "",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Christianity"
+    "wiki_url": "https://en.wikipedia.org/wiki/Christianity",
+    "twitter": "branch",
+    "website": "https://en.wikibooks.org/wiki/Biblical_Studies/Christianity",
+    "born_info": "Abrahamic",
+    "enriched": true
   },
   {
     "name": "Van Vicker",
@@ -3109,7 +3168,11 @@
     "last": "Vicker",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Van_Vicker"
+    "wiki_url": "https://en.wikipedia.org/wiki/Van_Vicker",
+    "imdb_id": "nm2647824",
+    "website": "http://www.vanvicker.org",
+    "born_info": "Joseph van Vicker (1977-08-01) 1 August 1977 (age 48)Accra, Ghana",
+    "enriched": true
   },
   {
     "name": "Jackie Appiah",
@@ -3117,7 +3180,13 @@
     "last": "Appiah",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Jackie_Appiah"
+    "wiki_url": "https://en.wikipedia.org/wiki/Jackie_Appiah",
+    "instagram": "jackieappiah",
+    "twitter": "actress",
+    "imdb_id": "nm2645304",
+    "website": "https://en.wikiquote.org/wiki/Jackie_Appiah",
+    "born_info": "(1983-12-05) 5 December 1983 (age 42)Toronto, Ontario, Canada",
+    "enriched": true
   },
   {
     "name": "Majid Michel",
@@ -3125,7 +3194,12 @@
     "last": "Michel",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Majid_Michel"
+    "wiki_url": "https://en.wikipedia.org/wiki/Majid_Michel",
+    "twitter": "majid",
+    "imdb_id": "nm2645663",
+    "website": "http://majidmichel.com/",
+    "born_info": "(1980-09-22) 22 September 1980 (age 45)Cantonments, Accra, Ghana",
+    "enriched": true
   },
   {
     "name": "Yvonne Nelson",
@@ -3133,7 +3207,12 @@
     "last": "Nelson",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Yvonne_Nelson"
+    "wiki_url": "https://en.wikipedia.org/wiki/Yvonne_Nelson",
+    "instagram": "yvonnenelsongh",
+    "imdb_id": "nm2925168",
+    "website": "https://en.wikiquote.org/wiki/Yvonne_Nelson",
+    "born_info": "(1985-11-12) 12 November 1985 (age 40)Accra, Ghana",
+    "enriched": true
   },
   {
     "name": "John Dumelo",
@@ -3141,7 +3220,12 @@
     "last": "Dumelo",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/John_Dumelo"
+    "wiki_url": "https://en.wikipedia.org/wiki/John_Dumelo",
+    "facebook": "pages",
+    "imdb_id": "nm3847554",
+    "website": "https://en.wikiquote.org/wiki/John_Dumelo",
+    "born_info": "John Matthew Kofi Setor Dumelo (1984-02-03) 3 February 1984 (age 42)Accra, Ghana",
+    "enriched": true
   },
   {
     "name": "Nadia Buari",
@@ -3149,7 +3233,11 @@
     "last": "Buari",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Nadia_Buari"
+    "wiki_url": "https://en.wikipedia.org/wiki/Nadia_Buari",
+    "imdb_id": "nm2790044",
+    "website": "https://en.wikiquote.org/wiki/Nadia_Buari",
+    "born_info": "(1982-11-21) 21 November 1982 (age 43)Sekondi-Takoradi, Ghana",
+    "enriched": true
   },
   {
     "name": "Yvonne Okoro",
@@ -3157,7 +3245,11 @@
     "last": "Okoro",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Yvonne_Okoro"
+    "wiki_url": "https://en.wikipedia.org/wiki/Yvonne_Okoro",
+    "imdb_id": "nm2794811",
+    "website": "https://en.wikiquote.org/wiki/Yvonne_Okoro",
+    "born_info": "Chinyere Yvonne Okoro (1984-11-25) 25 November 1984 (age 41)Tamale, Ghana",
+    "enriched": true
   },
   {
     "name": "streaming",
@@ -3165,7 +3257,9 @@
     "last": "",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Streaming_media"
+    "wiki_url": "https://en.wikipedia.org/wiki/Streaming_media",
+    "website": "http://link.springer.com/10.1007/978-3-642-12630-7_26",
+    "enriched": true
   },
   {
     "name": "low-budget",
@@ -3173,7 +3267,9 @@
     "last": "",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Low-budget_film"
+    "wiki_url": "https://en.wikipedia.org/wiki/Low-budget_film",
+    "website": "https://www.telegraph.co.uk/culture/film/10875377/How-to-make-a-low-budget-film-in-three-easy-steps.html",
+    "enriched": true
   },
   {
     "name": "2016",
@@ -3181,7 +3277,11 @@
     "last": "",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/2016_(2010_film)"
+    "wiki_url": "https://en.wikipedia.org/wiki/2016_(2010_film)",
+    "twitter": "filmdrunk",
+    "website": "http://www.huffingtonpost.com/2011/11/15/2016-ghana-movie-trailer-_n_1094756.html",
+    "born_info": "Samuel K. Nkansah",
+    "enriched": true
   },
   {
     "name": "The Atlantic",
@@ -3189,7 +3289,11 @@
     "last": "Atlantic",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/The_Atlantic"
+    "wiki_url": "https://en.wikipedia.org/wiki/The_Atlantic",
+    "twitter": "realDonaldTrump",
+    "website": "https://en.wikiquote.org/wiki/The_Atlantic",
+    "born_info": "Jeffrey Goldberg",
+    "enriched": true
   },
   {
     "name": "Daily Graphic",
@@ -3197,7 +3301,10 @@
     "last": "Graphic",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Daily_Graphic_(Ghana)"
+    "wiki_url": "https://en.wikipedia.org/wiki/Daily_Graphic_(Ghana)",
+    "website": "https://www.graphic.com.gh/",
+    "born_info": "Daily newspaper",
+    "enriched": true
   },
   {
     "name": "Badoe, Yaba",
@@ -3205,7 +3312,11 @@
     "last": "Yaba",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Yaba_Badoe"
+    "wiki_url": "https://en.wikipedia.org/wiki/Yaba_Badoe",
+    "facebook": "pages",
+    "website": "https://en.wikiquote.org/wiki/Yaba_Badoe",
+    "born_info": "1954 (age 71–72)Tamale, northern Ghana",
+    "enriched": true
   },
   {
     "name": "io9",
@@ -3213,7 +3324,12 @@
     "last": "",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Io9"
+    "wiki_url": "https://en.wikipedia.org/wiki/Io9",
+    "twitter": "charliejane",
+    "youtube": "io9futureshow",
+    "website": "https://gizmodo.com/io9",
+    "born_info": "Blog",
+    "enriched": true
   },
   {
     "name": "The Escapist",
@@ -3221,7 +3337,11 @@
     "last": "Escapist",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/The_Escapist_(magazine)"
+    "wiki_url": "https://en.wikipedia.org/wiki/The_Escapist_(magazine)",
+    "facebook": "notes",
+    "website": "http://escapistmagazine.com",
+    "born_info": "Video game website",
+    "enriched": true
   },
   {
     "name": "Sreberny–Mohammadi, Annabelle",
@@ -3229,7 +3349,10 @@
     "last": "Annabelle",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Annabelle_Sreberny"
+    "wiki_url": "https://en.wikipedia.org/wiki/Annabelle_Sreberny",
+    "website": "http://www.ibtauris.com/Books/Computing%20%20information%20technology/Computing%20general/Ethical%20%20social%20aspects%20of%20computing/Blogistan%20The%20Internet%20and%20Politics%20in%20Iran.aspx",
+    "born_info": "(1949-09-05)5 September 1949",
+    "enriched": true
   },
   {
     "name": "Small Media, Big Revolution. Communication, Culture, and the Iranian Revolution",
@@ -3237,7 +3360,9 @@
     "last": "Media, Big Revolution. Communication, Culture, and the Iranian Revolution",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Small_Media,_Big_Revolution"
+    "wiki_url": "https://en.wikipedia.org/wiki/Small_Media,_Big_Revolution",
+    "website": "https://www.foreignaffairs.com/reviews/capsule-review/1995-05-01/small-media-big-revolution-communication-culture-and-iranian",
+    "enriched": true
   },
   {
     "name": "Algeria",
@@ -3245,7 +3370,10 @@
     "last": "",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Cinema_of_Algeria"
+    "wiki_url": "https://en.wikipedia.org/wiki/Cinema_of_Algeria",
+    "website": "https://deepl.com",
+    "born_info": "19 (2009)[1]",
+    "enriched": true
   },
   {
     "name": "Angola",
@@ -3253,7 +3381,10 @@
     "last": "",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Cinema_of_Angola"
+    "wiki_url": "https://en.wikipedia.org/wiki/Cinema_of_Angola",
+    "website": "https://deepl.com",
+    "born_info": "50",
+    "enriched": true
   },
   {
     "name": "Botswana",
@@ -3261,7 +3392,10 @@
     "last": "",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Cinema_of_Botswana"
+    "wiki_url": "https://en.wikipedia.org/wiki/Cinema_of_Botswana",
+    "website": "https://www.balancingact-africa.com/news/broadcast_en/15186/botswood-sees-film-production-start-to-blossom-in-botswana",
+    "born_info": "Botswood",
+    "enriched": true
   },
   {
     "name": "Burkina Faso",
@@ -3269,7 +3403,10 @@
     "last": "Faso",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Cinema_of_Burkina_Faso"
+    "wiki_url": "https://en.wikipedia.org/wiki/Cinema_of_Burkina_Faso",
+    "website": "https://web.archive.org/web/20181224225516/http://data.uis.unesco.org/?ReportId=5542",
+    "born_info": "10 (2009)[1]",
+    "enriched": true
   },
   {
     "name": "Burundi",
@@ -3277,7 +3414,9 @@
     "last": "",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Cinema_of_Burundi"
+    "wiki_url": "https://en.wikipedia.org/wiki/Cinema_of_Burundi",
+    "website": "https://www.africarealcollective.org/resources/view/adept-central-africaburundi-central-africa",
+    "enriched": true
   },
   {
     "name": "Cameroon",
@@ -3285,7 +3424,9 @@
     "last": "",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Cinema_of_Cameroon"
+    "wiki_url": "https://en.wikipedia.org/wiki/Cinema_of_Cameroon",
+    "website": "https://web.archive.org/web/20170728041635/https://kamer360.com/2014/05/19/collywood-is-the-official-name-of-the-cameroon-film-industry/",
+    "enriched": true
   },
   {
     "name": "Cape Verde",
@@ -3293,7 +3434,9 @@
     "last": "Verde",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Cinema_of_Cape_Verde"
+    "wiki_url": "https://en.wikipedia.org/wiki/Cinema_of_Cape_Verde",
+    "website": "http://www.atlanticheart.com",
+    "enriched": true
   },
   {
     "name": "Chad",
@@ -3301,7 +3444,9 @@
     "last": "",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Cinema_of_Chad"
+    "wiki_url": "https://en.wikipedia.org/wiki/Cinema_of_Chad",
+    "website": "https://www.jeuneafrique.com/depeches/72194/politique/un-cinema-renait-a-ndjamena-sur-un-continent-prive-de-salles-obscures/",
+    "enriched": true
   },
   {
     "name": "Democratic Republic of the Congo",
@@ -3309,7 +3454,9 @@
     "last": "Republic of the Congo",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Cinema_of_the_Democratic_Republic_of_the_Congo"
+    "wiki_url": "https://en.wikipedia.org/wiki/Cinema_of_the_Democratic_Republic_of_the_Congo",
+    "website": "https://www.jstor.org/stable/27126479",
+    "enriched": true
   },
   {
     "name": "Djibouti",
@@ -3317,7 +3464,9 @@
     "last": "",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Cinema_of_Djibouti"
+    "wiki_url": "https://en.wikipedia.org/wiki/Cinema_of_Djibouti",
+    "website": "https://www.google.com/search?&q=%22Cinema+of+Djibouti%22&tbs=bkt:s&tbm=bks",
+    "enriched": true
   },
   {
     "name": "Egypt",
@@ -3325,7 +3474,11 @@
     "last": "",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Cinema_of_Egypt"
+    "wiki_url": "https://en.wikipedia.org/wiki/Cinema_of_Egypt",
+    "imdb_id": "nm0301577",
+    "website": "https://web.archive.org/web/20181224225516/http://data.uis.unesco.org/?ReportId=5542",
+    "born_info": "221 (2015)[1]",
+    "enriched": true
   },
   {
     "name": "Eritrea",
@@ -3333,7 +3486,9 @@
     "last": "",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Cinema_of_Eritrea"
+    "wiki_url": "https://en.wikipedia.org/wiki/Cinema_of_Eritrea",
+    "website": "https://doi.org/10.1080%2F13696815.2016.1201759",
+    "enriched": true
   },
   {
     "name": "Ethiopia",
@@ -3341,7 +3496,11 @@
     "last": "",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Cinema_of_Ethiopia"
+    "wiki_url": "https://en.wikipedia.org/wiki/Cinema_of_Ethiopia",
+    "imdb_id": "nm0354138",
+    "website": "https://web.archive.org/web/20170731231336/http://allafrica.com/stories/201707311228.html",
+    "born_info": "273 (2016)",
+    "enriched": true
   },
   {
     "name": "Gabon",
@@ -3349,7 +3508,9 @@
     "last": "",
     "role": "actor",
     "source": "wikipedia_deep",
-    "wiki_url": "https://en.wikipedia.org/wiki/Cinema_of_Gabon"
+    "wiki_url": "https://en.wikipedia.org/wiki/Cinema_of_Gabon",
+    "website": "https://books.google.com/books?id=zbZGDwAAQBAJ&pg=PA119",
+    "enriched": true
   },
   {
     "name": "Guinea-Bissau",

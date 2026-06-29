@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { profiles, userRoles } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,26 +38,32 @@ export default function Onboarding() {
     if (!profile) return;
     setLoading(true);
 
-    if (isSupabaseConfigured()) {
-      // Update profile
-      await supabase.from("profiles").update({
+    try {
+      await profiles.update(profile.id, {
         bio: form.bio || null,
         location: form.location || null,
-        updated_at: new Date().toISOString(),
-      }).eq("id", profile.id);
+      });
 
-      // Create role
       if (form.role) {
-        await supabase.from("user_roles").insert({
+        await userRoles.create({
           user_id: profile.id,
           role: form.role,
           experience: form.experience || null,
           skills: form.skills ? form.skills.split(",").map(s => s.trim()) : [],
           languages: form.languages ? form.languages.split(",").map(s => s.trim()) : [],
+          specialties: null,
+          hourly_rate: null,
+          availability: 'available',
+          portfolio: [],
+          awards: [],
+          credits: [],
+          is_active: true,
         });
       }
 
       await refreshProfile();
+    } catch {
+      // ignore - still proceed
     }
 
     toast({ title: "Welcome to NollyCrew!", description: "Your profile is set up. Start exploring!" });

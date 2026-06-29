@@ -12,7 +12,9 @@ import {
   Command,
   BarChart3,
   Search,
-  X
+  X,
+  Brain,
+  Calendar
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -46,6 +48,8 @@ export default function MobileMenu({
     { label: "Talent", icon: Users, path: "/talent" },
     { label: "Projects", icon: Film, path: "/projects" },
     { label: "Messages", icon: MessageCircle, path: "/messages" },
+    { label: "AI Tools", icon: Brain, path: "/ai-tools" },
+    { label: "Auditions", icon: Calendar, path: "/auditions" },
     { label: "Profile", icon: User, path: "/profile" },
     { label: "Calendar", icon: Command, path: "/calendar" },
     { label: "Analytics", icon: BarChart3, path: "/analytics" },
@@ -166,7 +170,7 @@ export default function MobileMenu({
         
         {/* Footer */}
         <div className="p-4 border-t text-center text-xs text-muted-foreground">
-          © 2024 NollyCrew
+          © 2026 NollyCrew
         </div>
       </div>
     </div>

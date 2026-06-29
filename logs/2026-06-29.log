@@ -1,0 +1,18 @@
+{"timestamp":"2026-06-29T04:18:27.053Z","level":"info","message":"Using MemStorage (In-memory storage)"}
+{"timestamp":"2026-06-29T11:28:27.780Z","level":"info","message":"Using MemStorage (In-memory storage)"}
+{"timestamp":"2026-06-29T11:28:30.900Z","level":"info","message":"WebSocket server initialized"}
+{"timestamp":"2026-06-29T11:28:31.072Z","level":"info","message":"Server started on port 5000"}
+{"timestamp":"2026-06-29T11:31:30.597Z","level":"info","message":"Using MemStorage (In-memory storage)"}
+{"timestamp":"2026-06-29T11:31:31.133Z","level":"info","message":"WebSocket server initialized"}
+{"timestamp":"2026-06-29T11:31:31.172Z","level":"info","message":"Server started on port 5000"}
+{"timestamp":"2026-06-29T11:31:36.371Z","level":"info","message":"[gqiefb4v] GET /api/health 200 in 10ms :: {\"status\":\"ok\",\"timestamp\":\"2026-06-29T11:31:36.…"}
+{"timestamp":"2026-06-29T11:32:18.247Z","level":"info","message":"Using MemStorage (In-memory storage)"}
+{"timestamp":"2026-06-29T11:32:18.851Z","level":"info","message":"WebSocket server initialized"}
+{"timestamp":"2026-06-29T11:32:18.911Z","level":"info","message":"Server started on port 5000"}
+{"timestamp":"2026-06-29T11:32:23.954Z","level":"info","message":"User registered successfully","meta":{"userId":"d2c84fef-ba58-4736-99f8-afe4f11f209c","email":"test2@test.com"}}
+{"timestamp":"2026-06-29T11:32:23.959Z","level":"info","message":"[iid1a141] POST /api/auth/register 201 in 87ms :: {\"user\":{\"id\":\"d2c84fef-ba58-4736-99f8-a…"}
+{"timestamp":"2026-06-29T11:32:24.039Z","level":"info","message":"User logged in successfully","meta":{"userId":"d2c84fef-ba58-4736-99f8-afe4f11f209c","email":"test2@test.com"}}
+{"timestamp":"2026-06-29T11:32:24.040Z","level":"info","message":"[kwp0rv6e] POST /api/auth/login 200 in 66ms :: {\"user\":{\"id\":\"d2c84fef-ba58-4736-99f8-afe4…"}
+{"timestamp":"2026-06-29T11:32:24.056Z","level":"info","message":"[i6m4dw8b] GET /api/jobs 200 in 2ms :: {\"jobs\":[]}"}
+{"timestamp":"2026-06-29T11:32:24.068Z","level":"info","message":"[rxri4a0p] GET /api/profile 200 in 2ms :: {\"user\":{\"id\":\"d2c84fef-ba58-4736-99f8-afe4f11f2…"}
+{"timestamp":"2026-06-29T16:47:45.517Z","level":"info","message":"Using MemStorage (In-memory storage)"}

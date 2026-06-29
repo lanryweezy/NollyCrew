@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ const ONLINE_USERS = [
 
 export default function Collaboration() {
   const { profile, isAuthenticated } = useAuth();
+  const { toast } = useToast();
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState(DEMO_MESSAGES);
 
@@ -55,8 +57,8 @@ export default function Collaboration() {
                 </div>
               ))}
               <div className="pt-4 flex gap-2">
-                <Button size="sm" variant="outline" className="flex-1"><Video className="w-3 h-3 mr-1" /> Call</Button>
-                <Button size="sm" variant="outline" className="flex-1"><Phone className="w-3 h-3 mr-1" /> Voice</Button>
+                <Button size="sm" variant="outline" className="flex-1" onClick={() => toast({ title: "Video call feature coming soon" })}><Video className="w-3 h-3 mr-1" /> Call</Button>
+                <Button size="sm" variant="outline" className="flex-1" onClick={() => toast({ title: "Voice call feature coming soon" })}><Phone className="w-3 h-3 mr-1" /> Voice</Button>
               </div>
             </CardContent>
           </Card>

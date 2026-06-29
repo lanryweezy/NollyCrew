@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
 import { jobs } from "@/lib/api";
-import { isSupabaseConfigured } from "@/lib/supabase";
 import Navigation from "@/components/Navigation";
 import SearchFilters from "@/components/SearchFilters";
 import JobCard from "@/components/JobCard";
@@ -24,6 +23,7 @@ import {
   Loader2
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import { JobsSkeleton } from "@/components/PageSkeletons";
 import type { Job } from "@/types/database";
 
 // Demo data for when Supabase is not configured
@@ -112,14 +112,13 @@ export default function Jobs() {
 
   async function loadJobs() {
     setLoadingList(true);
-    if (isSupabaseConfigured()) {
+    try {
       const data = await jobs.list({
         type: selectedType !== 'all' ? selectedType : undefined,
         location: selectedLocation !== 'all' ? selectedLocation : undefined,
       });
-      setJobList(data);
-    } else {
-      // Demo mode
+      setJobList(data.length > 0 ? data : DEMO_JOBS);
+    } catch {
       setJobList(DEMO_JOBS);
     }
     setLoadingList(false);
@@ -208,9 +207,7 @@ export default function Jobs() {
 
           <TabsContent value="browse" className="mt-6">
             {loadingList ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              </div>
+              <JobsSkeleton />
             ) : filteredJobs.length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center">

@@ -87,16 +87,23 @@ export default function LandingPage() {
       id: "1",
       title: "Lead Actor - Romantic Drama",
       type: "casting" as const,
-      company: "Trino Studios",
+      category: "lead-actor",
       location: "Lagos, Nigeria",
-      budget: "₦2M - ₦5M",
+      budget: 5000000,
+      currency: "NGN",
       duration: "6 weeks",
-      deadline: "Apply by Dec 30",
+      deadline: "2026-12-30",
       description: "We are seeking a talented lead actor for our upcoming romantic drama series.",
       requirements: ["5+ years experience", "Age 25-35", "Lagos based"],
-      applicants: 45,
-      isUrgent: true,
-      isBookmarked: false
+      skills: ["Acting", "Drama"],
+      experience: "senior" as const,
+      is_urgent: true,
+      is_active: true,
+      posted_by_id: "demo",
+      project_id: null,
+      payment_type: "project" as const,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     }
   ];
 
@@ -336,7 +343,7 @@ export default function LandingPage() {
                 </div>
               ))}
               <div className="card-hover">
-                <JobCard {...featuredJobs[0]} />
+                <JobCard job={featuredJobs[0]} />
               </div>
               <div className="card-hover">
                 <ProjectCard {...featuredProjects[0]} />
@@ -346,7 +353,7 @@ export default function LandingPage() {
         </AnimatePresence>
 
         <div className="text-center mt-12">
-          <Button variant="outline" size="lg" className="rounded-full px-8 border-primary text-primary hover:bg-primary/5">
+          <Button variant="outline" size="lg" className="rounded-full px-8 border-primary text-primary hover:bg-primary/5" onClick={() => setLocation('/talent')}>
             Explore All Opportunities
             <ArrowRight className="ml-2 w-4 h-4" />
           </Button>
@@ -417,11 +424,11 @@ export default function LandingPage() {
             Join thousands of Nollywood professionals already using NollyCrew to find opportunities and build the future of African cinema.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button size="lg" className="rounded-full h-14 px-10 text-lg font-bold">
+            <Button size="lg" className="rounded-full h-14 px-10 text-lg font-bold" onClick={() => setLocation('/register')}>
               Join for Free Today
             </Button>
-            <Button variant="outline" size="lg" className="rounded-full h-14 px-10 text-lg font-bold border-primary text-primary">
-              Book a Demo
+            <Button variant="outline" size="lg" className="rounded-full h-14 px-10 text-lg font-bold border-primary text-primary" onClick={() => setLocation('/dashboard')}>
+              Try Demo
             </Button>
           </div>
         </div>
@@ -453,30 +460,30 @@ export default function LandingPage() {
             <div>
               <h4 className="font-bold mb-6">Platform</h4>
               <ul className="space-y-4 text-muted-foreground">
-                <li className="hover:text-primary transition-colors cursor-pointer">Find Talent</li>
-                <li className="hover:text-primary transition-colors cursor-pointer">Casting Calls</li>
-                <li className="hover:text-primary transition-colors cursor-pointer">Project Management</li>
-                <li className="hover:text-primary transition-colors cursor-pointer">AI Tools</li>
+                <li className="hover:text-primary transition-colors cursor-pointer" onClick={() => setLocation('/talent')}>Find Talent</li>
+                <li className="hover:text-primary transition-colors cursor-pointer" onClick={() => setLocation('/jobs')}>Casting Calls</li>
+                <li className="hover:text-primary transition-colors cursor-pointer" onClick={() => setLocation('/projects')}>Project Management</li>
+                <li className="hover:text-primary transition-colors cursor-pointer" onClick={() => setLocation('/ai-tools')}>AI Tools</li>
               </ul>
             </div>
 
             <div>
               <h4 className="font-bold mb-6">Company</h4>
               <ul className="space-y-4 text-muted-foreground">
-                <li className="hover:text-primary transition-colors cursor-pointer">About Us</li>
-                <li className="hover:text-primary transition-colors cursor-pointer">Careers</li>
-                <li className="hover:text-primary transition-colors cursor-pointer">Privacy</li>
-                <li className="hover:text-primary transition-colors cursor-pointer">Terms</li>
+                <li className="hover:text-primary transition-colors cursor-pointer" onClick={() => setLocation('/dashboard')}>About Us</li>
+                <li className="hover:text-primary transition-colors cursor-pointer" onClick={() => setLocation('/dashboard')}>Careers</li>
+                <li className="hover:text-primary transition-colors cursor-pointer" onClick={() => setLocation('/dashboard')}>Privacy</li>
+                <li className="hover:text-primary transition-colors cursor-pointer" onClick={() => setLocation('/dashboard')}>Terms</li>
               </ul>
             </div>
           </div>
           
           <div className="border-t pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground font-medium">
-            <div>© 2024 NollyCrew. All rights reserved.</div>
+            <div>© 2026 NollyCrew. All rights reserved.</div>
             <div className="flex gap-8">
-              <span className="hover:text-foreground cursor-pointer transition-colors">Twitter</span>
-              <span className="hover:text-foreground cursor-pointer transition-colors">LinkedIn</span>
-              <span className="hover:text-foreground cursor-pointer transition-colors">Instagram</span>
+              <span className="hover:text-foreground cursor-pointer transition-colors" onClick={() => window.open('https://twitter.com/nollycrew', '_blank')}>Twitter</span>
+              <span className="hover:text-foreground cursor-pointer transition-colors" onClick={() => window.open('https://linkedin.com/company/nollycrew', '_blank')}>LinkedIn</span>
+              <span className="hover:text-foreground cursor-pointer transition-colors" onClick={() => window.open('https://instagram.com/nollycrew', '_blank')}>Instagram</span>
             </div>
           </div>
         </div>

@@ -153,6 +153,13 @@ export interface IStorage {
 
   // Dashboard
   getDashboardData(userId: string): Promise<any>;
+
+  // Invitations
+  createInvitation?(invitation: any): Promise<any>;
+  getInvitations?(projectId: string): Promise<any[]>;
+  getInvitationByToken?(token: string): Promise<any | undefined>;
+  updateInvitation?(id: string, updates: any): Promise<any | undefined>;
+  deleteInvitation?(id: string): Promise<boolean>;
 }
 
 export class DbStorage implements IStorage {
@@ -1237,6 +1244,34 @@ export class MemStorage implements IStorage {
       connections: [],
       user: userProfile ? { id: userProfile.id, email: userProfile.email, firstName: userProfile.firstName, lastName: userProfile.lastName } : null,
     };
+  }
+
+  // Invitations (in-memory)
+  private invitations = new Map<string, any>();
+
+  async createInvitation(invitation: any): Promise<any> {
+    this.invitations.set(invitation.id, invitation);
+    return invitation;
+  }
+
+  async getInvitations(projectId: string): Promise<any[]> {
+    return Array.from(this.invitations.values()).filter(i => i.projectId === projectId);
+  }
+
+  async getInvitationByToken(token: string): Promise<any | undefined> {
+    return Array.from(this.invitations.values()).find(i => i.token === token);
+  }
+
+  async updateInvitation(id: string, updates: any): Promise<any | undefined> {
+    const inv = this.invitations.get(id);
+    if (!inv) return undefined;
+    const updated = { ...inv, ...updates };
+    this.invitations.set(id, updated);
+    return updated;
+  }
+
+  async deleteInvitation(id: string): Promise<boolean> {
+    return this.invitations.delete(id);
   }
 }
 

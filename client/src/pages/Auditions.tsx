@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { jobs } from "@/lib/api";
 import Navigation from "@/components/Navigation";
 import EmptyState from "@/components/EmptyState";
 import { Card, CardContent } from "@/components/ui/card";
@@ -34,13 +34,14 @@ export default function Auditions() {
 
   async function loadAuditions() {
     setLoading(true);
-    if (isSupabaseConfigured() && profile) {
-      const { data } = await supabase.from("job_applications")
-        .select("*, job:jobs(id, title, location, deadline)")
-        .eq("applicant_id", profile.id)
-        .order("applied_at", { ascending: false });
-      setAuditions(data || []);
-    } else {
+    try {
+      if (profile) {
+        const data = await jobs.getMyApplications(profile.id);
+        setAuditions(data.length > 0 ? data : DEMO_AUDITIONS);
+      } else {
+        setAuditions(DEMO_AUDITIONS);
+      }
+    } catch {
       setAuditions(DEMO_AUDITIONS);
     }
     setLoading(false);

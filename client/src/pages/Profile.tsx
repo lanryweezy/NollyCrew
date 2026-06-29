@@ -2,16 +2,18 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
 import { profiles, userRoles } from "@/lib/api";
-import { isSupabaseConfigured } from "@/lib/supabase";
 import Navigation from "@/components/Navigation";
+import { AvatarUpload } from "@/components/FileUpload";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 import { User, MapPin, Edit, Save, Loader2 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import { ProfileSkeleton } from "@/components/PageSkeletons";
 
 export default function Profile() {
   const [, setLocation] = useLocation();
@@ -43,9 +45,11 @@ export default function Profile() {
   async function handleSave() {
     if (!profile) return;
     setSaving(true);
-    if (isSupabaseConfigured()) {
+    try {
       await profiles.update(profile.id, formData);
       await refreshProfile();
+    } catch {
+      // ignore
     }
     setSaving(false);
     setEditing(false);
@@ -81,13 +85,10 @@ export default function Profile() {
         <Card className="mb-6">
           <CardContent className="pt-6">
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
-                {profile?.avatar ? (
-                  <img src={profile.avatar} alt="" className="w-20 h-20 rounded-full object-cover" />
-                ) : (
-                  <User className="w-10 h-10 text-primary" />
-                )}
-              </div>
+              <AvatarUpload
+                currentAvatar={profile?.avatar}
+                onUpload={(url) => { if (profile) { refreshProfile(); } }}
+              />
               <div>
                 <h2 className="text-2xl font-bold">
                   {profile?.first_name} {profile?.last_name}
