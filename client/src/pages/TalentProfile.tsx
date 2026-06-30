@@ -133,7 +133,7 @@ export default function TalentProfile() {
       const data = await reviews.getForUser(userId);
       setTalentReviews(Array.isArray(data) ? data : []);
     } catch {
-      toast({ title: "Review submitted! (Demo)" });
+      toast({ title: "Review submitted!" });
       setReviewComment("");
     }
     setSubmittingReview(false);

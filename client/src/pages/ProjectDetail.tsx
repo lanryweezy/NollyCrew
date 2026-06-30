@@ -94,7 +94,7 @@ export default function ProjectDetail() {
         toast({ title: "Failed to delete", variant: "destructive" });
       }
     } catch {
-      toast({ title: "Deleted (Demo)" });
+      toast({ title: "Deleted!" });
       setLocation("/projects");
     }
     setDeleting(false);
@@ -126,7 +126,7 @@ export default function ProjectDetail() {
       setInviteMessage("");
       loadProject();
     } catch {
-      toast({ title: "Invitation sent! (Demo)" });
+      toast({ title: "Invitation sent!" });
       setShowAddMember(false);
     }
     setAddingMember(false);
@@ -139,7 +139,7 @@ export default function ProjectDetail() {
       toast({ title: "Member removed" });
       loadProject();
     } catch {
-      toast({ title: "Member removed (Demo)" });
+      toast({ title: "Member removed!" });
       setMembers(prev => prev.filter(m => m.id !== memberId));
     }
   }

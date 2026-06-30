@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { jobs, apiFetch } from "@/lib/api";
 import Navigation from "@/components/Navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,8 +35,20 @@ export default function CalendarPage() {
 
   async function loadEvents() {
     setLoading(true);
-    // Calendar events are demo-based for now
-    setEvents(DEMO_EVENTS);
+    try {
+      // Fetch jobs to create calendar events from deadlines
+      const jobsData = await jobs.list({ limit: 20 });
+      const jobEvents = jobsData.map((job: any) => ({
+        id: job.id,
+        title: job.title,
+        date: job.deadline || job.created_at?.split('T')[0],
+        type: job.type === 'casting' ? 'audition' : 'shoot',
+        location: job.location || '',
+      }));
+      setEvents(jobEvents.length > 0 ? jobEvents : DEMO_EVENTS);
+    } catch {
+      setEvents(DEMO_EVENTS);
+    }
     setLoading(false);
   }
 

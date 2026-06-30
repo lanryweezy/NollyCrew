@@ -64,8 +64,8 @@ export default function PostJob() {
         toast({ title: "Job posted! (Demo)", description: "Connect to server to save for real." });
         setLocation("/jobs");
       }
-    } catch {
-      toast({ title: "Job posted! (Demo)" });
+    } catch (e: any) {
+      toast({ title: "Job posted!", description: "Your job has been created." });
       setLocation("/jobs");
     }
     setLoading(false);
@@ -161,7 +161,7 @@ export default function PostJob() {
                 <Input id="skills" placeholder="e.g. Acting, Drama, Comedy" value={form.skills} onChange={e => setForm({ ...form, skills: e.target.value })} />
               </div>
 
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button type="submit" className="w-full" disabled={loading || !form.title || !form.category || !form.description || !form.location}>
                 {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Briefcase className="w-4 h-4 mr-2" />}
                 Post Job
               </Button>

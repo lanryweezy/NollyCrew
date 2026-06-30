@@ -178,7 +178,7 @@ export default function JobDetail() {
           <div className="space-y-6">
             {job.skills && job.skills.length > 0 && (
               <Card>
-                <CardHeader><CardTitle>Skills</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="text-sm">Skills</CardTitle></CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
                     {job.skills.map((skill, i) => (
@@ -188,6 +188,41 @@ export default function JobDetail() {
                 </CardContent>
               </Card>
             )}
+
+            <Card>
+              <CardHeader><CardTitle className="text-sm">Posted By</CardTitle></CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-sm font-semibold text-primary">
+                      {job.poster?.first_name?.[0]}{job.poster?.last_name?.[0]}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">{job.poster?.first_name} {job.poster?.last_name}</p>
+                    <p className="text-xs text-muted-foreground">{job.poster?.email}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader><CardTitle className="text-sm">Details</CardTitle></CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Experience</span>
+                  <span className="capitalize">{job.experience || "Not specified"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Payment Type</span>
+                  <span className="capitalize">{job.payment_type || "Project"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Posted</span>
+                  <span>{job.created_at ? new Date(job.created_at).toLocaleDateString() : "N/A"}</span>
+                </div>
+              </CardContent>
+            </Card>
 
             <Card>
               <CardHeader><CardTitle>Details</CardTitle></CardHeader>

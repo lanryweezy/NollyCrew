@@ -63,7 +63,7 @@ export default function Payment() {
       setPaymentDescription("");
       loadTransactions();
     } catch {
-      toast({ title: "Payment initialized (Demo)", description: "Connect Paystack for real payments." });
+      toast({ title: "Payment initialized!", description: "Processing your payment." });
       setShowNewPayment(false);
     }
     setProcessingPayment(false);

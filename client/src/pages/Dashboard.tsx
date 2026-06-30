@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
 import { jobs, projects, messages } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
 import Navigation from "@/components/Navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -59,17 +60,19 @@ export default function Dashboard() {
   async function loadDashboardData() {
     setLoading(true);
     try {
-      const [jobsData, appsData] = await Promise.all([
+      const [jobsData, appsData, projectsData, msgsData] = await Promise.all([
         jobs.list({ limit: 5 }),
         profile ? jobs.getMyApplications(profile.id) : Promise.resolve([]),
+        projects.list({ limit: 5 }),
+        apiFetch('/notifications').catch(() => []),
       ]);
       setRecentJobs(jobsData.length > 0 ? jobsData : DEMO_RECENT_JOBS);
       setRecentApps(appsData.length > 0 ? appsData : DEMO_RECENT_APPLICATIONS);
       setStats({
         totalJobs: jobsData.length || DEMO_STATS.totalJobs,
         totalApplications: appsData.length || DEMO_STATS.totalApplications,
-        totalProjects: DEMO_STATS.totalProjects,
-        unreadMessages: DEMO_STATS.unreadMessages,
+        totalProjects: projectsData.length || DEMO_STATS.totalProjects,
+        unreadMessages: Array.isArray(msgsData) ? msgsData.filter((n: any) => !n.read).length : DEMO_STATS.unreadMessages,
       });
     } catch (e) {
       setRecentJobs(DEMO_RECENT_JOBS);

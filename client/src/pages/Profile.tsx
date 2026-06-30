@@ -232,7 +232,7 @@ export default function Profile() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Personal Information</CardTitle>
-                  <Button variant="ghost" size="sm" onClick={() => editing ? handleSaveProfile() : setEditing(true)} disabled={saving}>
+                  <Button variant="ghost" size="sm" onClick={() => editing ? handleSaveProfile() : setEditing(true)} disabled={saving || (editing && (!formData.first_name.trim() || !formData.last_name.trim()))}>
                     {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : editing ? <Save className="w-4 h-4 mr-2" /> : <Edit className="w-4 h-4 mr-2" />}
                     {editing ? "Save" : "Edit"}
                   </Button>

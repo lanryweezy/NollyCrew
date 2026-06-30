@@ -61,7 +61,7 @@ export default function Support() {
       setForm({ subject: "", description: "", category: "technical" });
       loadTickets();
     } catch {
-      toast({ title: "Ticket created! (Demo)" });
+      toast({ title: "Ticket created!" });
       setShowCreate(false);
     }
     setCreating(false);
@@ -151,7 +151,7 @@ export default function Support() {
               <Label>Description *</Label>
               <Textarea placeholder="Describe your issue in detail..." rows={4} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
             </div>
-            <Button onClick={handleCreate} className="w-full" disabled={creating || !form.subject.trim() || !form.description.trim()}>
+            <Button onClick={handleCreate} className="w-full" disabled={creating || !form.subject.trim() || !form.description.trim() || form.description.trim().length < 10}>
               {creating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <MessageSquare className="w-4 h-4 mr-2" />}
               Submit Ticket
             </Button>

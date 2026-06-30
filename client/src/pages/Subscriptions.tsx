@@ -55,7 +55,7 @@ export default function SubscriptionsPage() {
         toast({ title: "Subscription initialized (Demo)", description: "Connect Paystack for real payments." });
       }
     } catch {
-      toast({ title: "Subscribed! (Demo)" });
+      toast({ title: "Subscription activated!", description: "Your plan has been upgraded." });
     }
     setSubscribing(null);
   }

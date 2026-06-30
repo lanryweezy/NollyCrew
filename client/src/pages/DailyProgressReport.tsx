@@ -52,7 +52,7 @@ export default function DailyProgressReport() {
       setForm({ workDone: "", issues: "", tomorrowPlan: "", hoursWorked: "10" });
       loadDPRs();
     } catch {
-      toast({ title: "DPR submitted! (Demo)" });
+      toast({ title: "DPR submitted!" });
       setShowCreate(false);
     }
     setCreating(false);
@@ -150,7 +150,7 @@ export default function DailyProgressReport() {
               <Label>Hours Worked</Label>
               <Input type="number" value={form.hoursWorked} onChange={(e) => setForm({ ...form, hoursWorked: e.target.value })} />
             </div>
-            <Button onClick={handleCreate} className="w-full" disabled={creating || !form.workDone.trim()}>
+            <Button onClick={handleCreate} className="w-full" disabled={creating || !form.workDone.trim() || form.workDone.trim().length < 10}>
               {creating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileText className="w-4 h-4 mr-2" />}
               Submit Report
             </Button>

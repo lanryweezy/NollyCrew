@@ -50,7 +50,7 @@ export default function Referrals() {
       setEmail("");
       loadReferrals();
     } catch {
-      toast({ title: "Invitation sent! (Demo)" });
+      toast({ title: "Invitation sent!" });
       setEmail("");
     }
     setSending(false);

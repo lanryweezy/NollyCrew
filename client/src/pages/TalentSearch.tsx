@@ -24,6 +24,7 @@ export default function TalentSearch() {
   const { isAuthenticated } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRole, setSelectedRole] = useState("all");
+  const [selectedAvailability, setSelectedAvailability] = useState("all");
   const [loading, setLoading] = useState(true);
   const [talentList, setTalentList] = useState<any[]>([]);
 
@@ -43,9 +44,15 @@ export default function TalentSearch() {
   }
 
   const filteredTalent = talentList.filter(t => {
-    if (!searchTerm) return true;
-    const name = `${t.first_name} ${t.last_name}`.toLowerCase();
-    return name.includes(searchTerm.toLowerCase());
+    if (searchTerm) {
+      const name = `${t.first_name} ${t.last_name}`.toLowerCase();
+      if (!name.includes(searchTerm.toLowerCase())) return false;
+    }
+    if (selectedAvailability !== "all") {
+      const avail = t.user_roles?.[0]?.availability || t.availability;
+      if (avail !== selectedAvailability) return false;
+    }
+    return true;
   });
 
   return (
@@ -79,6 +86,17 @@ export default function TalentSearch() {
               <SelectItem value="actor">Actors</SelectItem>
               <SelectItem value="crew">Crew</SelectItem>
               <SelectItem value="producer">Producers</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={selectedAvailability} onValueChange={setSelectedAvailability}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Availability" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Any Availability</SelectItem>
+              <SelectItem value="available">Available</SelectItem>
+              <SelectItem value="busy">Busy</SelectItem>
+              <SelectItem value="unavailable">Unavailable</SelectItem>
             </SelectContent>
           </Select>
           <Button onClick={searchTalent}>Search</Button>

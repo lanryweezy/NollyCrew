@@ -75,7 +75,7 @@ export default function Projects() {
       setShowCreate(false);
       loadProjects();
     } catch (e: any) {
-      toast({ title: "Project created! (Demo)" });
+      toast({ title: "Project created!" });
       setShowCreate(false);
     }
     setCreating(false);

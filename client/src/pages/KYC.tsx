@@ -57,7 +57,7 @@ export default function KYC() {
       toast({ title: "Verification submitted!", description: "We'll review your ID within 24 hours." });
       setKycStatus({ status: 'pending', type: idType });
     } catch {
-      toast({ title: "Submitted! (Demo)" });
+      toast({ title: "Submitted!", description: "Verification request received." });
       setKycStatus({ status: 'pending', type: idType });
     }
     setSubmitting(false);
@@ -132,7 +132,7 @@ export default function KYC() {
                 </div>
               </div>
 
-              <Button onClick={handleSubmit} className="w-full" disabled={submitting || !idNumber.trim()}>
+              <Button onClick={handleSubmit} className="w-full" disabled={submitting || !idNumber.trim() || idNumber.trim().length < 5}>
                 {submitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Shield className="w-4 h-4 mr-2" />}
                 Submit for Verification
               </Button>

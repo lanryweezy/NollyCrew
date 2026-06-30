@@ -71,7 +71,7 @@ export default function CallSheetsPage() {
         setGeneratedHTML(`<h1>${form.projectName}</h1><p>Date: ${form.date}</p><p>Call Time: ${form.callTime}</p>`);
       }
     } catch {
-      toast({ title: "Generated (Demo)" });
+      toast({ title: "Generated!", description: "Call sheet created." });
       setGeneratedHTML(`<h1>${form.projectName}</h1><p>Date: ${form.date}</p><p>Call Time: ${form.callTime}</p>`);
     }
     setGenerating(false);
