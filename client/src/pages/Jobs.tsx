@@ -47,6 +47,7 @@ export default function Jobs() {
   const [sortBy, setSortBy] = useState("newest");
   const [activeTab, setActiveTab] = useState("browse");
   const [loadingList, setLoadingList] = useState(true);
+  const [error, setError] = useState(false);
   const [jobList, setJobList] = useState<Job[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [page, setPage] = useState(1);
@@ -62,6 +63,7 @@ export default function Jobs() {
 
   async function loadJobs() {
     setLoadingList(true);
+    setError(false);
     try {
       const data = await jobs.list({
         type: selectedType !== 'all' ? selectedType : undefined,
@@ -70,6 +72,7 @@ export default function Jobs() {
       setJobList(data.length > 0 ? data : DEMO_JOBS);
     } catch {
       setJobList(DEMO_JOBS);
+      setError(true);
     }
     setLoadingList(false);
   }

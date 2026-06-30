@@ -215,22 +215,20 @@ export default function ProjectDetail() {
           <CardContent className="pt-6">
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  {editing ? (
-                    <Input value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} className="text-2xl font-bold" />
-                  ) : (
-                    <h1 className="text-3xl font-bold">{project.title}</h1>
-                  )}
-                  <Badge className={`text-xs ${STATUS_COLORS[project.status] || ""}`}>{project.status}</Badge>
-                </div>
                 {editing ? (
-                  <Textarea value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} rows={3} />
+                  <Input value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} className="text-2xl font-bold mb-2" />
                 ) : (
-                  <p className="text-muted-foreground">{project.description}</p>
+                  <h1 className="text-3xl font-bold mb-2">{project.title}</h1>
+                )}
+                <Badge className={`text-xs ${STATUS_COLORS[project.status] || ""}`}>{project.status}</Badge>
+                {editing ? (
+                  <Textarea value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} rows={3} className="mt-2" />
+                ) : (
+                  <p className="text-muted-foreground mt-2">{project.description}</p>
                 )}
               </div>
               {profile?.id === project.created_by_id && (
-                <div className="flex gap-2">
+                <div className="flex gap-2 ml-4">
                   {editing ? (
                     <>
                       <Button variant="outline" size="sm" onClick={() => setEditing(false)}>Cancel</Button>
@@ -249,8 +247,7 @@ export default function ProjectDetail() {
                 </div>
               )}
             </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Film className="w-4 h-4" /> {project.genre || "N/A"}
               </div>
@@ -289,9 +286,14 @@ export default function ProjectDetail() {
                 <div className="space-y-2">
                   {members.map((member: any) => (
                     <div key={member.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                      <div>
-                        <p className="font-medium text-sm">{member.userId}</p>
-                        <p className="text-xs text-muted-foreground capitalize">{member.role}</p>
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                          <span className="text-xs font-semibold text-primary">{member.userId?.slice(0, 2).toUpperCase()}</span>
+                        </div>
+                        <div>
+                          <p className="font-medium text-sm">{member.userId?.slice(0, 8)}...</p>
+                          <p className="text-xs text-muted-foreground capitalize">{member.role}</p>
+                        </div>
                       </div>
                       {profile?.id === project.created_by_id && (
                         <Button variant="ghost" size="sm" onClick={() => handleRemoveMember(member.id)}>
@@ -304,7 +306,6 @@ export default function ProjectDetail() {
               )}
             </CardContent>
           </Card>
-
           <Card>
             <CardHeader><CardTitle>Budget</CardTitle></CardHeader>
             <CardContent>
@@ -319,38 +320,20 @@ export default function ProjectDetail() {
 
       <Dialog open={showAddMember} onOpenChange={setShowAddMember}>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Invite Team Member</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>Invite Team Member</DialogTitle></DialogHeader>
           <div className="space-y-4">
-            {/* Invite method toggle */}
             <div className="flex gap-2">
-              <Button 
-                variant={inviteMethod === "email" ? "default" : "outline"} 
-                size="sm" 
-                onClick={() => setInviteMethod("email")}
-              >
+              <Button variant={inviteMethod === "email" ? "default" : "outline"} size="sm" onClick={() => setInviteMethod("email")}>
                 <Mail className="w-3 h-3 mr-1" /> Email
               </Button>
-              <Button 
-                variant={inviteMethod === "phone" ? "default" : "outline"} 
-                size="sm" 
-                onClick={() => setInviteMethod("phone")}
-              >
+              <Button variant={inviteMethod === "phone" ? "default" : "outline"} size="sm" onClick={() => setInviteMethod("phone")}>
                 <Phone className="w-3 h-3 mr-1" /> Phone
               </Button>
             </div>
-
             <div className="space-y-2">
               <Label>{inviteMethod === "email" ? "Email Address" : "Phone Number"}</Label>
-              <Input 
-                placeholder={inviteMethod === "email" ? "colleague@studio.com" : "+234..."} 
-                value={memberEmail} 
-                onChange={(e) => setMemberEmail(e.target.value)} 
-                type={inviteMethod === "email" ? "email" : "tel"}
-              />
+              <Input placeholder={inviteMethod === "email" ? "colleague@studio.com" : "+234..."} value={memberEmail} onChange={(e) => setMemberEmail(e.target.value)} type={inviteMethod === "email" ? "email" : "tel"} />
             </div>
-
             <div className="space-y-2">
               <Label>Role on Project</Label>
               <Select value={inviteRole} onValueChange={setInviteRole}>
@@ -361,29 +344,18 @@ export default function ProjectDetail() {
                   <SelectItem value="cinematographer">Cinematographer</SelectItem>
                   <SelectItem value="producer">Producer</SelectItem>
                   <SelectItem value="editor">Editor</SelectItem>
-                  <SelectItem value="sound_engineer">Sound Engineer</SelectItem>
-                  <SelectItem value="makeup_artist">Makeup Artist</SelectItem>
-                  <SelectItem value="gaffer">Gaffer</SelectItem>
                   <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-
             <div className="space-y-2">
               <Label>Personal Message (optional)</Label>
-              <Textarea 
-                placeholder="Hey! I'd love to have you on this project..." 
-                rows={2}
-                value={inviteMessage} 
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInviteMessage(e.target.value)} 
-              />
+              <Textarea placeholder="Hey! I'd love to have you on this project..." rows={2} value={inviteMessage} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInviteMessage(e.target.value)} />
             </div>
-
             <Button onClick={handleAddMember} className="w-full" disabled={addingMember || !memberEmail.trim()}>
               {addingMember ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
               Send Invitation
             </Button>
-
             {inviteLink && (
               <div className="p-3 bg-muted rounded-lg">
                 <p className="text-xs text-muted-foreground mb-1">Share this link:</p>

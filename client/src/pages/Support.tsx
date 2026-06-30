@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useToast } from "@/hooks/use-toast";
 import { HelpCircle, ArrowLeft, Loader2, Plus, MessageSquare, Clock, CheckCircle } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import { ProjectsSkeleton } from "@/components/PageSkeletons";
 
 const DEMO_TICKETS = [
   { id: "t1", subject: "Cannot upload profile photo", description: "I keep getting an error when trying to upload my profile picture.", category: "technical", status: "open", createdAt: new Date(Date.now() - 86400000).toISOString() },
@@ -89,9 +90,7 @@ export default function Support() {
         />
 
         {loading ? (
-          <div className="flex justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          </div>
+          <ProjectsSkeleton />
         ) : tickets.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">

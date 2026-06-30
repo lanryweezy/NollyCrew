@@ -370,7 +370,7 @@ export default function Profile() {
               </CardHeader>
               <CardContent>
                 {loadingReviews ? (
-                  <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin" /></div>
+                  <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
                 ) : userReviews.length === 0 ? (
                   <div className="text-center py-8">
                     <Star className="w-12 h-12 mx-auto text-muted-foreground mb-4" />

@@ -19,7 +19,9 @@ import {
   Plus,
   MessageSquare,
   Star,
-  Loader2
+  Loader2,
+  AlertTriangle,
+  RefreshCw
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { DashboardSkeleton } from "@/components/PageSkeletons";
@@ -47,6 +49,7 @@ export default function Dashboard() {
   const { profile, roles, isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [stats, setStats] = useState(DEMO_STATS);
   const [recentJobs, setRecentJobs] = useState<any[]>([]);
   const [recentApps, setRecentApps] = useState<any[]>([]);
@@ -77,6 +80,7 @@ export default function Dashboard() {
     } catch (e) {
       setRecentJobs(DEMO_RECENT_JOBS);
       setRecentApps(DEMO_RECENT_APPLICATIONS);
+      setError(true);
     }
     setLoading(false);
   }
@@ -174,6 +178,17 @@ export default function Dashboard() {
           <TabsContent value="overview" className="mt-6">
             {loading ? (
               <DashboardSkeleton />
+            ) : error ? (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <AlertTriangle className="w-12 h-12 mx-auto text-destructive mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Failed to load data</h3>
+                  <p className="text-muted-foreground mb-4">Check your connection and try again</p>
+                  <Button onClick={() => { setError(false); loadDashboardData(); }}>
+                    <RefreshCw className="w-4 h-4 mr-2" /> Retry
+                  </Button>
+                </CardContent>
+              </Card>
             ) : (
               <div className="grid md:grid-cols-2 gap-6">
                 <Card>

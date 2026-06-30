@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Bookmark, Briefcase, Loader2 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import { JobsSkeleton } from "@/components/PageSkeletons";
 
 export default function Bookmarks() {
   const [, setLocation] = useLocation();
@@ -38,7 +39,7 @@ export default function Bookmarks() {
         <PageHeader title="Saved Jobs" description={`${bookmarks.length} bookmarked jobs`} />
 
         {loading ? (
-          <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
+          <JobsSkeleton />
         ) : bookmarks.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">

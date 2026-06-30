@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Search, MapPin, Star, Users, Loader2 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import { ProjectsSkeleton } from "@/components/PageSkeletons";
 
 const DEMO_TALENT = [
   { id: "t1", first_name: "Adaeze", last_name: "Obi", location: "Lagos", avatar: null, user_roles: [{ role: "actor", skills: ["Drama", "Comedy"] }] },
@@ -104,9 +105,7 @@ export default function TalentSearch() {
 
         {/* Results */}
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          </div>
+          <ProjectsSkeleton />
         ) : filteredTalent.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">

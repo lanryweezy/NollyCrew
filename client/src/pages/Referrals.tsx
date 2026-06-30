@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Gift, ArrowLeft, Loader2, Mail, Copy, Check, Users, DollarSign } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import { ProjectsSkeleton } from "@/components/PageSkeletons";
 
 const DEMO_REFERRALS = [
   { id: "r1", referredEmail: "chidi@example.com", status: "accepted", rewardStatus: "pending", createdAt: new Date(Date.now() - 86400000).toISOString() },
@@ -140,7 +141,7 @@ export default function Referrals() {
           </CardHeader>
           <CardContent>
             {loading ? (
-              <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin" /></div>
+              <ProjectsSkeleton />
             ) : referralList.length === 0 ? (
               <div className="text-center py-8">
                 <Gift className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
