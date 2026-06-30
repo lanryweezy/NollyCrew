@@ -84,12 +84,16 @@ export default function Navigation({
   });
 
   const quickActions = [
+    { label: "Dashboard", icon: Home, action: () => setLocation("/dashboard") },
     { label: "Browse Jobs", icon: Briefcase, action: () => setLocation("/jobs") },
     { label: "Find Talent", icon: Users, action: () => setLocation("/talent") },
     { label: "My Projects", icon: Film, action: () => setLocation("/projects") },
-    { label: "Messages", icon: MessageCircle, action: () => setLocation("/messages") },
     { label: "AI Tools", icon: Brain, action: () => setLocation("/ai-tools") },
+    { label: "Messages", icon: MessageCircle, action: () => setLocation("/messages") },
+    { label: "Calendar", icon: Calendar, action: () => setLocation("/calendar") },
     { label: "Auditions", icon: Calendar, action: () => setLocation("/auditions") },
+    { label: "Analytics", icon: BarChart3, action: () => setLocation("/analytics") },
+    { label: "Collaboration", icon: Users, action: () => setLocation("/collaboration") },
     { label: "Profile", icon: User, action: () => setLocation("/profile") },
   ];
 
@@ -132,9 +136,9 @@ export default function Navigation({
               <span className="text-xl font-bold font-serif sm:hidden">NC</span>
             </div>
 
-            {/* Desktop Navigation */}
+            {/* Desktop Navigation - Essential items only */}
             {isAuthenticated && (
-              <div className="hidden md:flex items-center gap-1 lg:gap-2 xl:gap-4">
+              <div className="hidden md:flex items-center gap-1 lg:gap-2">
                 <Button 
                   variant={path === "/dashboard" ? "secondary" : "ghost"}
                   onClick={() => setLocation("/dashboard")}
@@ -172,51 +176,6 @@ export default function Navigation({
                   <span className="hidden sm:inline">Projects</span>
                 </Button>
                 <Button 
-                  variant={path === "/messages" ? "secondary" : "ghost"}
-                  onClick={() => setLocation("/messages")}
-                  data-testid="nav-messages"
-                  className="text-xs sm:text-sm"
-                >
-                  <MessageCircle className="w-4 h-4 mr-1 sm:mr-2" />
-                  <span className="hidden sm:inline">Messages</span>
-                </Button>
-                <Button 
-                  variant={path === "/profile" ? "secondary" : "ghost"}
-                  onClick={() => setLocation("/profile")}
-                  data-testid="nav-profile"
-                  className="text-xs sm:text-sm"
-                >
-                  <User className="w-4 h-4 mr-1 sm:mr-2" />
-                  <span className="hidden sm:inline">Profile</span>
-                </Button>
-                <Button 
-                  variant={path === "/calendar" ? "secondary" : "ghost"}
-                  onClick={() => setLocation("/calendar")}
-                  data-testid="nav-calendar"
-                  className="text-xs sm:text-sm"
-                >
-                  <Command className="w-4 h-4 mr-1 sm:mr-2" />
-                  <span className="hidden sm:inline">Calendar</span>
-                </Button>
-                <Button 
-                  variant={path === "/analytics" ? "secondary" : "ghost"}
-                  onClick={() => setLocation("/analytics")}
-                  data-testid="nav-analytics"
-                  className="text-xs sm:text-sm"
-                >
-                  <BarChart3 className="w-4 h-4 mr-1 sm:mr-2" />
-                  <span className="hidden sm:inline">Analytics</span>
-                </Button>
-                <Button 
-                  variant={path === "/collaboration" ? "secondary" : "ghost"}
-                  onClick={() => setLocation("/collaboration")}
-                  data-testid="nav-collaboration"
-                  className="text-xs sm:text-sm"
-                >
-                  <Users className="w-4 h-4 mr-1 sm:mr-2" />
-                  <span className="hidden sm:inline">Collab</span>
-                </Button>
-                <Button 
                   variant={path === "/ai-tools" ? "secondary" : "ghost"}
                   onClick={() => setLocation("/ai-tools")}
                   data-testid="nav-ai-tools"
@@ -224,15 +183,6 @@ export default function Navigation({
                 >
                   <Brain className="w-4 h-4 mr-1 sm:mr-2" />
                   <span className="hidden sm:inline">AI Tools</span>
-                </Button>
-                <Button 
-                  variant={path === "/auditions" ? "secondary" : "ghost"}
-                  onClick={() => setLocation("/auditions")}
-                  data-testid="nav-auditions"
-                  className="text-xs sm:text-sm"
-                >
-                  <Calendar className="w-4 h-4 mr-1 sm:mr-2" />
-                  <span className="hidden sm:inline">Auditions</span>
                 </Button>
               </div>
             )}
@@ -335,6 +285,42 @@ export default function Navigation({
                     >
                       <User className="mr-2 h-4 w-4" />
                       Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      data-testid="menu-messages"
+                      onClick={() => setLocation("/messages")}
+                    >
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      Messages
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      data-testid="menu-calendar"
+                      onClick={() => setLocation("/calendar")}
+                    >
+                      <Command className="mr-2 h-4 w-4" />
+                      Calendar
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      data-testid="menu-auditions"
+                      onClick={() => setLocation("/auditions")}
+                    >
+                      <Calendar className="mr-2 h-4 w-4" />
+                      Auditions
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      data-testid="menu-analytics"
+                      onClick={() => setLocation("/analytics")}
+                    >
+                      <BarChart3 className="mr-2 h-4 w-4" />
+                      Analytics
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      data-testid="menu-collaboration"
+                      onClick={() => setLocation("/collaboration")}
+                    >
+                      <Users className="mr-2 h-4 w-4" />
+                      Collaboration
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       data-testid="menu-settings"
