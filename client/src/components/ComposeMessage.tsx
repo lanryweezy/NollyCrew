@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { messages as messagesApi, profiles } from "@/lib/api";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -25,6 +25,17 @@ export default function ComposeMessage({ open, onOpenChange, recipientId, recipi
   const [subject, setSubject] = useState("");
   const [content, setContent] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
+
+  // Reset state when dialog opens with new recipient
+  useEffect(() => {
+    if (open) {
+      setToSearch(recipientName || "");
+      setToId(recipientId || "");
+      setSubject("");
+      setContent("");
+      setSearchResults([]);
+    }
+  }, [open, recipientId, recipientName]);
 
   async function searchUsers(query: string) {
     setToSearch(query);

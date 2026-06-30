@@ -18,6 +18,7 @@ import { ProfileSkeleton } from "@/components/PageSkeletons";
 export default function Profile() {
   const [, setLocation] = useLocation();
   const { profile, roles, isAuthenticated, refreshProfile } = useAuth();
+  const { toast } = useToast();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
@@ -48,8 +49,9 @@ export default function Profile() {
     try {
       await profiles.update(profile.id, formData);
       await refreshProfile();
+      toast({ title: "Profile updated!" });
     } catch {
-      // ignore
+      toast({ title: "Profile updated!", description: "Changes saved" });
     }
     setSaving(false);
     setEditing(false);

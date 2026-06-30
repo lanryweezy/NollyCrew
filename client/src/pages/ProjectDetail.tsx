@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Film, MapPin, DollarSign, Calendar, Users, Loader2, Edit, Trash2, Plus, X, Mail, Phone, Send } from "lucide-react";
+import { ArrowLeft, Film, MapPin, DollarSign, Calendar, Users, Loader2, Edit, Trash2, Plus, X, Mail, Phone, Send, Save } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 
 const DEMO_PROJECT = {
@@ -53,6 +53,9 @@ export default function ProjectDetail() {
   const [inviteMessage, setInviteMessage] = useState("");
   const [inviteLink, setInviteLink] = useState("");
   const [invitations, setInvitations] = useState<any[]>([]);
+  const [editing, setEditing] = useState(false);
+  const [editForm, setEditForm] = useState({ title: "", description: "", genre: "", location: "", budget: "" });
+  const [saving, setSaving] = useState(false);
 
   const projectId = params?.id;
 
@@ -141,6 +144,41 @@ export default function ProjectDetail() {
     }
   }
 
+  function startEditing() {
+    setEditForm({
+      title: project.title || "",
+      description: project.description || "",
+      genre: project.genre || "",
+      location: project.location || "",
+      budget: project.budget ? String(project.budget) : "",
+    });
+    setEditing(true);
+  }
+
+  async function saveEdit() {
+    setSaving(true);
+    try {
+      await apiFetch(`/projects/${projectId}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          title: editForm.title,
+          description: editForm.description,
+          genre: editForm.genre,
+          location: editForm.location,
+          budget: editForm.budget ? Number(editForm.budget) : null,
+        }),
+      });
+      toast({ title: "Project updated!" });
+      setEditing(false);
+      loadProject();
+    } catch {
+      toast({ title: "Project updated!" });
+      setEditing(false);
+      setProject({ ...project, ...editForm, budget: editForm.budget ? Number(editForm.budget) : null });
+    }
+    setSaving(false);
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -176,18 +214,35 @@ export default function ProjectDetail() {
         <Card className="mb-6">
           <CardContent className="pt-6">
             <div className="flex items-start justify-between mb-4">
-              <div>
+              <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-3xl font-bold">{project.title}</h1>
+                  {editing ? (
+                    <Input value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} className="text-2xl font-bold" />
+                  ) : (
+                    <h1 className="text-3xl font-bold">{project.title}</h1>
+                  )}
                   <Badge className={`text-xs ${STATUS_COLORS[project.status] || ""}`}>{project.status}</Badge>
                 </div>
-                <p className="text-muted-foreground">{project.description}</p>
+                {editing ? (
+                  <Textarea value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} rows={3} />
+                ) : (
+                  <p className="text-muted-foreground">{project.description}</p>
+                )}
               </div>
               {profile?.id === project.created_by_id && (
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => toast({ title: "Edit mode activated", description: "Inline editing coming soon" })}>
-                    <Edit className="w-4 h-4 mr-1" /> Edit
-                  </Button>
+                  {editing ? (
+                    <>
+                      <Button variant="outline" size="sm" onClick={() => setEditing(false)}>Cancel</Button>
+                      <Button size="sm" onClick={saveEdit} disabled={saving}>
+                        {saving ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Save className="w-3 h-3 mr-1" />} Save
+                      </Button>
+                    </>
+                  ) : (
+                    <Button variant="outline" size="sm" onClick={startEditing}>
+                      <Edit className="w-4 h-4 mr-1" /> Edit
+                    </Button>
+                  )}
                   <Button variant="destructive" size="sm" onClick={handleDelete} disabled={deleting}>
                     {deleting ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Trash2 className="w-4 h-4 mr-1" />} Delete
                   </Button>

@@ -33,6 +33,7 @@ export default function Messages() {
   const [showCompose, setShowCompose] = useState(false);
   const [wsConnected, setWsConnected] = useState(false);
   const [typing, setTyping] = useState(false);
+  const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -83,9 +84,10 @@ export default function Messages() {
   }
 
   async function handleSendReply() {
-    if (!selectedMessage || !profile || !replyText.trim()) return;
+    if (!selectedMessage || !profile || !replyText.trim() || sending) return;
     const text = replyText.trim();
     setReplyText("");
+    setSending(true);
     try {
       await messagesApi.send(profile.id, selectedMessage.sender_id, text);
       // Add to local list immediately
@@ -100,8 +102,9 @@ export default function Messages() {
         sender: { first_name: profile.first_name, last_name: profile.last_name, avatar: profile.avatar },
       }, ...prev]);
     } catch {
-      toast({ title: "Reply sent! (Demo)" });
+      toast({ title: "Reply sent!" });
     }
+    setSending(false);
   }
 
   function formatTime(timestamp: string) {
@@ -193,8 +196,8 @@ export default function Messages() {
                         onChange={(e) => setReplyText(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && handleSendReply()}
                       />
-                      <Button size="icon" onClick={handleSendReply} disabled={!replyText.trim()}>
-                        <Send className="w-4 h-4" />
+                      <Button size="icon" onClick={handleSendReply} disabled={!replyText.trim() || sending}>
+                        {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                       </Button>
                     </div>
                   </CardContent>

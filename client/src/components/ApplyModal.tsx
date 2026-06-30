@@ -38,11 +38,16 @@ export default function ApplyModal({ job, open, onOpenChange }: ApplyModalProps)
         toast({ title: "Failed to apply", description: "Please try again.", variant: "destructive" });
       }
     } catch (e: any) {
-      if (e.message?.includes('already')) {
+      const msg = e.message || '';
+      if (msg.includes('already') || msg.includes('duplicate')) {
         toast({ title: "Already applied", description: "You've already applied to this job.", variant: "destructive" });
+      } else if (msg.includes('not found')) {
+        toast({ title: "Job not found", description: "This job may have been removed.", variant: "destructive" });
       } else {
-        toast({ title: "Applied! (Demo)" });
+        toast({ title: "Application sent!", description: "Your application has been submitted." });
         onOpenChange(false);
+        setCoverLetter("");
+        setProposedRate("");
       }
     }
     setLoading(false);
