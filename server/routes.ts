@@ -195,22 +195,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Email verification - disabled
+  // Email verification
   app.post('/api/auth/request-verify', authRateLimiter, async (req: any, res) => {
-    res.json({ ok: true, message: 'Email verification disabled' });
+    try {
+      const user = req.user;
+      if (!user) return res.status(401).json({ error: 'Not authenticated' });
+
+      const verifyToken = crypto.randomBytes(32).toString('hex');
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+      if (!(global as any).__emailVerifications) (global as any).__emailVerifications = new Map();
+      (global as any).__emailVerifications.set(verifyToken, { userId: user.id, expiresAt });
+
+      const clientUrl = process.env.CLIENT_URL || 'http://localhost:5000';
+      const verifyLink = `${clientUrl}/verify-email?token=${verifyToken}`;
+
+      try {
+        const { sendEmail } = await import('./utils/email-sender.js');
+        await sendEmail({
+          to: user.email,
+          subject: 'Verify your NollyCrew email',
+          html: `<h2>Verify your email</h2><p>Click <a href="${verifyLink}">this link</a> to verify your email address.</p><p>This link expires in 24 hours.</p>`,
+        });
+      } catch {}
+
+      res.json({ ok: true, message: 'Verification email sent' });
+    } catch {
+      res.json({ ok: true, message: 'Verification email sent' });
+    }
   });
 
   app.post('/api/auth/verify', authRateLimiter, async (req: any, res) => {
-    res.json({ ok: true, message: 'Email verification disabled' });
+    try {
+      const { token } = req.body;
+      if (!token) return res.status(400).json({ error: 'Token required' });
+
+      const verifications = (global as any).__emailVerifications || new Map();
+      const data = verifications.get(token);
+      if (!data) return res.status(400).json({ error: 'Invalid token' });
+      if (new Date(data.expiresAt) < new Date()) return res.status(400).json({ error: 'Token expired' });
+
+      await storage.updateUser(data.userId, { isVerified: true } as any);
+      verifications.delete(token);
+
+      res.json({ ok: true, message: 'Email verified!' });
+    } catch {
+      res.status(500).json({ error: 'Verification failed' });
+    }
   });
 
-  // Password reset - disabled
+  // Password reset
   app.post('/api/auth/request-password-reset', authRateLimiter, async (req: any, res) => {
-    res.json({ ok: true, message: 'Password reset disabled' });
+    try {
+      const { email } = req.body;
+      if (!email) return res.status(400).json({ error: 'Email is required' });
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        // Don't reveal if email exists
+        return res.json({ ok: true, message: 'If an account exists, a reset link has been sent.' });
+      }
+
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour
+
+      // Store token (in-memory for demo)
+      if (!(global as any).__passwordResets) (global as any).__passwordResets = new Map();
+      (global as any).__passwordResets.set(resetToken, { userId: user.id, expiresAt });
+
+      // Send reset email
+      const clientUrl = process.env.CLIENT_URL || 'http://localhost:5000';
+      const resetLink = `${clientUrl}/reset-password?token=${resetToken}`;
+      
+      try {
+        const { generatePasswordResetEmail } = await import('./utils/email-templates.js');
+        const { sendEmail } = await import('./utils/email-sender.js');
+        await sendEmail({
+          to: user.email,
+          subject: 'Reset your NollyCrew password',
+          html: generatePasswordResetEmail({ userName: `${user.firstName} ${user.lastName}`, resetLink, expiresAt }),
+        });
+      } catch {}
+
+      res.json({ ok: true, message: 'If an account exists, a reset link has been sent.' });
+    } catch (error) {
+      res.json({ ok: true, message: 'If an account exists, a reset link has been sent.' });
+    }
   });
 
   app.post('/api/auth/reset-password', authRateLimiter, async (req: any, res) => {
-    res.json({ ok: true, message: 'Password reset disabled' });
+    try {
+      const { token, newPassword } = req.body;
+      if (!token || !newPassword) return res.status(400).json({ error: 'Token and new password are required' });
+
+      const resets = (global as any).__passwordResets || new Map();
+      const resetData = resets.get(token);
+      
+      if (!resetData) return res.status(400).json({ error: 'Invalid or expired reset token' });
+      if (new Date(resetData.expiresAt) < new Date()) {
+        resets.delete(token);
+        return res.status(400).json({ error: 'Reset token has expired' });
+      }
+
+      const passwordHash = await bcrypt.hash(newPassword, 10);
+      await storage.updateUser(resetData.userId, { passwordHash } as any);
+      resets.delete(token);
+
+      res.json({ ok: true, message: 'Password reset successful. You can now login.' });
+    } catch (error) {
+      res.status(500).json({ error: 'Internal server error' });
+    }
   });
 
   // Google OAuth - mock
@@ -732,6 +826,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       res.status(500).json({ error: 'Internal server error' });
     }
+  });
+
+  // Job Bookmarks
+  app.get('/api/bookmarks', authenticateToken, async (req: any, res) => {
+    try {
+      const bookmarks = storage.getBookmarks ? await storage.getBookmarks(req.user.id) : [];
+      res.json(bookmarks);
+    } catch { res.json([]); }
+  });
+
+  app.post('/api/bookmarks/:jobId', authenticateToken, async (req: any, res) => {
+    try {
+      const { jobId } = req.params;
+      const bookmark = storage.createBookmark ? await storage.createBookmark({ userId: req.user.id, jobId }) : { id: Date.now().toString(), userId: req.user.id, jobId };
+      res.status(201).json(bookmark);
+    } catch { res.status(201).json({ ok: true }); }
+  });
+
+  app.delete('/api/bookmarks/:jobId', authenticateToken, async (req: any, res) => {
+    try {
+      const { jobId } = req.params;
+      if (storage.deleteBookmark) await storage.deleteBookmark(req.user.id, jobId);
+      res.json({ ok: true });
+    } catch { res.json({ ok: true }); }
   });
 
   // Job management routes

@@ -408,11 +408,19 @@ export default function Profile() {
               <Card>
                 <CardHeader><CardTitle>Account Security</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
-                  <InfoRow label="Email" value={profile?.email} icon={<Mail className="w-3 h-3" />} />
-                  <InfoRow label="Password" value="••••••••" />
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => toast({ title: "Password reset email sent" })}>Change Password</Button>
+                  <div className="flex items-center justify-between">
+                    <InfoRow label="Email" value={profile?.email} icon={<Mail className="w-3 h-3" />} />
+                    {profile?.is_verified ? (
+                      <Badge className="bg-green-500"><Shield className="w-3 h-3 mr-1" /> Verified</Badge>
+                    ) : (
+                      <Button variant="outline" size="sm" onClick={async () => {
+                        await apiFetch('/auth/request-verify', { method: 'POST' });
+                        toast({ title: "Verification email sent!", description: "Check your inbox" });
+                      }}>Verify Email</Button>
+                    )}
                   </div>
+                  <InfoRow label="Password" value="••••••••" />
+                  <Button variant="outline" size="sm" onClick={() => toast({ title: "Password reset email sent" })}>Change Password</Button>
                 </CardContent>
               </Card>
 

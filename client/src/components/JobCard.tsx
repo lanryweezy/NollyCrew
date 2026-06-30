@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useAuth } from "@/lib/auth-context";
+import { apiFetch } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, Clock, DollarSign, Users, Calendar, Bookmark, Share2, AlertCircle } from "lucide-react";
+import { MapPin, Clock, DollarSign, Calendar, Bookmark, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ApplyModal from "./ApplyModal";
 import type { Job } from "@/types/database";
@@ -14,6 +16,7 @@ interface JobCardProps {
 
 export default function JobCard({ job }: JobCardProps) {
   const [, setLocation] = useLocation();
+  const { profile } = useAuth();
   const [showApply, setShowApply] = useState(false);
   const [showFull, setShowFull] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
@@ -37,6 +40,19 @@ export default function JobCard({ job }: JobCardProps) {
     ? new Date(job.deadline).toLocaleDateString("en-NG", { month: "short", day: "numeric" })
     : "Open";
 
+  async function toggleBookmark() {
+    const newState = !bookmarked;
+    setBookmarked(newState);
+    try {
+      if (newState) {
+        await apiFetch(`/bookmarks/${job.id}`, { method: 'POST' });
+      } else {
+        await apiFetch(`/bookmarks/${job.id}`, { method: 'DELETE' });
+      }
+    } catch {}
+    toast({ title: newState ? "Bookmarked!" : "Removed from bookmarks" });
+  }
+
   return (
     <>
       <Card className="w-full hover:shadow-md transition-shadow">
@@ -53,7 +69,9 @@ export default function JobCard({ job }: JobCardProps) {
                   </Badge>
                 )}
               </div>
-              <CardTitle className="text-lg cursor-pointer hover:text-primary transition-colors" onClick={() => setLocation(`/jobs/${job.id}`)}>{job.title}</CardTitle>
+              <CardTitle className="text-lg cursor-pointer hover:text-primary transition-colors" onClick={() => setLocation(`/jobs/${job.id}`)}>
+                {job.title}
+              </CardTitle>
             </div>
           </div>
         </CardHeader>
@@ -76,7 +94,7 @@ export default function JobCard({ job }: JobCardProps) {
             </div>
           </div>
 
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground line-clamp-2">
             {showFull ? job.description : truncated}
           </p>
           {job.description.length > 120 && (
@@ -98,7 +116,7 @@ export default function JobCard({ job }: JobCardProps) {
           <Button className="flex-1" onClick={() => setShowApply(true)}>
             Apply Now
           </Button>
-          <Button variant="outline" size="icon" onClick={() => { setBookmarked(!bookmarked); toast({ title: bookmarked ? "Removed from bookmarks" : "Bookmarked!" }); }}>
+          <Button variant="outline" size="icon" onClick={toggleBookmark}>
             <Bookmark className={`w-4 h-4 ${bookmarked ? "fill-primary" : ""}`} />
           </Button>
         </CardFooter>
@@ -108,3 +126,4 @@ export default function JobCard({ job }: JobCardProps) {
     </>
   );
 }
+

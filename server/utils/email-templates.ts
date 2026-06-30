@@ -335,3 +335,52 @@ export function generateApplicationUpdateEmail(data: ApplicationUpdateEmailData)
 </body>
 </html>`;
 }
+
+interface PasswordResetEmailData {
+  userName: string;
+  resetLink: string;
+  expiresAt: string;
+}
+
+export function generatePasswordResetEmail(data: PasswordResetEmailData): string {
+  const { userName, resetLink } = data;
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; padding: 40px 20px;">
+    <tr><td align="center">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+        <tr>
+          <td style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 40px 48px; text-align: center;">
+            <span style="color: #ffffff; font-size: 24px; font-weight: 700;">NollyCrew</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 40px 48px; text-align: center;">
+            <h1 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #0f172a;">Reset Your Password</h1>
+            <p style="margin: 0 0 24px; font-size: 16px; color: #64748b; line-height: 1.6;">
+              Hi ${userName},<br><br>
+              We received a request to reset your password. Click the button below to create a new password.
+            </p>
+            <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 0 auto 24px;">
+              <tr>
+                <td style="border-radius: 10px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+                  <a href="${resetLink}" style="display: inline-block; padding: 16px 48px; font-size: 16px; font-weight: 600; color: #ffffff; text-decoration: none;">
+                    Reset Password
+                  </a>
+                </td>
+              </tr>
+            </table>
+            <p style="margin: 0 0 16px; font-size: 13px; color: #94a3b8;">
+              This link expires in 1 hour. If you didn't request this, ignore this email.
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}

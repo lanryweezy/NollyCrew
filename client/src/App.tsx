@@ -9,6 +9,13 @@ import LandingPage from "@/components/LandingPage";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
+import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
+import VerifyEmail from "@/pages/VerifyEmail";
+import Settings from "@/pages/Settings";
+import PublicProfile from "@/pages/PublicProfile";
+import Bookmarks from "@/pages/Bookmarks";
+import Applications from "@/pages/Applications";
 import Payment from "@/pages/Payment";
 import PaymentSuccess from "@/pages/PaymentSuccess";
 import PaymentError from "@/pages/PaymentError";
@@ -59,6 +66,14 @@ function Router() {
           <Route path="/" component={LandingPage} />
           <Route path="/login" component={Login} />
           <Route path="/register" component={Register} />
+          <Route path="/forgot-password" component={ForgotPassword} />
+          <Route path="/reset-password/:token" component={ResetPassword} />
+          <Route path="/verify-email/:token" component={VerifyEmail} />
+          <Route path="/settings">
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          </Route>
           <Route path="/test-proxy" component={TestProxy} />
           <Route path="/payment" component={Payment} />
           <Route path="/payment/success" component={PaymentSuccess} />
@@ -114,6 +129,17 @@ function Router() {
           <Route path="/talent/:userId">
             <ProtectedRoute>
               <TalentProfile />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/u/:userId" component={PublicProfile} />
+          <Route path="/bookmarks">
+            <ProtectedRoute>
+              <Bookmarks />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/applications">
+            <ProtectedRoute>
+              <Applications />
             </ProtectedRoute>
           </Route>
           <Route path="/projects">

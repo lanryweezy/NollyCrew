@@ -160,6 +160,11 @@ export interface IStorage {
   getInvitationByToken?(token: string): Promise<any | undefined>;
   updateInvitation?(id: string, updates: any): Promise<any | undefined>;
   deleteInvitation?(id: string): Promise<boolean>;
+
+  // Bookmarks
+  getBookmarks?(userId: string): Promise<any[]>;
+  createBookmark?(bookmark: any): Promise<any>;
+  deleteBookmark?(userId: string, jobId: string): Promise<boolean>;
 }
 
 export class DbStorage implements IStorage {
@@ -1272,6 +1277,22 @@ export class MemStorage implements IStorage {
 
   async deleteInvitation(id: string): Promise<boolean> {
     return this.invitations.delete(id);
+  }
+
+  // Bookmarks (in-memory)
+  private bookmarks = new Map<string, any>();
+
+  async getBookmarks(userId: string): Promise<any[]> {
+    return Array.from(this.bookmarks.values()).filter(b => b.userId === userId);
+  }
+
+  async createBookmark(bookmark: any): Promise<any> {
+    this.bookmarks.set(`${bookmark.userId}-${bookmark.jobId}`, bookmark);
+    return bookmark;
+  }
+
+  async deleteBookmark(userId: string, jobId: string): Promise<boolean> {
+    return this.bookmarks.delete(`${userId}-${jobId}`);
   }
 }
 
