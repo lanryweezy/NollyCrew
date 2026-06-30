@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { apiFetch } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { 
   Users, 
   Briefcase, 
@@ -10,7 +12,11 @@ import {
   PieChart as PieChartIcon,
   Activity,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  Shield,
+  CreditCard,
+  Headphones,
+  FileText
 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import { 
@@ -40,6 +46,7 @@ interface PlatformStats {
 }
 
 export default function BossDashboard() {
+  const [, setLocation] = useLocation();
   const { data: stats, isLoading } = useQuery<PlatformStats>({
     queryKey: ["/api/admin/stats"],
     queryFn: () => apiFetch("/api/admin/stats"),
@@ -280,6 +287,27 @@ export default function BossDashboard() {
                       <span className="text-xs text-muted-foreground font-medium">{item.time}</span>
                     </div>
                   ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Quick Actions */}
+            <Card>
+              <CardHeader><CardTitle>Quick Actions</CardTitle></CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Button variant="outline" className="justify-start" onClick={() => setLocation("/jobs")}>
+                    <Briefcase className="w-4 h-4 mr-2" /> All Jobs
+                  </Button>
+                  <Button variant="outline" className="justify-start" onClick={() => setLocation("/projects")}>
+                    <Film className="w-4 h-4 mr-2" /> All Projects
+                  </Button>
+                  <Button variant="outline" className="justify-start" onClick={() => setLocation("/talent")}>
+                    <Users className="w-4 h-4 mr-2" /> All Talent
+                  </Button>
+                  <Button variant="outline" className="justify-start" onClick={() => setLocation("/analytics")}>
+                    <BarChart3 className="w-4 h-4 mr-2" /> Analytics
+                  </Button>
                 </div>
               </CardContent>
             </Card>

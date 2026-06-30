@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
 import ThemeToggle from "@/components/ThemeToggle";
+import FileUpload from "@/components/FileUpload";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -496,10 +497,11 @@ export default function EnhancedCollaboration() {
                   <CardHeader>
                     <div className="flex justify-between items-center">
                       <CardTitle>Shared Documents</CardTitle>
-                        <Button onClick={() => toast({ title: "Upload started", description: "Select a file from your device" })}>
-                        <Upload className="w-4 h-4 mr-2" />
-                        Upload
-                      </Button>
+                        <FileUpload 
+                          label="Upload Document"
+                          accept=".pdf,.doc,.docx,.txt,.png,.jpg,.mp4"
+                          onUpload={(file) => toast({ title: "Uploaded!", description: file.filename })}
+                        />
                     </div>
                   </CardHeader>
                   <CardContent>

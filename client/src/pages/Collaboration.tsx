@@ -1,13 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
+import { useWebSocket } from "@/lib/websocket";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Users, Send, Loader2, Video, Phone, Wifi } from "lucide-react";
+import { MessageSquare, Send, Wifi, WifiOff } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 
 const DEMO_MESSAGES = [
@@ -16,28 +17,54 @@ const DEMO_MESSAGES = [
   { id: "m3", user: "Don Omope", message: "Budget approved. We're greenlit!", time: "Yesterday" },
 ];
 
-const ONLINE_USERS = [
-  { name: "Kunle A.", status: "online" },
-  { name: "Kemi A.", status: "online" },
-  { name: "Don O.", status: "away" },
-  { name: "Blessing E.", status: "offline" },
-];
-
 export default function Collaboration() {
   const [, setLocation] = useLocation();
   const { profile, isAuthenticated } = useAuth();
   const { toast } = useToast();
+  const { connect, disconnect, sendChatMessage, addListener, removeListener } = useWebSocket();
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState(DEMO_MESSAGES);
+  const [wsConnected, setWsConnected] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    connect();
+    const handleConnected = () => setWsConnected(true);
+    const handleDisconnected = () => setWsConnected(false);
+    const handleChat = (data: any) => {
+      setMessages(prev => [...prev, {
+        id: `msg-${Date.now()}`,
+        user: data.userName || "Team Member",
+        message: data.content,
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      }]);
+    };
+    addListener('connected', handleConnected);
+    addListener('disconnected', handleDisconnected);
+    addListener('chat_message', handleChat);
+    return () => {
+      disconnect();
+      removeListener('connected', handleConnected);
+      removeListener('disconnected', handleDisconnected);
+      removeListener('chat_message', handleChat);
+    };
+  }, []);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   function handleSend() {
     if (!message.trim()) return;
-    setMessages([...messages, {
+    const newMsg = {
       id: `m${Date.now()}`,
       user: profile?.first_name || "You",
       message: message.trim(),
-      time: "Now"
-    }]);
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    };
+    setMessages(prev => [...prev, newMsg]);
+    // Send via WebSocket
+    sendChatMessage("project-1", message.trim());
     setMessage("");
   }
 
@@ -52,15 +79,20 @@ export default function Collaboration() {
           <Card className="md:col-span-1">
             <CardHeader><CardTitle className="text-sm">Team Members</CardTitle></CardHeader>
             <CardContent className="space-y-3">
-              {ONLINE_USERS.map((u, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${u.status === "online" ? "bg-green-500" : u.status === "away" ? "bg-yellow-500" : "bg-gray-300"}`} />
-                  <span className="text-sm">{u.name}</span>
-                </div>
-              ))}
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-green-500" />
+                <span className="text-sm">{profile?.first_name || "You"} (You)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-green-500" />
+                <span className="text-sm">Kunle A.</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-yellow-500" />
+                <span className="text-sm">Kemi A.</span>
+              </div>
               <div className="pt-4 flex gap-2">
-                <Button size="sm" variant="outline" className="flex-1" onClick={() => setLocation("/enhanced-collaboration")}><Video className="w-3 h-3 mr-1" /> Call</Button>
-                <Button size="sm" variant="outline" className="flex-1" onClick={() => setLocation("/enhanced-collaboration")}><Phone className="w-3 h-3 mr-1" /> Voice</Button>
+                <Button size="sm" variant="outline" className="flex-1" onClick={() => setLocation("/enhanced-collaboration")}>Video Call</Button>
               </div>
             </CardContent>
           </Card>
@@ -70,11 +102,15 @@ export default function Collaboration() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MessageSquare className="w-4 h-4" /> Project Chat
-                <Badge variant="secondary" className="ml-auto"><Wifi className="w-3 h-3 mr-1" /> Live</Badge>
+                {wsConnected ? (
+                  <Badge variant="secondary" className="ml-auto"><Wifi className="w-3 h-3 mr-1" /> Live</Badge>
+                ) : (
+                  <Badge variant="outline" className="ml-auto"><WifiOff className="w-3 h-3 mr-1" /> Offline</Badge>
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3 mb-4 max-h-[400px] overflow-y-auto">
+              <div className="space-y-3 mb-4 max-h-[400px] overflow-y-auto p-3 bg-muted rounded-lg">
                 {messages.map((msg) => (
                   <div key={msg.id} className="flex items-start gap-3">
                     <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -86,11 +122,12 @@ export default function Collaboration() {
                     </div>
                   </div>
                 ))}
+                <div ref={messagesEndRef} />
               </div>
               <div className="flex gap-2">
                 <Input placeholder="Type a message..." value={message} onChange={e => setMessage(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && handleSend()} />
-                <Button size="icon" onClick={handleSend}><Send className="w-4 h-4" /></Button>
+                <Button size="icon" onClick={handleSend} disabled={!message.trim()}><Send className="w-4 h-4" /></Button>
               </div>
             </CardContent>
           </Card>
