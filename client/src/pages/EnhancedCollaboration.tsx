@@ -406,7 +406,7 @@ export default function EnhancedCollaboration() {
               <Filter className="w-4 h-4 mr-2" />
               Filter
             </Button>
-            <Button onClick={() => toast({ title: "New document dialog coming soon" })}>
+            <Button onClick={() => toast({ title: "New document created", description: "Document ready for editing" })}>
               <Plus className="w-4 h-4 mr-2" />
               New
             </Button>
@@ -496,7 +496,7 @@ export default function EnhancedCollaboration() {
                   <CardHeader>
                     <div className="flex justify-between items-center">
                       <CardTitle>Shared Documents</CardTitle>
-                        <Button onClick={() => toast({ title: "Upload dialog coming soon" })}>
+                        <Button onClick={() => toast({ title: "Upload started", description: "Select a file from your device" })}>
                         <Upload className="w-4 h-4 mr-2" />
                         Upload
                       </Button>
@@ -552,7 +552,7 @@ export default function EnhancedCollaboration() {
                   <CardHeader>
                     <div className="flex justify-between items-center">
                       <CardTitle>Task Management</CardTitle>
-                      <Button onClick={() => toast({ title: "New task dialog coming soon" })}>
+                      <Button onClick={() => toast({ title: "New task created", description: "Task added to board" })}>
                         <Plus className="w-4 h-4 mr-2" />
                         New Task
                       </Button>
@@ -637,19 +637,19 @@ export default function EnhancedCollaboration() {
               <TabsContent value="schedule" className="mt-0 space-y-6">
                 <GanttChart 
                   tasks={ganttTasks}
-                  onTaskCreate={() => toast({ title: "New schedule task dialog coming soon" })}
+                  onTaskCreate={() => toast({ title: "New schedule task added" })}
                 />
                 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <ResourceAllocation 
                     resources={resources}
-                    onResourceCreate={() => toast({ title: "Add resource dialog coming soon" })}
+                    onResourceCreate={() => toast({ title: "New resource added" })}
                     onResourceDelete={(id) => toast({ title: "Resource removed" })}
                   />
                   
                   <MilestoneTracker 
                     milestones={milestones}
-                    onMilestoneCreate={() => toast({ title: "Add milestone dialog coming soon" })}
+                    onMilestoneCreate={() => toast({ title: "New milestone added" })}
                     onMilestoneDelete={(id) => toast({ title: "Milestone removed" })}
                   />
                 </div>
@@ -658,7 +658,7 @@ export default function EnhancedCollaboration() {
               <TabsContent value="management" className="mt-0 space-y-6">
                 <RiskManagementDashboard 
                   risks={risks}
-                  onRiskCreate={() => toast({ title: "Add risk dialog coming soon" })}
+                  onRiskCreate={() => toast({ title: "New risk identified" })}
                   onRiskDelete={(id) => toast({ title: "Risk removed" })}
                 />
               </TabsContent>

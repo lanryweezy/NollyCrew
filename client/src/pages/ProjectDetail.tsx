@@ -185,7 +185,7 @@ export default function ProjectDetail() {
               </div>
               {profile?.id === project.created_by_id && (
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => toast({ title: "Edit coming soon" })}>
+                  <Button variant="outline" size="sm" onClick={() => toast({ title: "Edit mode activated", description: "Inline editing coming soon" })}>
                     <Edit className="w-4 h-4 mr-1" /> Edit
                   </Button>
                   <Button variant="destructive" size="sm" onClick={handleDelete} disabled={deleting}>

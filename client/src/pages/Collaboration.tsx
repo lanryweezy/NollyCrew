@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
@@ -23,6 +24,7 @@ const ONLINE_USERS = [
 ];
 
 export default function Collaboration() {
+  const [, setLocation] = useLocation();
   const { profile, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [message, setMessage] = useState("");
@@ -57,8 +59,8 @@ export default function Collaboration() {
                 </div>
               ))}
               <div className="pt-4 flex gap-2">
-                <Button size="sm" variant="outline" className="flex-1" onClick={() => toast({ title: "Video call feature coming soon" })}><Video className="w-3 h-3 mr-1" /> Call</Button>
-                <Button size="sm" variant="outline" className="flex-1" onClick={() => toast({ title: "Voice call feature coming soon" })}><Phone className="w-3 h-3 mr-1" /> Voice</Button>
+                <Button size="sm" variant="outline" className="flex-1" onClick={() => setLocation("/enhanced-collaboration")}><Video className="w-3 h-3 mr-1" /> Call</Button>
+                <Button size="sm" variant="outline" className="flex-1" onClick={() => setLocation("/enhanced-collaboration")}><Phone className="w-3 h-3 mr-1" /> Voice</Button>
               </div>
             </CardContent>
           </Card>
