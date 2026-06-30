@@ -49,6 +49,8 @@ export default function Jobs() {
   const [loadingList, setLoadingList] = useState(true);
   const [jobList, setJobList] = useState<Job[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 12;
 
   // Debounce search
   useEffect(() => {
@@ -102,10 +104,12 @@ export default function Jobs() {
     return result;
   }, [jobList, debouncedSearch, selectedType, selectedLocation, selectedExperience, sortBy]);
 
-  const castingJobs = filteredJobs.filter(j => j.type === "casting");
-  const crewJobs = filteredJobs.filter(j => j.type === "crew");
-
   const activeFilterCount = [selectedType, selectedLocation, selectedExperience].filter(f => f !== "all").length;
+  const paginatedJobs = filteredJobs.slice(0, page * PAGE_SIZE);
+  const hasMore = filteredJobs.length > page * PAGE_SIZE;
+
+  const castingJobs = paginatedJobs.filter(j => j.type === "casting");
+  const crewJobs = paginatedJobs.filter(j => j.type === "crew");
 
   function clearFilters() {
     setSearchTerm("");
@@ -114,6 +118,7 @@ export default function Jobs() {
     setSelectedLocation("all");
     setSelectedExperience("all");
     setSortBy("newest");
+    setPage(1);
   }
 
   function removeFilter(filter: string) {
@@ -253,10 +258,10 @@ export default function Jobs() {
               <Briefcase className="w-4 h-4" /> All ({filteredJobs.length})
             </TabsTrigger>
             <TabsTrigger value="casting" className="flex items-center gap-2">
-              <Film className="w-4 h-4" /> Casting ({castingJobs.length})
+              <Film className="w-4 h-4" /> Casting ({filteredJobs.filter(j => j.type === "casting").length})
             </TabsTrigger>
             <TabsTrigger value="crew" className="flex items-center gap-2">
-              <Camera className="w-4 h-4" /> Crew ({crewJobs.length})
+              <Camera className="w-4 h-4" /> Crew ({filteredJobs.filter(j => j.type === "crew").length})
             </TabsTrigger>
           </TabsList>
 
@@ -288,11 +293,20 @@ export default function Jobs() {
                     </CardContent>
                   </Card>
                 ) : (
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {list.map(job => (
-                      <JobCard key={job.id} job={job} />
-                    ))}
-                  </div>
+                  <>
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                      {list.map(job => (
+                        <JobCard key={job.id} job={job} />
+                      ))}
+                    </div>
+                    {hasMore && (
+                      <div className="text-center mt-6">
+                        <Button variant="outline" onClick={() => setPage(p => p + 1)}>
+                          Load More ({filteredJobs.length - paginatedJobs.length} remaining)
+                        </Button>
+                      </div>
+                    )}
+                  </>
                 )}
               </TabsContent>
             );
