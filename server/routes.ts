@@ -181,6 +181,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         passwordHash
       });
 
+      // Create default user role if provided
+      if (req.body.role) {
+        await storage.createUserRole({
+          userId: user.id,
+          role: req.body.role,
+          isActive: true,
+        });
+      }
+
       // Return user without password
       const { passwordHash: _, ...userWithoutPassword } = user;
       const token = signToken({ userId: user.id, email: user.email });
@@ -1436,13 +1445,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       if (!req.file) return res.status(400).json({ error: 'No file provided' });
 
-      const { originalname, mimetype, size } = req.file;
+      const { originalname, mimetype, size, buffer } = req.file;
       const id = crypto.randomUUID();
-      const fileUrl = `/uploads/${id}/${originalname}`;
+      
+      // Store in local filesystem
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      const uploadDir = path.join(process.cwd(), 'public', 'uploads', id);
+      await fs.mkdir(uploadDir, { recursive: true });
+      await fs.writeFile(path.join(uploadDir, originalname), buffer);
 
+      const fileUrl = `/uploads/${id}/${originalname}`;
       res.json({ id, filename: originalname, mimetype, size, url: fileUrl, userId: req.user.id });
     } catch (error) {
+      logger.error('Upload error', { error: (error as Error).message });
       res.status(500).json({ error: 'Upload failed' });
+    }
+  });
+
+  // Serve uploaded files
+  app.get('/uploads/:id/:filename', async (req, res) => {
+    try {
+      const { id, filename } = req.params;
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      const filePath = path.join(process.cwd(), 'public', 'uploads', id, filename);
+      await fs.access(filePath);
+      res.sendFile(filePath);
+    } catch {
+      res.status(404).json({ error: 'File not found' });
     }
   });
 
@@ -1452,6 +1483,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!req.file) return res.status(400).json({ error: 'No file provided' });
 
       const id = crypto.randomUUID();
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'avatar', id);
+      await fs.mkdir(uploadDir, { recursive: true });
+      await fs.writeFile(path.join(uploadDir, req.file.originalname), req.file.buffer);
+
       const avatarUrl = `/uploads/avatar/${id}/${req.file.originalname}`;
 
       const updated = await storage.updateUser(req.user.id, { avatar: avatarUrl } as any);

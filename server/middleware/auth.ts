@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { storage } from '../storage.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
 
@@ -28,8 +29,12 @@ export const authenticateToken = async (req: any, _res: any, next: any) => {
     const token = authHeader.slice(7);
     const payload = verifyToken(token);
     if (payload) {
-      req.user = { id: payload.userId, email: payload.email };
-      return next();
+      // Verify user exists in database
+      const user = await storage.getUser(payload.userId);
+      if (user) {
+        req.user = { id: user.id, email: user.email };
+        return next();
+      }
     }
   }
   // Fallback: no auth (demo mode)
