@@ -266,11 +266,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const resetToken = crypto.randomBytes(32).toString('hex');
-      const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
-      // Store token (in-memory for demo)
-      if (!(global as any).__passwordResets) (global as any).__passwordResets = new Map();
-      (global as any).__passwordResets.set(resetToken, { userId: user.id, expiresAt });
+      if (storage.createPasswordResetToken) {
+        await storage.createPasswordResetToken({
+          userId: user.id,
+          token: resetToken,
+          expiresAt: expiresAt,
+        });
+      }
 
       // Send reset email
       const clientUrl = process.env.CLIENT_URL || 'http://localhost:5000';
@@ -282,7 +286,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await sendEmail({
           to: user.email,
           subject: 'Reset your NollyCrew password',
-          html: generatePasswordResetEmail({ userName: `${user.firstName} ${user.lastName}`, resetLink, expiresAt }),
+          html: generatePasswordResetEmail({ userName: `${user.firstName} ${user.lastName}`, resetLink, expiresAt: expiresAt.toISOString() }),
         });
       } catch {}
 
@@ -297,18 +301,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { token, newPassword } = req.body;
       if (!token || !newPassword) return res.status(400).json({ error: 'Token and new password are required' });
 
-      const resets = (global as any).__passwordResets || new Map();
-      const resetData = resets.get(token);
+      if (!storage.getPasswordResetToken || !storage.deletePasswordResetToken) {
+        return res.status(500).json({ error: 'Internal server error' });
+      }
+
+      const resetData = await storage.getPasswordResetToken(token);
       
       if (!resetData) return res.status(400).json({ error: 'Invalid or expired reset token' });
       if (new Date(resetData.expiresAt) < new Date()) {
-        resets.delete(token);
+        await storage.deletePasswordResetToken(token);
         return res.status(400).json({ error: 'Reset token has expired' });
       }
 
       const passwordHash = await bcrypt.hash(newPassword, 10);
       await storage.updateUser(resetData.userId, { passwordHash } as any);
-      resets.delete(token);
+      await storage.deletePasswordResetToken(token);
 
       res.json({ ok: true, message: 'Password reset successful. You can now login.' });
     } catch (error) {

@@ -10,3 +10,4 @@
 **Vulnerability:** Use of `Math.random().toString(36).substring(2, 11)` for generating entity IDs in `MemStorage`. `Math.random()` is not cryptographically secure and can lead to predictable IDs, enabling enumeration or collision attacks.
 **Learning:** In-memory storage implementations often use simple random strings for convenience, but these shortcuts compromise security in systems where IDs are used for access control or object referencing. UUIDs provide a standardized, collision-resistant, and cryptographically secure alternative.
 **Prevention:** Always use `crypto.randomUUID()` or a similar CSPRNG (Cryptographically Secure Pseudo-Random Number Generator) for generating identifiers. Avoid `Math.random()` for any security-sensitive application, including ID generation, session tokens, or password resets.
+- Added InsertPasswordResetToken schema to address TypeScript compilation failures for db table inserts

@@ -3,6 +3,19 @@ import { pgTable, text, varchar, timestamp, integer, decimal, jsonb, boolean, pr
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Password reset tokens for account recovery
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  token: text("token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => {
+  return {
+    tokenIdx: index("password_reset_tokens_idx").on(table.token),
+  };
+});
+
 // Waitlist table for collecting early-access emails
 export const waitlist = pgTable("waitlist", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -500,6 +513,10 @@ export type SupportTicket = typeof supportTickets.$inferSelect;
 export type InsertSupportTicket = z.infer<typeof insertSupportTicketSchema>;
 export type Referral = typeof referrals.$inferSelect;
 export type InsertReferral = z.infer<typeof insertReferralSchema>;
+
+export const insertPasswordResetTokenSchema = createInsertSchema(passwordResetTokens);
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+export type InsertPasswordResetToken = typeof passwordResetTokens.$inferInsert;
 
 // Invitations table for project member invites via email/phone
 export const invitations = pgTable("invitations", {
