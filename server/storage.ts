@@ -34,6 +34,8 @@ import {
   type InsertSupportTicket,
   type Referral,
   type InsertReferral,
+  type PasswordResetToken,
+  type InsertPasswordResetToken,
   users,
   userRoles,
   projects,
@@ -50,7 +52,8 @@ import {
   kycVerifications,
   dailyProgressReports,
   supportTickets,
-  referrals
+  referrals,
+  passwordResetTokens
 } from "../shared/schema.js";
 import { db } from "./db.js";
 import { eq, and, desc, count, ilike } from "drizzle-orm";
@@ -165,6 +168,11 @@ export interface IStorage {
   getBookmarks?(userId: string): Promise<any[]>;
   createBookmark?(bookmark: any): Promise<any>;
   deleteBookmark?(userId: string, jobId: string): Promise<boolean>;
+
+  // Password Reset Tokens
+  createPasswordResetToken?(token: InsertPasswordResetToken): Promise<PasswordResetToken>;
+  getPasswordResetToken?(tokenStr: string): Promise<PasswordResetToken | undefined>;
+  deletePasswordResetToken?(tokenStr: string): Promise<boolean>;
 }
 
 export class DbStorage implements IStorage {
@@ -588,6 +596,22 @@ export class DbStorage implements IStorage {
       user: userProfile ? { id: userProfile.id, email: userProfile.email, firstName: userProfile.firstName, lastName: userProfile.lastName } : null,
     };
   }
+
+  async createPasswordResetToken(token: InsertPasswordResetToken): Promise<PasswordResetToken> {
+    const [newToken] = await db!.insert(passwordResetTokens).values(token as any).returning();
+    return newToken;
+  }
+
+  async getPasswordResetToken(tokenStr: string): Promise<PasswordResetToken | undefined> {
+    return await db!.query.passwordResetTokens.findFirst({
+      where: eq(passwordResetTokens.token, tokenStr),
+    });
+  }
+
+  async deletePasswordResetToken(tokenStr: string): Promise<boolean> {
+    const [deleted] = await db!.delete(passwordResetTokens).where(eq(passwordResetTokens.token, tokenStr)).returning();
+    return !!deleted;
+  }
 }
 
 export class MemStorage implements IStorage {
@@ -608,6 +632,7 @@ export class MemStorage implements IStorage {
   private dailyProgressReports = new Map<string, DailyProgressReport>();
   private supportTickets = new Map<string, SupportTicket>();
   private referrals = new Map<string, Referral>();
+  private passwordResetTokens = new Map<string, PasswordResetToken>();
 
   async getUser(id: string): Promise<User | undefined> {
     return this.users.get(id);
@@ -1293,6 +1318,27 @@ export class MemStorage implements IStorage {
 
   async deleteBookmark(userId: string, jobId: string): Promise<boolean> {
     return this.bookmarks.delete(`${userId}-${jobId}`);
+  }
+
+  async createPasswordResetToken(token: InsertPasswordResetToken): Promise<PasswordResetToken> {
+    const id = Date.now().toString();
+    const newToken: PasswordResetToken = {
+      id,
+      userId: token.userId,
+      token: token.token,
+      expiresAt: new Date(token.expiresAt as string | number | Date),
+      createdAt: new Date(),
+    };
+    this.passwordResetTokens.set(token.token, newToken);
+    return newToken;
+  }
+
+  async getPasswordResetToken(tokenStr: string): Promise<PasswordResetToken | undefined> {
+    return this.passwordResetTokens.get(tokenStr);
+  }
+
+  async deletePasswordResetToken(tokenStr: string): Promise<boolean> {
+    return this.passwordResetTokens.delete(tokenStr);
   }
 }
 
