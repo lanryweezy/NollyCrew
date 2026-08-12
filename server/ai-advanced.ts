@@ -91,7 +91,7 @@ export async function analyzeSentiment(scriptText: string): Promise<any> {
 
   try {
     const prompt = `Analyze the emotional arc of this script. 
-    Return a JSON array of objects representing scenes or story beats, where each object has:
+    Return a JSON object containing an "arc" array. Each item in the array should represent a scene or story beat with:
     { "beat": "Name of the beat/scene", "tension": 1-10, "primaryEmotion": "Emotion" }`;
 
     const response = await openai.chat.completions.create({
@@ -109,10 +109,26 @@ export async function analyzeSentiment(scriptText: string): Promise<any> {
       ]
     });
 
-    return JSON.parse(response.choices[0]?.message?.content || '{"arc": []}');
+    const content = response.choices[0]?.message?.content || '{"arc": []}';
+    let parsed;
+    try {
+      parsed = JSON.parse(content);
+    } catch {
+      console.warn('AI Quality: Failed to parse sentiment analysis JSON, falling back');
+      return { arc: [] };
+    }
+
+    // AI Quality: Validate expected output structure before use
+    if (!parsed || !Array.isArray(parsed.arc)) {
+      console.warn('AI Quality: Sentiment analysis returned unexpected schema, falling back');
+      return { arc: [] };
+    }
+
+    return parsed;
   } catch (error) {
     console.error('Sentiment analysis error:', error);
-    throw new Error('Failed to analyze sentiment');
+    // AI Quality: Graceful fallback instead of throwing error directly to the user
+    return { arc: [] };
   }
 }
 
@@ -178,9 +194,25 @@ export async function predictFatigue(scheduleDays: any[]): Promise<any> {
       ]
     });
 
-    return JSON.parse(response.choices[0]?.message?.content || '{"warnings": []}');
+    const content = response.choices[0]?.message?.content || '{"warnings": []}';
+    let parsed;
+    try {
+      parsed = JSON.parse(content);
+    } catch {
+      console.warn('AI Quality: Failed to parse fatigue prediction JSON, falling back');
+      return { warnings: [] };
+    }
+
+    // AI Quality: Validate expected output structure before use
+    if (!parsed || !Array.isArray(parsed.warnings)) {
+      console.warn('AI Quality: Fatigue prediction returned unexpected schema, falling back');
+      return { warnings: [] };
+    }
+
+    return parsed;
   } catch (error) {
     console.error('Fatigue prediction error:', error);
-    throw new Error('Failed to predict fatigue');
+    // AI Quality: Graceful fallback instead of throwing error directly to the user
+    return { warnings: [] };
   }
 }
