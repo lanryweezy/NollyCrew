@@ -6,6 +6,18 @@ const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 }) : null;
 
+// AI Quality: Helper to safely parse JSON from model responses, handling markdown wrappers
+function safeParseAIJSON<T>(content: string): T | null {
+  try {
+    // Strip markdown formatting if present (e.g., ```json\n...\n```)
+    const cleaned = content.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim();
+    return JSON.parse(cleaned) as T;
+  } catch (e) {
+    console.warn('AI Quality: Failed to parse JSON response', e);
+    return null;
+  }
+}
+
 export interface EnhancedScriptAnalysis {
   scenes: number;
   sceneList: Array<{
@@ -249,8 +261,11 @@ ${scriptText.substring(0, 8000)} // Limit to avoid token limits
       throw new Error('No response from OpenAI');
     }
 
-    // Parse JSON response
-    const analysis = JSON.parse(response);
+    // Parse JSON response safely
+    const analysis = safeParseAIJSON<any>(response);
+    if (!analysis) {
+      throw new Error('Failed to parse AI response as valid JSON');
+    }
     
     // Add analyzedAt timestamp
     analysis.analyzedAt = new Date().toISOString();
@@ -494,7 +509,12 @@ Optimize for:
       throw new Error('No response from OpenAI');
     }
 
-    return JSON.parse(response);
+    const optimization = safeParseAIJSON<EnhancedScheduleOptimization>(response);
+    if (!optimization) {
+      throw new Error('Failed to parse schedule optimization as valid JSON');
+    }
+
+    return optimization;
     
   } catch (error) {
     console.error('Enhanced schedule optimization error:', error);
@@ -602,7 +622,12 @@ Return JSON with:
       throw new Error('No response from OpenAI');
     }
 
-    return JSON.parse(response);
+    const marketingContent = safeParseAIJSON<any>(response);
+    if (!marketingContent) {
+      throw new Error('Failed to parse marketing content as valid JSON');
+    }
+
+    return marketingContent;
     
   } catch (error) {
     console.error('Enhanced marketing content generation error:', error);
