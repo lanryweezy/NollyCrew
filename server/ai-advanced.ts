@@ -112,7 +112,9 @@ export async function analyzeSentiment(scriptText: string): Promise<any> {
     const content = response.choices[0]?.message?.content || '{"arc": []}';
     let parsed;
     try {
-      parsed = JSON.parse(content);
+      // AI Quality: Strip markdown formatting if present to prevent silent parsing failures
+      const cleaned = content.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim();
+      parsed = JSON.parse(cleaned);
     } catch {
       console.warn('AI Quality: Failed to parse sentiment analysis JSON, falling back');
       return { arc: [] };
@@ -197,7 +199,9 @@ export async function predictFatigue(scheduleDays: any[]): Promise<any> {
     const content = response.choices[0]?.message?.content || '{"warnings": []}';
     let parsed;
     try {
-      parsed = JSON.parse(content);
+      // AI Quality: Strip markdown formatting if present to prevent silent parsing failures
+      const cleaned = content.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim();
+      parsed = JSON.parse(cleaned);
     } catch {
       console.warn('AI Quality: Failed to parse fatigue prediction JSON, falling back');
       return { warnings: [] };
