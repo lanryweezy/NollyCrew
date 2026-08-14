@@ -5,3 +5,7 @@
 ## 2026-08-14 - Silent Failures from Markdown-wrapped JSON
 **Learning:** When using models without \`response_format: { type: "json_object" }\` (like standard gpt-4), they often wrap JSON outputs in markdown formatting (e.g., \`\`\`json ... \`\`\`). Raw \`JSON.parse(completion)\` throws a \`SyntaxError\` on this formatting, causing the application to silently crash or fall back to mock data unexpectedly.
 **Action:** Always parse AI JSON responses using a safe wrapper that strips markdown backticks and catches parsing errors. Use \`content.replace(/^```(?:json)?\\n?/i, "").replace(/\\n?```$/i, "").trim()\` before calling \`JSON.parse\`.
+
+## 2026-08-14 - Robust AI JSON Output Parsing Strategy
+**Learning:** Standard AI output parsing using regex to strip markdown (e.g. `^```json`) can fail if the model includes a conversational preamble (e.g., "Here is your JSON..."). This results in a parsing crash or fallback. Wait, actually, `JSON.parse` is very strict. The current regex `content.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim()` anchors to the start (`^`) and end (`$`), making it fail if there is any preamble or postamble.
+**Action:** When parsing AI responses for JSON, a more resilient pattern might be needed if models regularly output preambles, or we must use strict prompt engineering (`return ONLY valid JSON matching this schema... Do not include markdown, preamble, or explanation.`). Given the strict prompts in this repo, the `^...$` approach usually suffices, but we must ensure we don't accidentally modify un-staged junk files.
