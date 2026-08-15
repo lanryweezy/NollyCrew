@@ -53,7 +53,8 @@ async function callOpenAIWithSchema<T>(options: {
     if (!response) throw new Error('No response from OpenAI');
 
     // AI Quality: Strip markdown formatting if present to prevent parsing crashes
-    const cleanedResponse = response.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim();
+    const match = response.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+    const cleanedResponse = match ? match[1] : (response.match(/\{[\s\S]*\}/)?.[0] || response.match(/\[[\s\S]*\]/)?.[0] || response.trim());
     const result = JSON.parse(cleanedResponse) as T;
     await setCache(cacheKey, result, options.ttl || 86400);
     return result;

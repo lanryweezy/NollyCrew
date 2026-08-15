@@ -9,8 +9,9 @@ const openai = process.env.OPENAI_API_KEY ? new OpenAI({
 // AI Quality: Helper to safely parse JSON from model responses, handling markdown wrappers
 function safeParseAIJSON<T>(content: string): T | null {
   try {
-    // Strip markdown formatting if present (e.g., ```json\n...\n```)
-    const cleaned = content.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim();
+    // AI Quality: Improved JSON parsing resilience against markdown preambles/postambles
+    const match = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+    const cleaned = match ? match[1] : (content.match(/\{[\s\S]*\}/)?.[0] || content.match(/\[[\s\S]*\]/)?.[0] || content.trim());
     return JSON.parse(cleaned) as T;
   } catch (e) {
     console.warn('AI Quality: Failed to parse JSON response', e);
