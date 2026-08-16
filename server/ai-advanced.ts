@@ -113,7 +113,8 @@ export async function analyzeSentiment(scriptText: string): Promise<any> {
     let parsed;
     try {
       // AI Quality: Strip markdown formatting if present to prevent silent parsing failures
-      const cleaned = content.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim();
+      const match = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+      const cleaned = match ? match[1] : (content.match(/\{[\s\S]*\}/)?.[0] || content.match(/\[[\s\S]*\]/)?.[0] || content.trim());
       parsed = JSON.parse(cleaned);
     } catch {
       console.warn('AI Quality: Failed to parse sentiment analysis JSON, falling back');
@@ -200,7 +201,8 @@ export async function predictFatigue(scheduleDays: any[]): Promise<any> {
     let parsed;
     try {
       // AI Quality: Strip markdown formatting if present to prevent silent parsing failures
-      const cleaned = content.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim();
+      const match = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+      const cleaned = match ? match[1] : (content.match(/\{[\s\S]*\}/)?.[0] || content.match(/\[[\s\S]*\]/)?.[0] || content.trim());
       parsed = JSON.parse(cleaned);
     } catch {
       console.warn('AI Quality: Failed to parse fatigue prediction JSON, falling back');
