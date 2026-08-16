@@ -47,7 +47,7 @@ async function callOpenAIWithSchema<T>(options: {
         }
       },
       temperature: 0.1,
-    });
+    }, { timeout: 60000 });
 
     const response = completion.choices[0]?.message?.content;
     if (!response) throw new Error('No response from OpenAI');
@@ -377,7 +377,7 @@ async function getEmbedding(text: string): Promise<number[]> {
   const response = await openai.embeddings.create({
     model: "text-embedding-3-small",
     input: text
-  });
+  }, { timeout: 15000 });
   
   return response.data[0].embedding;
 }
