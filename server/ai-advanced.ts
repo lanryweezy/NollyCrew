@@ -74,7 +74,7 @@ export async function translateScript(scriptText: string, targetLanguage: 'Yorub
         }
       ],
       temperature: 0.3
-    });
+    }, { timeout: 60000 });
 
     return response.choices[0]?.message?.content || "Translation failed.";
   } catch (error) {
@@ -107,7 +107,7 @@ export async function analyzeSentiment(scriptText: string): Promise<any> {
           content: prompt + "\n\nScript:\n" + scriptText.substring(0, 10000)
         }
       ]
-    });
+    }, { timeout: 60000 });
 
     const content = response.choices[0]?.message?.content || '{"arc": []}';
     let parsed;
@@ -159,7 +159,7 @@ export async function generateReleaseForm(talentName: string, roleName: string, 
           Include standard clauses for name & likeness rights in perpetuity, non-disclosure, and payment terms.`
         }
       ]
-    });
+    }, { timeout: 60000 });
 
     return response.choices[0]?.message?.content || "Contract generation failed.";
   } catch (error) {
@@ -195,7 +195,7 @@ export async function predictFatigue(scheduleDays: any[]): Promise<any> {
           content: prompt
         }
       ]
-    });
+    }, { timeout: 60000 });
 
     const content = response.choices[0]?.message?.content || '{"warnings": []}';
     let parsed;

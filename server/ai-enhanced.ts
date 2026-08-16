@@ -255,7 +255,7 @@ ${scriptText.substring(0, 8000)} // Limit to avoid token limits
       ],
       temperature: 0.1,
       max_tokens: 4000
-    });
+    }, { timeout: 120000 });
 
     const response = completion.choices[0]?.message?.content;
     if (!response) {
@@ -503,7 +503,7 @@ Optimize for:
       ],
       temperature: 0.1,
       max_tokens: 3000
-    });
+    }, { timeout: 90000 });
 
     const response = completion.choices[0]?.message?.content;
     if (!response) {
@@ -616,7 +616,7 @@ Return JSON with:
       ],
       temperature: 0.7,
       max_tokens: 2500
-    });
+    }, { timeout: 60000 });
 
     const response = completion.choices[0]?.message?.content;
     if (!response) {
@@ -660,7 +660,7 @@ async function getEmbedding(text: string): Promise<number[]> {
   const response = await openai.embeddings.create({
     model: "text-embedding-3-small",
     input: text
-  });
+  }, { timeout: 15000 });
   
   return response.data[0].embedding;
 }
