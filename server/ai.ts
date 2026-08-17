@@ -7,6 +7,32 @@ export const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 }) : null;
 
+// AI Quality: Add exponential backoff retry logic for transient API failures
+async function withAIRetry<T>(
+  operation: () => Promise<T>,
+  maxRetries: number = 3,
+  baseDelay: number = 1000
+): Promise<T> {
+  let attempt = 0;
+  while (true) {
+    try {
+      return await operation();
+    } catch (error: any) {
+      attempt++;
+      // Only retry on rate limits (429) or server errors (500+)
+      const isRetryable = !error?.status || error.status === 429 || error.status >= 500;
+      if (attempt > maxRetries || !isRetryable) {
+        throw error;
+      }
+      // Exponential backoff with jitter
+      const jitter = Math.random() * 200;
+      const delay = baseDelay * Math.pow(2, attempt - 1) + jitter;
+      console.warn(`AI Quality: API error ${error?.status || 'network'}, retrying attempt ${attempt}/${maxRetries} after ${Math.round(delay)}ms`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+}
+
 // Helper to generate cache keys
 function generateCacheKey(prefix: string, content: any): string {
   const hash = crypto.createHash('sha256').update(JSON.stringify(content)).digest('hex');
@@ -32,7 +58,7 @@ async function callOpenAIWithSchema<T>(options: {
   if (cached) return cached;
 
   try {
-    const completion = await openai.chat.completions.create({
+    const completion = await withAIRetry(() => openai.chat.completions.create({
       model: options.model || "gpt-4o-2024-08-06",
       messages: [
         { role: "system", content: options.systemPrompt },
@@ -47,7 +73,7 @@ async function callOpenAIWithSchema<T>(options: {
         }
       },
       temperature: 0.1,
-    }, { timeout: 60000 });
+    }, { timeout: 60000 }));
 
     const response = completion.choices[0]?.message?.content;
     if (!response) throw new Error('No response from OpenAI');
@@ -375,10 +401,10 @@ export async function generateMarketingContent(
 async function getEmbedding(text: string): Promise<number[]> {
   if (!openai) return [];
   
-  const response = await openai.embeddings.create({
+  const response = await withAIRetry(() => openai.embeddings.create({
     model: "text-embedding-3-small",
     input: text
-  }, { timeout: 15000 });
+  }, { timeout: 15000 }));
   
   return response.data[0].embedding;
 }
