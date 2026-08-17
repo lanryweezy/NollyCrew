@@ -15,3 +15,7 @@
 ## 2024-05-18 - Missing Timeout Guard for External AI Calls
 **Learning:** Unguarded AI API calls (like `openai.chat.completions.create` or `openai.embeddings.create`) can silently hang indefinitely when the model or network stalls. Without timeouts, the app doesn't hit our intended fallback mechanisms, causing poor UX and resource exhaustion.
 **Action:** Always use the OpenAI SDK's native `{ timeout: ms }` option on external AI API calls with correctly calibrated durations (e.g., 60-120s for completions, 15s for embeddings). This rejects the hanging connection to free up underlying server network resources and triggers the app's graceful fallback logic.
+
+## 2026-08-17 - Missing Retries for Batch Parallel AI Calls
+**Learning:** Unguarded parallel AI calls, especially `openai.embeddings.create` mapped over an array, are extremely vulnerable to rate limiting (HTTP 429). A single 429 error within a `Promise.all` fails the entire batch, immediately triggering the app's fallback logic (e.g. mock data generation) despite other network requests succeeding. This degrades feature quality silently.
+**Action:** Always wrap transient-prone AI API calls with a retry utility that utilizes exponential backoff with jitter. This is critical for both chat completions and embeddings, ensuring robust operation under load or network transient failures.
