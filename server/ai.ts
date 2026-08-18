@@ -8,7 +8,7 @@ export const openai = process.env.OPENAI_API_KEY ? new OpenAI({
 }) : null;
 
 // AI Quality: Add exponential backoff retry logic for transient API failures
-async function withAIRetry<T>(
+export async function withAIRetry<T>(
   operation: () => Promise<T>,
   maxRetries: number = 3,
   baseDelay: number = 1000
