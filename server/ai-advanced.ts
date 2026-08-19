@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { withAIRetry } from './ai.js';
 
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -61,7 +62,7 @@ export async function translateScript(scriptText: string, targetLanguage: 'Yorub
   }
 
   try {
-    const response = await openai.chat.completions.create({
+    const response = await withAIRetry(() => openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
@@ -74,7 +75,7 @@ export async function translateScript(scriptText: string, targetLanguage: 'Yorub
         }
       ],
       temperature: 0.3
-    }, { timeout: 60000 });
+    }, { timeout: 60000 }));
 
     return response.choices[0]?.message?.content || "Translation failed.";
   } catch (error) {
@@ -94,7 +95,7 @@ export async function analyzeSentiment(scriptText: string): Promise<any> {
     Return a JSON object containing an "arc" array. Each item in the array should represent a scene or story beat with:
     { "beat": "Name of the beat/scene", "tension": 1-10, "primaryEmotion": "Emotion" }`;
 
-    const response = await openai.chat.completions.create({
+    const response = await withAIRetry(() => openai.chat.completions.create({
       model: "gpt-4o",
       response_format: { type: "json_object" },
       messages: [
@@ -107,7 +108,7 @@ export async function analyzeSentiment(scriptText: string): Promise<any> {
           content: prompt + "\n\nScript:\n" + scriptText.substring(0, 10000)
         }
       ]
-    }, { timeout: 60000 });
+    }, { timeout: 60000 }));
 
     const content = response.choices[0]?.message?.content || '{"arc": []}';
     let parsed;
@@ -142,7 +143,7 @@ export async function generateReleaseForm(talentName: string, roleName: string, 
   }
 
   try {
-    const response = await openai.chat.completions.create({
+    const response = await withAIRetry(() => openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
@@ -159,7 +160,7 @@ export async function generateReleaseForm(talentName: string, roleName: string, 
           Include standard clauses for name & likeness rights in perpetuity, non-disclosure, and payment terms.`
         }
       ]
-    }, { timeout: 60000 });
+    }, { timeout: 60000 }));
 
     return response.choices[0]?.message?.content || "Contract generation failed.";
   } catch (error) {
@@ -182,7 +183,7 @@ export async function predictFatigue(scheduleDays: any[]): Promise<any> {
     
     Return a JSON object: { "warnings": [{ "day": number, "issue": "Description", "severity": "High|Medium|Low", "suggestion": "How to fix" }] }`;
 
-    const response = await openai.chat.completions.create({
+    const response = await withAIRetry(() => openai.chat.completions.create({
       model: "gpt-4o",
       response_format: { type: "json_object" },
       messages: [
@@ -195,7 +196,7 @@ export async function predictFatigue(scheduleDays: any[]): Promise<any> {
           content: prompt
         }
       ]
-    }, { timeout: 60000 });
+    }, { timeout: 60000 }));
 
     const content = response.choices[0]?.message?.content || '{"warnings": []}';
     let parsed;

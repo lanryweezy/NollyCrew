@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import pdf from 'pdf-parse';
+import { withAIRetry } from './ai.js';
 
 // Initialize OpenAI client
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({
@@ -241,7 +242,7 @@ Script text:
 ${scriptText.substring(0, 8000)} // Limit to avoid token limits
 `;
 
-    const completion = await openai.chat.completions.create({
+    const completion = await withAIRetry(() => openai.chat.completions.create({
       model: "gpt-4",
       messages: [
         {
@@ -255,7 +256,7 @@ ${scriptText.substring(0, 8000)} // Limit to avoid token limits
       ],
       temperature: 0.1,
       max_tokens: 4000
-    }, { timeout: 120000 });
+    }, { timeout: 120000 }));
 
     const response = completion.choices[0]?.message?.content;
     if (!response) {
@@ -489,7 +490,7 @@ Optimize for:
 8. Plan for weather dependencies
 `;
 
-    const completion = await openai.chat.completions.create({
+    const completion = await withAIRetry(() => openai.chat.completions.create({
       model: "gpt-4",
       messages: [
         {
@@ -503,7 +504,7 @@ Optimize for:
       ],
       temperature: 0.1,
       max_tokens: 3000
-    }, { timeout: 90000 });
+    }, { timeout: 90000 }));
 
     const response = completion.choices[0]?.message?.content;
     if (!response) {
@@ -602,7 +603,7 @@ Return JSON with:
 }
 `;
 
-    const completion = await openai.chat.completions.create({
+    const completion = await withAIRetry(() => openai.chat.completions.create({
       model: "gpt-4",
       messages: [
         {
@@ -616,7 +617,7 @@ Return JSON with:
       ],
       temperature: 0.7,
       max_tokens: 2500
-    }, { timeout: 60000 });
+    }, { timeout: 60000 }));
 
     const response = completion.choices[0]?.message?.content;
     if (!response) {
@@ -657,10 +658,10 @@ Return JSON with:
 async function getEmbedding(text: string): Promise<number[]> {
   if (!openai) return [];
   
-  const response = await openai.embeddings.create({
+  const response = await withAIRetry(() => openai.embeddings.create({
     model: "text-embedding-3-small",
     input: text
-  }, { timeout: 15000 });
+  }, { timeout: 15000 }));
   
   return response.data[0].embedding;
 }
