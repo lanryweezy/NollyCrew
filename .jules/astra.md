@@ -19,3 +19,7 @@
 ## 2026-08-17 - Missing Retries for Batch Parallel AI Calls
 **Learning:** Unguarded parallel AI calls, especially `openai.embeddings.create` mapped over an array, are extremely vulnerable to rate limiting (HTTP 429). A single 429 error within a `Promise.all` fails the entire batch, immediately triggering the app's fallback logic (e.g. mock data generation) despite other network requests succeeding. This degrades feature quality silently.
 **Action:** Always wrap transient-prone AI API calls with a retry utility that utilizes exponential backoff with jitter. This is critical for both chat completions and embeddings, ensuring robust operation under load or network transient failures.
+
+## 2026-08-23 - Graceful Fallback for Retried AI Calls
+**Learning:** While wrapping AI calls with a retry utility (e.g., `ai.withAIRetry()`) handles transient network issues and rate limits, it still throws an error if all retries are exhausted. If this error isn't caught directly on the Promise chain or handled gracefully within the `catch` block of the route, the server responds with a generic 500 error, providing a poor user experience.
+**Action:** When implementing timeouts and retries on AI calls, always append a `.catch()` directly on the Promise chain to provide a graceful fallback response (e.g., returning a mock object with a user-friendly error message embedded in the expected response structure) before the server's generic error handler is triggered.

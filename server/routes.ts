@@ -1212,7 +1212,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ reply: "I'm currently in 'script-reading' mode (OpenAI not configured). I'd love to help you once the connection is established!" });
       }
 
-      const completion = await openai.chat.completions.create({
+      // AI Quality: Add timeout and retry guard to prevent silent hangs, with graceful fallback
+      const completion = await ai.withAIRetry(() => openai!.chat.completions.create({
         model: "gpt-4o",
         messages: [
           {
@@ -1227,6 +1228,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ],
         temperature: 0.7,
         max_tokens: 1000
+      }, { timeout: 60000 })).catch(error => {
+        logger.error('Director chat AI fallback triggered', { error: (error as Error).message });
+        return { choices: [{ message: { content: "I'm experiencing some technical difficulties connecting to my creative network right now. Please try asking again in a moment!" } }] };
       });
 
       const reply = completion.choices[0]?.message?.content;
