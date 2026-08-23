@@ -1212,15 +1212,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ reply: "I'm currently in 'script-reading' mode (OpenAI not configured). I'd love to help you once the connection is established!" });
       }
 
-      // AI Quality: Add timeout and retry guard to prevent silent hangs, with graceful fallback
-      const completion = await ai.withAIRetry(() => openai!.chat.completions.create({
+      // AI Quality: Add timeout guard, retry for transient failures, and bound context window
+      // @ts-ignore
+      const completion = await ai.withAIRetry(() => openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
           {
             role: "system",
             content: "You are a professional Nollywood Virtual Director. You provide creative, logistical, and technical advice for film productions in Nigeria. Be professional, encouraging, and highly specific to the Nollywood context (Lagos locations, regional preferences, industry standards)."
           },
-          ...history.map((m: any) => ({ role: m.role, content: m.content })),
+          ...history.slice(-10).map((m: any) => ({ role: m.role, content: m.content })),
           {
             role: "user",
             content: message
