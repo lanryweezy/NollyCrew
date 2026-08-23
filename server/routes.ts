@@ -1229,7 +1229,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ],
         temperature: 0.7,
         max_tokens: 1000
-      }, { timeout: 60000 }));
+      }, { timeout: 60000 })).catch(error => {
+        logger.error('Director chat AI fallback triggered', { error: (error as Error).message });
+        return { choices: [{ message: { content: "I'm experiencing some technical difficulties connecting to my creative network right now. Please try asking again in a moment!" } }] };
+      });
 
       const reply = completion.choices[0]?.message?.content;
       res.json({ reply });

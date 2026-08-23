@@ -23,3 +23,6 @@
 ## 2026-08-20 - Unbounded Context Growth in Chat
 **Learning:** Sending the entire conversation history in every API call causes unbounded token growth, leading to excessive costs and eventual token limit errors (400 Bad Request).
 **Action:** Always bound the conversation history (e.g., `history.slice(-10)`) before sending it to the model to maintain context efficiency and prevent errors.
+## 2026-08-23 - Graceful Fallback for Retried AI Calls
+**Learning:** While wrapping AI calls with a retry utility (e.g., `ai.withAIRetry()`) handles transient network issues and rate limits, it still throws an error if all retries are exhausted. If this error isn't caught directly on the Promise chain or handled gracefully within the `catch` block of the route, the server responds with a generic 500 error, providing a poor user experience.
+**Action:** When implementing timeouts and retries on AI calls, always append a `.catch()` directly on the Promise chain to provide a graceful fallback response (e.g., returning a mock object with a user-friendly error message embedded in the expected response structure) before the server's generic error handler is triggered.
