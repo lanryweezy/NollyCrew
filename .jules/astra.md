@@ -22,3 +22,10 @@
 ## 2026-08-21 - Silent Failures from Missing Timeout on Director Chat AI Call
 **Learning:** Unguarded AI API calls (like `openai.chat.completions.create` in `/api/ai/director-chat`) can silently hang indefinitely when the model or network stalls. Without timeouts, the app doesn't hit our intended fallback mechanisms, causing poor UX and resource exhaustion. This can also lead to rate limits (HTTP 429).
 **Action:** Always wrap transient-prone AI API calls with the `withAIRetry` utility (which utilizes exponential backoff with jitter) and add the native `{ timeout: ms }` option in the request configuration object.
+
+## 2026-08-20 - Unbounded Context Growth in Chat
+**Learning:** Sending the entire conversation history in every API call causes unbounded token growth, leading to excessive costs and eventual token limit errors (400 Bad Request).
+**Action:** Always bound the conversation history (e.g., `history.slice(-10)`) before sending it to the model to maintain context efficiency and prevent errors.
+## 2026-08-23 - Graceful Fallback for Retried AI Calls
+**Learning:** While wrapping AI calls with a retry utility (e.g., `ai.withAIRetry()`) handles transient network issues and rate limits, it still throws an error if all retries are exhausted. If this error isn't caught directly on the Promise chain or handled gracefully within the `catch` block of the route, the server responds with a generic 500 error, providing a poor user experience.
+**Action:** When implementing timeouts and retries on AI calls, always append a `.catch()` directly on the Promise chain to provide a graceful fallback response (e.g., returning a mock object with a user-friendly error message embedded in the expected response structure) before the server's generic error handler is triggered.
