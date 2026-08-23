@@ -6,7 +6,7 @@ import { createServer, type Server } from "http";
 import bcrypt from "bcryptjs";
 import { storage } from "./storage.js";
 import { logAction } from "./utils/audit.js";
-import { openai } from "./ai.js";
+import { openai, withAIRetry } from "./ai.js";
 import { requirePermission } from "./middleware/rbac.js";
 import { 
   initializeTransaction, 
@@ -1212,9 +1212,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ reply: "I'm currently in 'script-reading' mode (OpenAI not configured). I'd love to help you once the connection is established!" });
       }
 
-      // AI Quality: Add timeout guard, retry for transient failures, and bound context window
-      // @ts-ignore
-      const completion = await ai.withAIRetry(() => openai.chat.completions.create({
+      // AI Quality: Add timeout guard and exponential backoff retry to prevent hanging connections on slow model response
+      // and silently failing due to transient network or 429 rate limit errors.
+      const completion = await withAIRetry(() => openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
           {

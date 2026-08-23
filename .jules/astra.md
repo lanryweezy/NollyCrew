@@ -19,6 +19,9 @@
 ## 2026-08-17 - Missing Retries for Batch Parallel AI Calls
 **Learning:** Unguarded parallel AI calls, especially `openai.embeddings.create` mapped over an array, are extremely vulnerable to rate limiting (HTTP 429). A single 429 error within a `Promise.all` fails the entire batch, immediately triggering the app's fallback logic (e.g. mock data generation) despite other network requests succeeding. This degrades feature quality silently.
 **Action:** Always wrap transient-prone AI API calls with a retry utility that utilizes exponential backoff with jitter. This is critical for both chat completions and embeddings, ensuring robust operation under load or network transient failures.
+## 2026-08-21 - Silent Failures from Missing Timeout on Director Chat AI Call
+**Learning:** Unguarded AI API calls (like `openai.chat.completions.create` in `/api/ai/director-chat`) can silently hang indefinitely when the model or network stalls. Without timeouts, the app doesn't hit our intended fallback mechanisms, causing poor UX and resource exhaustion. This can also lead to rate limits (HTTP 429).
+**Action:** Always wrap transient-prone AI API calls with the `withAIRetry` utility (which utilizes exponential backoff with jitter) and add the native `{ timeout: ms }` option in the request configuration object.
 
 ## 2026-08-20 - Unbounded Context Growth in Chat
 **Learning:** Sending the entire conversation history in every API call causes unbounded token growth, leading to excessive costs and eventual token limit errors (400 Bad Request).
