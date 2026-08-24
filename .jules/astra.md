@@ -29,3 +29,7 @@
 ## 2026-08-23 - Graceful Fallback for Retried AI Calls
 **Learning:** While wrapping AI calls with a retry utility (e.g., `ai.withAIRetry()`) handles transient network issues and rate limits, it still throws an error if all retries are exhausted. If this error isn't caught directly on the Promise chain or handled gracefully within the `catch` block of the route, the server responds with a generic 500 error, providing a poor user experience.
 **Action:** When implementing timeouts and retries on AI calls, always append a `.catch()` directly on the Promise chain to provide a graceful fallback response (e.g., returning a mock object with a user-friendly error message embedded in the expected response structure) before the server's generic error handler is triggered.
+
+## 2026-08-24 - Centralized AI JSON Parsing
+**Learning:** Having scattered, duplicated markdown-stripping and JSON-parsing logic across different AI modules (`ai.ts`, `ai-advanced.ts`, `ai-enhanced.ts`) leads to inconsistent parsing resilience. While some files correctly strip conversational preambles/postambles via regex matching before parsing, others may rely on brittle methods or raw `JSON.parse`. This inconsistency can cause silent failures or unexpected fallbacks when models return markdown-wrapped JSON.
+**Action:** Centralize resilient JSON parsing into a shared, robust utility function (e.g., `safeParseAIJSON`) and mandate its usage for parsing all model outputs that require structured JSON. This guarantees uniform quality and simplifies future parser improvements.

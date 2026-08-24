@@ -33,6 +33,19 @@ export async function withAIRetry<T>(
   }
 }
 
+// AI Quality: Helper to safely parse JSON from model responses, handling markdown wrappers
+export function safeParseAIJSON<T>(content: string): T | null {
+  try {
+    // AI Quality: Improved JSON parsing resilience against markdown preambles/postambles
+    const match = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+    const cleaned = match ? match[1] : (content.match(/\{[\s\S]*\}/)?.[0] || content.match(/\[[\s\S]*\]/)?.[0] || content.trim());
+    return JSON.parse(cleaned) as T;
+  } catch (e) {
+    console.warn('AI Quality: Failed to parse JSON response', e);
+    return null;
+  }
+}
+
 // Helper to generate cache keys
 function generateCacheKey(prefix: string, content: any): string {
   const hash = crypto.createHash('sha256').update(JSON.stringify(content)).digest('hex');
@@ -78,10 +91,12 @@ async function callOpenAIWithSchema<T>(options: {
     const response = completion.choices[0]?.message?.content;
     if (!response) throw new Error('No response from OpenAI');
 
-    // AI Quality: Strip markdown formatting if present to prevent parsing crashes
-    const match = response.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
-    const cleanedResponse = match ? match[1] : (response.match(/\{[\s\S]*\}/)?.[0] || response.match(/\[[\s\S]*\]/)?.[0] || response.trim());
-    const result = JSON.parse(cleanedResponse) as T;
+    // AI Quality: Safely parse JSON and handle markdown wrappers
+    const result = safeParseAIJSON<T>(response);
+    if (!result) {
+      throw new Error(`Failed to parse AI response as valid JSON for schema ${options.schemaName}`);
+    }
+
     await setCache(cacheKey, result, options.ttl || 86400);
     return result;
   } catch (error) {

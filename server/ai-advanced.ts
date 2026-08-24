@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import { withAIRetry } from './ai.js';
+import { withAIRetry, safeParseAIJSON } from './ai.js';
 
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -111,13 +111,9 @@ export async function analyzeSentiment(scriptText: string): Promise<any> {
     }, { timeout: 60000 }));
 
     const content = response.choices[0]?.message?.content || '{"arc": []}';
-    let parsed;
-    try {
-      // AI Quality: Strip markdown formatting if present to prevent silent parsing failures
-      const match = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
-      const cleaned = match ? match[1] : (content.match(/\{[\s\S]*\}/)?.[0] || content.match(/\[[\s\S]*\]/)?.[0] || content.trim());
-      parsed = JSON.parse(cleaned);
-    } catch {
+    const parsed = safeParseAIJSON<{ arc: any[] }>(content);
+
+    if (!parsed) {
       console.warn('AI Quality: Failed to parse sentiment analysis JSON, falling back');
       return { arc: [] };
     }
@@ -199,13 +195,9 @@ export async function predictFatigue(scheduleDays: any[]): Promise<any> {
     }, { timeout: 60000 }));
 
     const content = response.choices[0]?.message?.content || '{"warnings": []}';
-    let parsed;
-    try {
-      // AI Quality: Strip markdown formatting if present to prevent silent parsing failures
-      const match = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
-      const cleaned = match ? match[1] : (content.match(/\{[\s\S]*\}/)?.[0] || content.match(/\[[\s\S]*\]/)?.[0] || content.trim());
-      parsed = JSON.parse(cleaned);
-    } catch {
+    const parsed = safeParseAIJSON<{ warnings: any[] }>(content);
+
+    if (!parsed) {
       console.warn('AI Quality: Failed to parse fatigue prediction JSON, falling back');
       return { warnings: [] };
     }
