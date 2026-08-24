@@ -1,24 +1,11 @@
 import OpenAI from 'openai';
 import pdf from 'pdf-parse';
-import { withAIRetry } from './ai.js';
+import { withAIRetry, safeParseAIJSON } from './ai.js';
 
 // Initialize OpenAI client
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 }) : null;
-
-// AI Quality: Helper to safely parse JSON from model responses, handling markdown wrappers
-function safeParseAIJSON<T>(content: string): T | null {
-  try {
-    // AI Quality: Improved JSON parsing resilience against markdown preambles/postambles
-    const match = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
-    const cleaned = match ? match[1] : (content.match(/\{[\s\S]*\}/)?.[0] || content.match(/\[[\s\S]*\]/)?.[0] || content.trim());
-    return JSON.parse(cleaned) as T;
-  } catch (e) {
-    console.warn('AI Quality: Failed to parse JSON response', e);
-    return null;
-  }
-}
 
 export interface EnhancedScriptAnalysis {
   scenes: number;
