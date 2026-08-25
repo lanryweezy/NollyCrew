@@ -323,7 +323,10 @@ export async function generateEnhancedCastingRecommendations(
     const candidateEmbeddings = await Promise.all(
       candidates.map(candidate => {
         const candidateText = `${candidate.name} - ${candidate.bio} - Skills: ${candidate.skills.join(', ')} - Experience: ${candidate.experience}`;
-        return getEmbedding(candidateText);
+        return getEmbedding(candidateText).catch(e => {
+          console.warn(`AI Quality: Embedding failed for candidate ${candidate.name}`, e?.message || e);
+          return [];
+        });
       })
     );
 
