@@ -270,7 +270,11 @@ export async function generateCastingRecommendations(
     const candidateEmbeddings = await Promise.all(
       candidates.map(candidate => {
         const candidateText = `${candidate.name} - ${candidate.bio} - Skills: ${candidate.skills.join(', ')} - Experience: ${candidate.experience}`;
-        return getEmbedding(candidateText);
+        // AI Quality: Add .catch() to individual promises in batch parallel calls to prevent a single failure from rejecting the entire batch
+        return getEmbedding(candidateText).catch(error => {
+          console.warn(`AI Quality: Failed to get embedding for candidate ${candidate.id}`, error);
+          return [];
+        });
       })
     );
 

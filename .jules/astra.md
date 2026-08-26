@@ -33,3 +33,7 @@
 ## 2026-08-24 - Centralized AI JSON Parsing
 **Learning:** Having scattered, duplicated markdown-stripping and JSON-parsing logic across different AI modules (`ai.ts`, `ai-advanced.ts`, `ai-enhanced.ts`) leads to inconsistent parsing resilience. While some files correctly strip conversational preambles/postambles via regex matching before parsing, others may rely on brittle methods or raw `JSON.parse`. This inconsistency can cause silent failures or unexpected fallbacks when models return markdown-wrapped JSON.
 **Action:** Centralize resilient JSON parsing into a shared, robust utility function (e.g., `safeParseAIJSON`) and mandate its usage for parsing all model outputs that require structured JSON. This guarantees uniform quality and simplifies future parser improvements.
+
+## 2026-08-26 - Graceful Degradation in Batch AI Calls
+**Learning:** When using `Promise.all` with a `.map` to fetch multiple AI outputs in parallel (such as generating embeddings for an array of candidates), a single failed request (e.g., due to rate-limiting or network issues) will reject the entire batch if the internal promises are unguarded. This causes the entire feature to fail or fallback silently, even if most requests succeeded.
+**Action:** Always append a `.catch()` block directly to individual promises inside the mapping array before passing them to `Promise.all`. Resolve the error gracefully by logging the failure and returning a default value (like an empty array `[]`), ensuring the larger operation can continue for the successful requests.
