@@ -323,7 +323,8 @@ export async function generateEnhancedCastingRecommendations(
     const candidateEmbeddings = await Promise.all(
       candidates.map(candidate => {
         const candidateText = `${candidate.name} - ${candidate.bio} - Skills: ${candidate.skills.join(', ')} - Experience: ${candidate.experience}`;
-        return getEmbedding(candidateText);
+        // AI Quality: Append .catch() so a single failure (e.g. 429) doesn't reject the whole batch
+        return getEmbedding(candidateText).catch(() => []);
       })
     );
 
@@ -331,6 +332,11 @@ export async function generateEnhancedCastingRecommendations(
       const candidate = candidates[i];
       const candidateEmbedding = candidateEmbeddings[i];
       
+      if (candidateEmbedding.length === 0) {
+        console.warn(`AI Quality: Skipping candidate ${candidate.id} due to embedding API failure.`);
+        continue;
+      }
+
       // Calculate cosine similarity
       const similarity = cosineSimilarity(roleEmbedding, candidateEmbedding);
       
