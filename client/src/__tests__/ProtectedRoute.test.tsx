@@ -64,13 +64,14 @@ describe('ProtectedRoute', () => {
     // @ts-ignore
     delete window.location;
     // @ts-ignore
-    window.location = { ...originalLocation, href: '' };
+    window.location = { ...originalLocation, href: '' } as any;
 
     render(<ProtectedRoute>{mockChildren}</ProtectedRoute>);
     
     expect(window.location.href).toBe('/login');
 
     // Restore window.location
+    // @ts-ignore
     window.location = originalLocation;
   });
 

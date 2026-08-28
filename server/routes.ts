@@ -1214,7 +1214,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // AI Quality: Add timeout guard and exponential backoff retry to prevent hanging connections on slow model response
       // and silently failing due to transient network or 429 rate limit errors.
-      const completion = await withAIRetry(() => openai.chat.completions.create({
+      const completion = await withAIRetry(() => openai!.chat.completions.create({
         model: "gpt-4o",
         messages: [
           {
@@ -1229,7 +1229,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ],
         temperature: 0.7,
         max_tokens: 1000
-      }, { timeout: 60000 })).catch(error => {
+      }, { timeout: 60000 } as any)).catch(error => {
         logger.error('Director chat AI fallback triggered', { error: (error as Error).message });
         return { choices: [{ message: { content: "I'm experiencing some technical difficulties connecting to my creative network right now. Please try asking again in a moment!" } }] };
       });
