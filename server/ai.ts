@@ -270,7 +270,11 @@ export async function generateCastingRecommendations(
     const candidateEmbeddings = await Promise.all(
       candidates.map(candidate => {
         const candidateText = `${candidate.name} - ${candidate.bio} - Skills: ${candidate.skills.join(', ')} - Experience: ${candidate.experience}`;
-        return getEmbedding(candidateText);
+        // AI Quality: Add individual catch to prevent entire batch from failing due to rate limits
+        return getEmbedding(candidateText).catch((err) => {
+          console.warn(`AI Quality: Embedding failed for candidate ${candidate.id}`, err);
+          return [];
+        });
       })
     );
 
@@ -278,6 +282,12 @@ export async function generateCastingRecommendations(
       const candidate = candidates[i];
       const candidateEmbedding = candidateEmbeddings[i];
       
+      // AI Quality: Handle fallbacks from batch embedding failures gracefully
+      if (!candidateEmbedding || candidateEmbedding.length === 0) {
+        console.warn(`AI Quality: Skipping similarity calculation for candidate ${candidate.id} due to missing embedding`);
+        continue;
+      }
+
       // Calculate cosine similarity
       const similarity = cosineSimilarity(roleEmbedding, candidateEmbedding);
       
