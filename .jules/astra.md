@@ -33,3 +33,7 @@
 ## 2026-08-24 - Centralized AI JSON Parsing
 **Learning:** Having scattered, duplicated markdown-stripping and JSON-parsing logic across different AI modules (`ai.ts`, `ai-advanced.ts`, `ai-enhanced.ts`) leads to inconsistent parsing resilience. While some files correctly strip conversational preambles/postambles via regex matching before parsing, others may rely on brittle methods or raw `JSON.parse`. This inconsistency can cause silent failures or unexpected fallbacks when models return markdown-wrapped JSON.
 **Action:** Centralize resilient JSON parsing into a shared, robust utility function (e.g., `safeParseAIJSON`) and mandate its usage for parsing all model outputs that require structured JSON. This guarantees uniform quality and simplifies future parser improvements.
+
+## 2026-08-29 - Batch Parallel AI Calls Silence Partial Failures
+**Learning:** A single failure in a `Promise.all` batch of AI calls (like generating candidate embeddings) causes the entire batch to fail and fallback to mock data, losing all the successful API calls.
+**Action:** Append `.catch()` blocks resolving to a fallback (like `[]`) to individual promises mapped inside `Promise.all()`, and handle the fallback downstream by filtering them out (e.g., `if (embedding.length === 0) continue;`) to prevent silent data corruption.
