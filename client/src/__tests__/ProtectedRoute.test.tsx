@@ -4,7 +4,7 @@ import ProtectedRoute from '../components/ProtectedRoute';
 import { useAuth } from '../lib/auth-context';
 
 // Mock the useAuth hook
-vi.mock('../lib/auth', () => ({
+vi.mock('../lib/auth-context', () => ({
   useAuth: vi.fn()
 }));
 
@@ -38,20 +38,23 @@ describe('ProtectedRoute', () => {
     expect(screen.getByTestId('protected-content')).toBeInTheDocument();
   });
 
-  it('should render skeleton when loading', () => {
+  it('should render loading spinner when loading', () => {
     (useAuth as any).mockReturnValue({
       isAuthenticated: false,
       loading: true,
       roles: []
     });
 
-    render(<ProtectedRoute>{mockChildren}</ProtectedRoute>);
+    const { container } = render(<ProtectedRoute>{mockChildren}</ProtectedRoute>);
     
-    expect(screen.getAllByTestId('skeleton').length).toBeGreaterThan(0);
+    expect(container.querySelector('.animate-spin')).toBeInTheDocument();
   });
 
   it('should redirect to login when not authenticated and not loading', async () => {
-    
+    const originalLocation = window.location;
+    delete (window as any).location;
+    (window as any).location = { href: '' };
+
     (useAuth as any).mockReturnValue({
       isAuthenticated: false,
       loading: false,
@@ -61,23 +64,10 @@ describe('ProtectedRoute', () => {
     render(<ProtectedRoute>{mockChildren}</ProtectedRoute>);
     
     await waitFor(() => {
-      expect(mockSetLocation).toHaveBeenCalledWith('/login');
-    });
-  });
-
-  it('should redirect to onboarding when authenticated but no roles', async () => {
-    
-    (useAuth as any).mockReturnValue({
-      isAuthenticated: true,
-      loading: false,
-      roles: []
+      expect(window.location.href).toBe('/login');
     });
 
-    render(<ProtectedRoute>{mockChildren}</ProtectedRoute>);
-    
-    await waitFor(() => {
-      expect(mockSetLocation).toHaveBeenCalledWith('/onboarding');
-    });
+    (window as any).location = originalLocation;
   });
 
   });

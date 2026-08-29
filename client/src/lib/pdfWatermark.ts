@@ -24,6 +24,6 @@ export async function watermarkPdf(pdfUrl: string, watermarkText: string): Promi
   }
 
   const pdfBytes = await pdfDoc.save();
-  const blob = new Blob([pdfBytes], { type: "application/pdf" });
+  const blob = new Blob([pdfBytes as any], { type: "application/pdf" });
   return URL.createObjectURL(blob);
 }
