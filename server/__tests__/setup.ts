@@ -139,6 +139,15 @@ vi.mock('../middleware/auth.js', () => {
       };
       next();
     }),
+    authenticateToken: vi.fn((req, res, next) => {
+      req.user = {
+        id: '123',
+        email: 'test@example.com',
+        firstName: 'Test',
+        lastName: 'User'
+      };
+      next();
+    }),
   };
 });
 

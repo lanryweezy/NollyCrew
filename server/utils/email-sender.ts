@@ -51,7 +51,7 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
   if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
     try {
       // Dynamic import for nodemailer (optional dependency)
-      const nodemailer = await import('nodemailer' as string).catch(() => null);
+      const nodemailer = await eval('import("nodemailer")').catch(() => null);
       if (nodemailer) {
         const transporter = nodemailer.default.createTransport({
           host: SMTP_HOST,

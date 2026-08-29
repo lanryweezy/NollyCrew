@@ -8,7 +8,8 @@ const openai = process.env.OPENAI_API_KEY ? new OpenAI({
 let GoogleGenerativeAI: any = null;
 let genAI: any = null;
 try {
-  const mod = await import(/* @vite-ignore */ '@google' + '/generative-ai');
+  // Use eval to completely hide the import from static analyzers like Vite
+  const mod = await eval('import("@google/generative-ai")');
   GoogleGenerativeAI = mod.GoogleGenerativeAI;
   genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
 } catch {}
