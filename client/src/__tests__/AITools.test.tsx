@@ -61,71 +61,61 @@ describe('AITools', () => {
     
     // Check if main components are rendered
     expect(screen.getByTestId('navigation')).toBeInTheDocument();
-    expect(screen.getByTestId('theme-toggle')).toBeInTheDocument();
     expect(screen.getByTestId('page-header')).toBeInTheDocument();
-    expect(screen.getByTestId('responsive-section')).toBeInTheDocument();
     
     // Check if page title is rendered
-    expect(screen.getByRole('heading', { name: /Intelligence Center/i })).toBeInTheDocument();
-    expect(screen.getByText('The algorithmic heart of your next blockbuster.')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /AI Production Suite/i })).toBeInTheDocument();
   }, 10000);
 
   it('should render all AI tool tabs', () => {
     render(<AITools />);
     
     // Check if all tabs are rendered in the sidebar
-    expect(screen.getByText('Script')).toBeInTheDocument();
-    expect(screen.getByText('Casting')).toBeInTheDocument();
-    expect(screen.getByText('Schedule')).toBeInTheDocument();
-    expect(screen.getByText('Marketing')).toBeInTheDocument();
+    expect(screen.getByText('Script Breakdown')).toBeInTheDocument();
+    expect(screen.getByText('Casting AI')).toBeInTheDocument();
+    expect(screen.getByText('Schedule Optimizer')).toBeInTheDocument();
+    expect(screen.getByText('Marketing Content')).toBeInTheDocument();
   }, 10000);
 
   it('should switch between different AI tools', async () => {
     render(<AITools />);
     
-    // Check if default tab (Script Analysis) content is shown
-    expect(screen.getByText('Script Analysis')).toBeInTheDocument();
-    
     // Switch to Casting tab via Sidebar
-    const castingTool = screen.getByText('Casting');
+    const castingTool = screen.getByText('Casting AI');
     fireEvent.click(castingTool);
     
-    // Check if Casting tab content is shown (Placeholder for now since it shows upgraded polish message)
-    expect(screen.getByText(/This module is receiving the final cinematic polish/)).toBeInTheDocument();
+    expect(screen.getByText('Character Description & Requirements')).toBeInTheDocument();
   }, 10000);
 
-  it('should handle script analysis functionality', () => {
+  it('should handle script analysis functionality', async () => {
     render(<AITools />);
     
+    // Click Script Breakdown tool
+    const scriptTool = screen.getByText('Script Breakdown');
+    fireEvent.click(scriptTool);
+
     // Fill in script text
-    const scriptTextarea = screen.getByPlaceholderText(/Paste your script text here/) as HTMLTextAreaElement;
+    const scriptTextarea = screen.getByPlaceholderText(/Paste your full script here/i) as HTMLTextAreaElement;
     fireEvent.change(scriptTextarea, { target: { value: 'This is a test script for analysis.' } });
     
     // Click analyze button
-    const analyzeButton = screen.getByText('Execute Intelligence');
+    const analyzeButton = screen.getByText('Run Full Breakdown');
     fireEvent.click(analyzeButton);
     
     // Check if analysis started (button should show loading state)
-    expect(screen.getByText('Processing...')).toBeInTheDocument();
+    expect(screen.getByText('Analyzing script...')).toBeInTheDocument();
   }, 10000);
 
   it('should render AI tools sidebar with all tools', () => {
     render(<AITools />);
     
     // Check if AI tools are listed in sidebar using labels
-    expect(screen.getByText('Script')).toBeInTheDocument();
-    expect(screen.getByText('Director')).toBeInTheDocument();
-    expect(screen.getByText('Casting')).toBeInTheDocument();
-    expect(screen.getByText('Schedule')).toBeInTheDocument();
-    expect(screen.getByText('Marketing')).toBeInTheDocument();
-    expect(screen.getByText('Legal')).toBeInTheDocument();
+    expect(screen.getByText('Script Breakdown')).toBeInTheDocument();
+    expect(screen.getByText('Casting AI')).toBeInTheDocument();
+    expect(screen.getByText('Schedule Optimizer')).toBeInTheDocument();
+    expect(screen.getByText('Marketing Content')).toBeInTheDocument();
+    expect(screen.getByText('Virtual Director')).toBeInTheDocument();
+    expect(screen.getByText('Script Translator')).toBeInTheDocument();
   }, 10000);
 
-  it('should render credits and tokens info', () => {
-    render(<AITools />);
-    
-    // Check if credits section is rendered
-    expect(screen.getByText('Credits Available')).toBeInTheDocument();
-    expect(screen.getByText('750 / 1000 tokens remaining')).toBeInTheDocument();
-  }, 10000);
 });

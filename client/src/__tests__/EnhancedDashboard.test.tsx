@@ -9,7 +9,7 @@ vi.mock('wouter', () => ({
   useLocation: () => [null, mockSetLocation]
 }));
 
-vi.mock('../lib/auth', () => ({
+vi.mock('../lib/auth-context', () => ({
   useAuth: () => ({
     user: {
       id: 'user-1',
