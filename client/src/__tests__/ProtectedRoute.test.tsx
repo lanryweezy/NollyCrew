@@ -53,8 +53,10 @@ describe('ProtectedRoute', () => {
   it('should redirect to login when not authenticated and not loading', async () => {
     // Mock window.location
     const originalLocation = window.location;
-    delete (window as any).location;
-    (window as any).location = { href: '' } as any;
+    Object.defineProperty(window, 'location', {
+      value: { href: '' },
+      writable: true
+    });
 
     (useAuth as any).mockReturnValue({
       isAuthenticated: false,
@@ -67,7 +69,10 @@ describe('ProtectedRoute', () => {
     expect(window.location.href).toBe('/login');
 
     // Restore window.location
-    window.location = originalLocation;
+    Object.defineProperty(window, 'location', {
+      value: originalLocation,
+      writable: true
+    });
   });
 
   });
