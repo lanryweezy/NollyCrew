@@ -323,7 +323,11 @@ export async function generateEnhancedCastingRecommendations(
     const candidateEmbeddings = await Promise.all(
       candidates.map(candidate => {
         const candidateText = `${candidate.name} - ${candidate.bio} - Skills: ${candidate.skills.join(', ')} - Experience: ${candidate.experience}`;
-        return getEmbedding(candidateText);
+        // AI Quality: Add .catch() to prevent a single embedding failure from failing the entire batch (e.g., due to rate limits)
+        return getEmbedding(candidateText).catch(error => {
+          console.warn(`AI Quality: Failed to get embedding for candidate ${candidate.id}`, error);
+          return []; // Return empty array as fallback
+        });
       })
     );
 
@@ -331,6 +335,11 @@ export async function generateEnhancedCastingRecommendations(
       const candidate = candidates[i];
       const candidateEmbedding = candidateEmbeddings[i];
       
+      // AI Quality: Explicitly handle fallback empty embeddings to avoid silent math failures
+      if (!candidateEmbedding || candidateEmbedding.length === 0) {
+        continue;
+      }
+
       // Calculate cosine similarity
       const similarity = cosineSimilarity(roleEmbedding, candidateEmbedding);
       
