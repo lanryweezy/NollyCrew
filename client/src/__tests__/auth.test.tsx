@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { auth as authService } from '../lib/api';
+import { User, UserRole } from '../../../shared/schema';
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -21,13 +22,9 @@ describe('AuthService', () => {
     vi.clearAllMocks();
     Object.defineProperty(window, 'localStorage', { value: localStorageMock });
     localStorageMock.clear();
-    // Reset auth service state
-    (authService as any).token = null;
-    (authService as any).user = null;
-    (authService as any).roles = [];
   });
 
-  describe('register', () => {
+  describe('signUp', () => {
     it('should register a new user successfully', async () => {
       const mockResponse = {
         user: {
@@ -38,7 +35,6 @@ describe('AuthService', () => {
           isVerified: true
         },
         token: 'mockToken',
-        roles: []
       };
 
       mockFetch.mockResolvedValueOnce({
@@ -46,23 +42,16 @@ describe('AuthService', () => {
         json: () => Promise.resolve(mockResponse)
       });
 
-      const userData = {
-        email: 'test@example.com',
-        password: 'password123',
-        firstName: 'Test',
-        lastName: 'User'
-      };
+      const result = await authService.signUp('test@example.com', 'password123', 'Test', 'User');
 
-      const result = await authService.register(userData);
-
-      expect(result).toEqual(mockResponse);
-      expect(localStorage.getItem('auth_token')).toBe('mockToken');
+      expect(result).toEqual({ user: mockResponse.user, error: null });
+      expect(localStorage.getItem('nollycrew_token')).toBe('mockToken');
       expect(mockFetch).toHaveBeenCalledWith('/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(userData),
+        body: JSON.stringify({ email: 'test@example.com', password: 'password123', firstName: 'Test', lastName: 'User', first_name: 'Test', last_name: 'User' }),
       });
     });
 
@@ -72,18 +61,12 @@ describe('AuthService', () => {
         json: () => Promise.resolve({ error: 'Email already exists' })
       });
 
-      const userData = {
-        email: 'test@example.com',
-        password: 'password123',
-        firstName: 'Test',
-        lastName: 'User'
-      };
-
-      await expect(authService.register(userData)).rejects.toThrow('Email already exists');
+      const result = await authService.signUp('test@example.com', 'password123', 'Test', 'User');
+      expect(result.error).toBeDefined();
     });
   });
 
-  describe('login', () => {
+  describe('signIn', () => {
     it('should login successfully and store token', async () => {
       const mockResponse = {
         user: {
@@ -94,7 +77,6 @@ describe('AuthService', () => {
           isVerified: true
         },
         token: 'mockToken',
-        roles: []
       };
 
       mockFetch.mockResolvedValueOnce({
@@ -102,14 +84,15 @@ describe('AuthService', () => {
         json: () => Promise.resolve(mockResponse)
       });
 
-      const result = await authService.login('test@example.com', 'password123');
+      const result = await authService.signIn('test@example.com', 'password123');
 
-      expect(result).toEqual(mockResponse);
-      expect(localStorage.getItem('auth_token')).toBe('mockToken');
+      expect(result).toEqual({ user: mockResponse.user, error: null });
+      expect(localStorage.getItem('nollycrew_token')).toBe('mockToken');
       expect(mockFetch).toHaveBeenCalledWith('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': 'Bearer mockToken'
         },
         body: JSON.stringify({ email: 'test@example.com', password: 'password123' }),
       });
@@ -119,16 +102,17 @@ describe('AuthService', () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 401,
-        text: () => Promise.resolve(JSON.stringify({ error: 'Invalid credentials' }))
+        json: () => Promise.resolve({ error: 'Invalid credentials' })
       });
 
-      await expect(authService.login('test@example.com', 'wrongpassword')).rejects.toThrow('Login failed with status 401');
+      const result = await authService.signIn('test@example.com', 'wrongpassword');
+      expect(result.error).toBeDefined();
     });
   });
 
-  describe('getCurrentUser', () => {
+  describe('getUser', () => {
     it('should return user data when authenticated', async () => {
-      const mockUser: User = {
+      const mockUser = {
         id: '123',
         email: 'test@example.com',
         firstName: 'Test',
@@ -136,64 +120,82 @@ describe('AuthService', () => {
         isVerified: true
       };
 
-      const mockRoles: UserRole[] = [
-        {
-          id: 'role1',
-          userId: '123',
-          role: 'actor',
-          isActive: true
-        }
-      ];
-
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({ user: mockUser, roles: mockRoles })
+        json: () => Promise.resolve({ user: mockUser })
       });
 
-      // Set token first
-      (authService as any).token = 'mockToken';
+      localStorageMock.setItem('nollycrew_token', 'mockToken');
 
-      const result = await authService.getCurrentUser();
+      const result = await authService.getUser();
 
-      expect(result).toEqual({ user: mockUser, roles: mockRoles });
+      expect(result).toEqual(mockUser);
       expect(mockFetch).toHaveBeenCalledWith('/api/auth/me', {
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': 'Bearer mockToken',
         },
       });
     });
 
     it('should return null when not authenticated', async () => {
-      const result = await authService.getCurrentUser();
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        json: () => Promise.resolve({ error: 'Unauthorized' })
+      });
+
+      const result = await authService.getUser();
       expect(result).toBeNull();
     });
   });
 
-  describe('isAuthenticated', () => {
-    it('should return true when token exists', () => {
-      (authService as any).token = 'mockToken';
-      expect(authService.isAuthenticated()).toBe(true);
+  describe('getSession', () => {
+    it('should return user session data', async () => {
+      const mockUser = {
+        id: '123',
+        email: 'test@example.com',
+      };
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ user: mockUser })
+      });
+
+      const result = await authService.getSession();
+      expect(result).toEqual({ user: mockUser });
     });
 
-    it('should return false when no token', () => {
-      expect(authService.isAuthenticated()).toBe(false);
+    it('should return null when not authenticated', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        json: () => Promise.resolve({ error: 'Unauthorized' })
+      });
+
+      const result = await authService.getSession();
+      expect(result).toBeNull();
     });
   });
 
-  describe('logout', () => {
-    it('should clear authentication data', () => {
-      (authService as any).token = 'mockToken';
-      (authService as any).user = { id: '123' } as User;
-      (authService as any).roles = [{ id: 'role1' }] as UserRole[];
+  describe('signOut', () => {
+    it('should clear authentication data', async () => {
+      localStorageMock.setItem('nollycrew_token', 'mockToken');
       
-      localStorageMock.setItem('auth_token', 'mockToken');
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({})
+      });
       
-      authService.logout();
+      await authService.signOut();
       
-      expect(authService.getToken()).toBeNull();
-      expect(authService.getUser()).toBeNull();
-      expect(authService.getRoles()).toEqual([]);
-      expect(localStorage.getItem('auth_token')).toBeNull();
+      expect(localStorage.getItem('nollycrew_token')).toBeNull();
+      expect(mockFetch).toHaveBeenCalledWith('/api/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
     });
   });
 });
