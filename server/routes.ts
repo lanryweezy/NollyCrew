@@ -1214,7 +1214,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // AI Quality: Add timeout guard and exponential backoff retry to prevent hanging connections on slow model response
       // and silently failing due to transient network or 429 rate limit errors.
-      const completion = await withAIRetry(() => openai.chat.completions.create({
+      const completion = await withAIRetry(() => openai!.chat.completions.create({
         model: "gpt-4o",
         messages: [
           {

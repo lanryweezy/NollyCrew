@@ -4,7 +4,7 @@ import ProtectedRoute from '../components/ProtectedRoute';
 import { useAuth } from '../lib/auth-context';
 
 // Mock the useAuth hook
-vi.mock('../lib/auth', () => ({
+vi.mock('../lib/auth-context', () => ({
   useAuth: vi.fn()
 }));
 

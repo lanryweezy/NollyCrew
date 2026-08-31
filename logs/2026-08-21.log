@@ -1,8 +1,0 @@
-{"timestamp":"2026-08-21T03:21:43.756Z","level":"info","message":"Using DbStorage (PostgreSQL storage)"}
-{"timestamp":"2026-08-21T03:21:44.199Z","level":"warn","message":"Missing environment variables in production","meta":{"missingEnvVars":["PAYSTACK_SECRET_KEY","PAYSTACK_PUBLIC_KEY"]}}
-{"timestamp":"2026-08-21T03:21:44.213Z","level":"info","message":"WebSocket server initialized"}
-{"timestamp":"2026-08-21T03:21:44.220Z","level":"info","message":"Server started on port 3001"}
-{"timestamp":"2026-08-21T03:28:19.947Z","level":"info","message":"Using DbStorage (PostgreSQL storage)"}
-{"timestamp":"2026-08-21T03:28:20.386Z","level":"warn","message":"Missing environment variables in production","meta":{"missingEnvVars":["PAYSTACK_SECRET_KEY","PAYSTACK_PUBLIC_KEY"]}}
-{"timestamp":"2026-08-21T03:28:20.400Z","level":"info","message":"WebSocket server initialized"}
-{"timestamp":"2026-08-21T03:28:20.407Z","level":"info","message":"Server started on port 3001"}
