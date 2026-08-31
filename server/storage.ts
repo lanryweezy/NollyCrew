@@ -177,50 +177,50 @@ export interface IStorage {
 
 export class DbStorage implements IStorage {
   async getUser(id: string): Promise<User | undefined> {
-    return db.query.users.findFirst({ where: eq(users.id, id) });
+    return db!.query.users.findFirst({ where: eq(users.id, id) });
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    return db.query.users.findFirst({ where: eq(users.email, email) });
+    return db!.query.users.findFirst({ where: eq(users.email, email) });
   }
 
   async createUser(user: Omit<InsertUser, 'password'> & { passwordHash: string }): Promise<User> {
-    const result = await db.insert(users).values(user as any).returning();
+    const result = await db!.insert(users).values(user as any).returning();
     return result[0];
   }
 
   async updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined> {
-    const result = await db.update(users).set(updates as any).where(eq(users.id, id)).returning();
+    const result = await db!.update(users).set(updates as any).where(eq(users.id, id)).returning();
     return result[0];
   }
 
   async getUserRoles(userId: string): Promise<UserRole[]> {
-    return db.query.userRoles.findMany({ where: eq(userRoles.userId, userId) });
+    return db!.query.userRoles.findMany({ where: eq(userRoles.userId, userId) });
   }
 
   async createUserRole(role: InsertUserRole): Promise<UserRole> {
-    const result = await db.insert(userRoles).values(role as any).returning();
+    const result = await db!.insert(userRoles).values(role as any).returning();
     return result[0];
   }
 
   async updateUserRole(id: string, updates: Partial<InsertUserRole>): Promise<UserRole | undefined> {
-    const result = await db.update(userRoles).set(updates as any).where(eq(userRoles.id, id)).returning();
+    const result = await db!.update(userRoles).set(updates as any).where(eq(userRoles.id, id)).returning();
     return result[0];
   }
 
   async deleteUserRole(id: string): Promise<boolean> {
-    const result = await db.delete(userRoles).where(eq(userRoles.id, id));
+    const result = await db!.delete(userRoles).where(eq(userRoles.id, id));
     return (result.rowCount ?? 0) > 0;
   }
 
   async getProject(id: string): Promise<Project | undefined> {
-    return db.query.projects.findFirst({ where: eq(projects.id, id) });
+    return db!.query.projects.findFirst({ where: eq(projects.id, id) });
   }
 
   async getProjects(filters?: { status?: string; createdById?: string; limit?: number }): Promise<Project[]> {
     const { status, createdById, limit } = filters || {};
     // @ts-ignore
-    const rows: Project[] = await db.query.projects.findMany({
+    const rows: Project[] = await db!.query.projects.findMany({
       where: (p: any, { and, eq }: any) => and(
         status ? eq(p.status, status) : undefined,
         createdById ? eq(p.createdById, createdById) : undefined,
@@ -231,51 +231,51 @@ export class DbStorage implements IStorage {
   }
 
   async createProject(project: InsertProject): Promise<Project> {
-    const result = await db.insert(projects).values(project as any).returning();
+    const result = await db!.insert(projects).values(project as any).returning();
     return result[0];
   }
 
   async updateProject(id: string, updates: Partial<InsertProject>): Promise<Project | undefined> {
-    const result = await db.update(projects).set(updates as any).where(eq(projects.id, id)).returning();
+    const result = await db!.update(projects).set(updates as any).where(eq(projects.id, id)).returning();
     return result[0];
   }
 
   async deleteProject(id: string): Promise<boolean> {
-    const result = await db.delete(projects).where(eq(projects.id, id));
+    const result = await db!.delete(projects).where(eq(projects.id, id));
     return (result.rowCount ?? 0) > 0;
   }
 
   async getProjectMember(id: string): Promise<ProjectMember | undefined> {
-    return db.query.projectMembers.findFirst({ where: eq(projectMembers.id, id) });
+    return db!.query.projectMembers.findFirst({ where: eq(projectMembers.id, id) });
   }
 
   async getProjectMembers(projectId: string): Promise<ProjectMember[]> {
-    return db.query.projectMembers.findMany({ where: eq(projectMembers.projectId, projectId) });
+    return db!.query.projectMembers.findMany({ where: eq(projectMembers.projectId, projectId) });
   }
 
   async createProjectMember(member: InsertProjectMember): Promise<ProjectMember> {
-    const result = await db.insert(projectMembers).values(member as any).returning();
+    const result = await db!.insert(projectMembers).values(member as any).returning();
     return result[0];
   }
 
   async updateProjectMember(id: string, updates: Partial<InsertProjectMember>): Promise<ProjectMember | undefined> {
-    const result = await db.update(projectMembers).set(updates as any).where(eq(projectMembers.id, id)).returning();
+    const result = await db!.update(projectMembers).set(updates as any).where(eq(projectMembers.id, id)).returning();
     return result[0];
   }
 
   async deleteProjectMember(id: string): Promise<boolean> {
-    const result = await db.delete(projectMembers).where(eq(projectMembers.id, id));
+    const result = await db!.delete(projectMembers).where(eq(projectMembers.id, id));
     return (result.rowCount ?? 0) > 0;
   }
 
   async getJob(id: string): Promise<Job | undefined> {
-    return db.query.jobs.findFirst({ where: eq(jobs.id, id) });
+    return db!.query.jobs.findFirst({ where: eq(jobs.id, id) });
   }
 
   async getJobs(filters?: { type?: string; location?: string; isActive?: boolean; limit?: number }): Promise<Job[]> {
     const { type, location, isActive, limit } = filters || {};
     // @ts-ignore
-    const rows: Job[] = await db.query.jobs.findMany({
+    const rows: Job[] = await db!.query.jobs.findMany({
       where: (j: any, { and, eq }: any) => and(
         type ? eq(j.type, type) : undefined,
         typeof isActive === 'boolean' ? eq(j.isActive, isActive) : undefined,
@@ -287,43 +287,43 @@ export class DbStorage implements IStorage {
   }
 
   async createJob(job: InsertJob): Promise<Job> {
-    const result = await db.insert(jobs).values(job as any).returning();
+    const result = await db!.insert(jobs).values(job as any).returning();
     return result[0];
   }
 
   async updateJob(id: string, updates: Partial<InsertJob>): Promise<Job | undefined> {
-    const result = await db.update(jobs).set(updates as any).where(eq(jobs.id, id)).returning();
+    const result = await db!.update(jobs).set(updates as any).where(eq(jobs.id, id)).returning();
     return result[0];
   }
 
   async deleteJob(id: string): Promise<boolean> {
-    const result = await db.delete(jobs).where(eq(jobs.id, id));
+    const result = await db!.delete(jobs).where(eq(jobs.id, id));
     return (result.rowCount ?? 0) > 0;
   }
 
   async getJobApplication(id: string): Promise<JobApplication | undefined> {
-    return db.query.jobApplications.findFirst({ where: eq(jobApplications.id, id) });
+    return db!.query.jobApplications.findFirst({ where: eq(jobApplications.id, id) });
   }
 
   async getJobApplications(filters?: { jobId?: string; applicantId?: string; status?: string }): Promise<JobApplication[]> {
     // @ts-ignore
-    return db.query.jobApplications.findMany({ where: filters });
+    return db!.query.jobApplications.findMany({ where: filters });
   }
 
   async createJobApplication(application: InsertJobApplication): Promise<JobApplication> {
-    const result = await db.insert(jobApplications).values(application as any).returning();
+    const result = await db!.insert(jobApplications).values(application as any).returning();
     return result[0];
   }
 
   async updateJobApplication(id: string, updates: Partial<InsertJobApplication>): Promise<JobApplication | undefined> {
-    const result = await db.update(jobApplications).set(updates as any).where(eq(jobApplications.id, id)).returning();
+    const result = await db!.update(jobApplications).set(updates as any).where(eq(jobApplications.id, id)).returning();
     return result[0];
   }
 
   async getMessages(userId: string, otherUserId?: string): Promise<Message[]> {
     if (otherUserId) {
       // @ts-ignore
-      return db.query.messages.findMany({
+      return db!.query.messages.findMany({
         where: (m: any, { and, or, eq }: any) => and(
           or(
             and(eq(m.senderId, userId), eq(m.recipientId, otherUserId)),
@@ -334,7 +334,7 @@ export class DbStorage implements IStorage {
       });
     }
     // @ts-ignore
-    return db.query.messages.findMany({
+    return db!.query.messages.findMany({
       where: (m: any, { or, eq }: any) => or(eq(m.senderId, userId), eq(m.recipientId, userId)),
       orderBy: (m: any, { asc }: any) => [asc(m.sentAt)],
     });
@@ -343,7 +343,7 @@ export class DbStorage implements IStorage {
   async searchTalent(filters: { role?: string; location?: string; skills?: string[]; limit?: number }): Promise<UserRole[]> {
     const { role, location, skills, limit } = filters;
     // @ts-ignore
-    let rows: UserRole[] = await db.query.userRoles.findMany({
+    let rows: UserRole[] = await db!.query.userRoles.findMany({
       where: (ur: any, { and, eq }: any) => and(
         eq(ur.isActive, true),
         role ? eq(ur.role, role) : undefined,
@@ -353,7 +353,7 @@ export class DbStorage implements IStorage {
     if (location) {
       const userIds = Array.from(new Set(rows.map(r => r.userId)));
       // @ts-ignore
-      const userRows: User[] = await db.query.users.findMany({
+      const userRows: User[] = await db!.query.users.findMany({
         where: (u: any, { inArray }: any) => inArray(u.id, userIds),
       });
       const usersById = new Map<string, User>(userRows.map(u => [u.id, u]));
@@ -369,28 +369,28 @@ export class DbStorage implements IStorage {
   }
 
   async createMessage(message: InsertMessage): Promise<Message> {
-    const result = await db.insert(messages).values(message as any).returning();
+    const result = await db!.insert(messages).values(message as any).returning();
     return result[0];
   }
 
   async markMessageAsRead(id: string): Promise<boolean> {
-    const result = await db.update(messages).set({ isRead: true } as any).where(eq(messages.id, id));
+    const result = await db!.update(messages).set({ isRead: true } as any).where(eq(messages.id, id));
     return (result.rowCount ?? 0) > 0;
   }
 
   async getUserReviews(userId: string): Promise<Review[]> {
-    return db.query.reviews.findMany({ where: eq(reviews.revieweeId, userId) });
+    return db!.query.reviews.findMany({ where: eq(reviews.revieweeId, userId) });
   }
 
   async createReview(review: InsertReview): Promise<Review> {
-    const result = await db.insert(reviews).values(review as any).returning();
+    const result = await db!.insert(reviews).values(review as any).returning();
     return result[0];
   }
 
   async getAuditLogs(filters?: { userId?: string; entityType?: string; entityId?: string; limit?: number }): Promise<AuditLog[]> {
     const { userId, entityType, entityId, limit } = filters || {};
     // @ts-ignore
-    return db.query.auditLogs.findMany({
+    return db!.query.auditLogs.findMany({
       where: (al: any, { and, eq }: any) => and(
         userId ? eq(al.userId, userId) : undefined,
         entityType ? eq(al.entityType, entityType) : undefined,
@@ -402,62 +402,62 @@ export class DbStorage implements IStorage {
   }
 
   async createAuditLog(log: InsertAuditLog): Promise<AuditLog> {
-    const result = await db.insert(auditLogs).values(log as any).returning();
+    const result = await db!.insert(auditLogs).values(log as any).returning();
     return result[0];
   }
 
   async getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
-    return db.query.subscriptionPlans.findMany({ where: eq(subscriptionPlans.isActive, true) });
+    return db!.query.subscriptionPlans.findMany({ where: eq(subscriptionPlans.isActive, true) });
   }
 
   async getSubscriptionPlan(id: string): Promise<SubscriptionPlan | undefined> {
-    return db.query.subscriptionPlans.findFirst({ where: eq(subscriptionPlans.id, id) });
+    return db!.query.subscriptionPlans.findFirst({ where: eq(subscriptionPlans.id, id) });
   }
 
   async createSubscriptionPlan(plan: InsertSubscriptionPlan): Promise<SubscriptionPlan> {
-    const result = await db.insert(subscriptionPlans).values(plan as any).returning();
+    const result = await db!.insert(subscriptionPlans).values(plan as any).returning();
     return result[0];
   }
 
   async getUserSubscription(userId: string): Promise<Subscription | undefined> {
-    return db.query.subscriptions.findFirst({ 
+    return db!.query.subscriptions.findFirst({
       where: eq(subscriptions.userId, userId),
       orderBy: [desc(subscriptions.createdAt)]
     });
   }
 
   async createSubscription(subscription: InsertSubscription): Promise<Subscription> {
-    const result = await db.insert(subscriptions).values(subscription as any).returning();
+    const result = await db!.insert(subscriptions).values(subscription as any).returning();
     return result[0];
   }
 
   async updateSubscription(id: string, updates: Partial<InsertSubscription>): Promise<Subscription | undefined> {
-    const result = await db.update(subscriptions).set(updates as any).where(eq(subscriptions.id, id)).returning();
+    const result = await db!.update(subscriptions).set(updates as any).where(eq(subscriptions.id, id)).returning();
     return result[0];
   }
 
   async getApiKeys(userId: string): Promise<ApiKey[]> {
-    return db.query.apiKeys.findMany({ where: eq(apiKeys.userId, userId) });
+    return db!.query.apiKeys.findMany({ where: eq(apiKeys.userId, userId) });
   }
 
   async getApiKey(id: string): Promise<ApiKey | undefined> {
-    return db.query.apiKeys.findFirst({ where: eq(apiKeys.id, id) });
+    return db!.query.apiKeys.findFirst({ where: eq(apiKeys.id, id) });
   }
 
   async createApiKey(apiKey: InsertApiKey): Promise<ApiKey> {
-    const result = await db.insert(apiKeys).values(apiKey as any).returning();
+    const result = await db!.insert(apiKeys).values(apiKey as any).returning();
     return result[0];
   }
 
   async deleteApiKey(id: string): Promise<boolean> {
-    const result = await db.delete(apiKeys).where(eq(apiKeys.id, id));
+    const result = await db!.delete(apiKeys).where(eq(apiKeys.id, id));
     return (result.rowCount ?? 0) > 0;
   }
 
   async getEscrowTransactions(filters?: { senderId?: string; recipientId?: string; projectId?: string; status?: string; limit?: number }): Promise<EscrowTransaction[]> {
     const { senderId, recipientId, projectId, status, limit } = filters || {};
     // @ts-ignore
-    return db.query.escrowTransactions.findMany({
+    return db!.query.escrowTransactions.findMany({
       where: (et: any, { and, eq }: any) => and(
         senderId ? eq(et.senderId, senderId) : undefined,
         recipientId ? eq(et.recipientId, recipientId) : undefined,
@@ -470,48 +470,48 @@ export class DbStorage implements IStorage {
   }
 
   async createEscrowTransaction(transaction: InsertEscrowTransaction): Promise<EscrowTransaction> {
-    const result = await db.insert(escrowTransactions).values(transaction as any).returning();
+    const result = await db!.insert(escrowTransactions).values(transaction as any).returning();
     return result[0];
   }
 
   async updateEscrowTransaction(id: string, updates: Partial<InsertEscrowTransaction>): Promise<EscrowTransaction | undefined> {
-    const result = await db.update(escrowTransactions).set(updates as any).where(eq(escrowTransactions.id, id)).returning();
+    const result = await db!.update(escrowTransactions).set(updates as any).where(eq(escrowTransactions.id, id)).returning();
     return result[0];
   }
 
   async getKycVerifications(userId: string): Promise<KycVerification[]> {
-    return db.query.kycVerifications.findMany({ 
+    return db!.query.kycVerifications.findMany({
       where: eq(kycVerifications.userId, userId),
       orderBy: [desc(kycVerifications.createdAt)]
     });
   }
 
   async createKycVerification(verification: InsertKycVerification): Promise<KycVerification> {
-    const result = await db.insert(kycVerifications).values(verification as any).returning();
+    const result = await db!.insert(kycVerifications).values(verification as any).returning();
     return result[0];
   }
 
   async updateKycVerification(id: string, updates: Partial<InsertKycVerification>): Promise<KycVerification | undefined> {
-    const result = await db.update(kycVerifications).set(updates as any).where(eq(kycVerifications.id, id)).returning();
+    const result = await db!.update(kycVerifications).set(updates as any).where(eq(kycVerifications.id, id)).returning();
     return result[0];
   }
 
   async getDPRs(projectId: string): Promise<DailyProgressReport[]> {
-    return db.query.dailyProgressReports.findMany({
+    return db!.query.dailyProgressReports.findMany({
       where: eq(dailyProgressReports.projectId, projectId),
       orderBy: [desc(dailyProgressReports.reportDate)]
     });
   }
 
   async createDPR(report: InsertDailyProgressReport): Promise<DailyProgressReport> {
-    const result = await db.insert(dailyProgressReports).values(report as any).returning();
+    const result = await db!.insert(dailyProgressReports).values(report as any).returning();
     return result[0];
   }
 
   async getSupportTickets(filters?: { userId?: string; status?: string; type?: string; limit?: number }): Promise<SupportTicket[]> {
     const { userId, status, type, limit } = filters || {};
     // @ts-ignore
-    return db.query.supportTickets.findMany({
+    return db!.query.supportTickets.findMany({
       where: (st: any, { and, eq }: any) => and(
         userId ? eq(st.userId, userId) : undefined,
         status ? eq(st.status, status) : undefined,
@@ -523,35 +523,35 @@ export class DbStorage implements IStorage {
   }
 
   async getSupportTicket(id: string): Promise<SupportTicket | undefined> {
-    return db.query.supportTickets.findFirst({
+    return db!.query.supportTickets.findFirst({
       where: eq(supportTickets.id, id),
     });
   }
 
   async createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket> {
-    const result = await db.insert(supportTickets).values(ticket as any).returning();
+    const result = await db!.insert(supportTickets).values(ticket as any).returning();
     return result[0];
   }
 
   async updateSupportTicket(id: string, updates: Partial<InsertSupportTicket>): Promise<SupportTicket | undefined> {
-    const result = await db.update(supportTickets).set({ ...updates, updatedAt: new Date() } as any).where(eq(supportTickets.id, id)).returning();
+    const result = await db!.update(supportTickets).set({ ...updates, updatedAt: new Date() } as any).where(eq(supportTickets.id, id)).returning();
     return result[0];
   }
 
   async getReferrals(userId: string): Promise<Referral[]> {
-    return db.query.referrals.findMany({
+    return db!.query.referrals.findMany({
       where: eq(referrals.referrerId, userId),
       orderBy: [desc(referrals.createdAt)]
     });
   }
 
   async createReferral(referral: InsertReferral): Promise<Referral> {
-    const result = await db.insert(referrals).values(referral as any).returning();
+    const result = await db!.insert(referrals).values(referral as any).returning();
     return result[0];
   }
 
   async updateReferral(id: string, updates: Partial<InsertReferral>): Promise<Referral | undefined> {
-    const result = await db.update(referrals).set(updates as any).where(eq(referrals.id, id)).returning();
+    const result = await db!.update(referrals).set(updates as any).where(eq(referrals.id, id)).returning();
     return result[0];
   }
 
@@ -562,12 +562,12 @@ export class DbStorage implements IStorage {
       unreadMessagesCountResult,
       userProfile,
     ] = await Promise.all([
-      db.query.projects.findMany({
+      db!.query.projects.findMany({
         where: eq(projects.createdById, userId),
         orderBy: [desc(projects.createdAt)],
         limit: 3,
       }),
-      db.select({
+      db!.select({
           id: jobApplications.id,
           jobId: jobApplications.jobId,
           status: jobApplications.status,
@@ -580,7 +580,7 @@ export class DbStorage implements IStorage {
         .where(eq(jobApplications.applicantId, userId))
         .orderBy(desc(jobApplications.appliedAt))
         .limit(3),
-      db.select({ count: count() })
+      db!.select({ count: count() })
         .from(messages)
         .where(and(eq(messages.recipientId, userId), eq(messages.isRead, false))),
       this.getUser(userId),
