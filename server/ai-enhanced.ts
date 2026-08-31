@@ -323,7 +323,10 @@ export async function generateEnhancedCastingRecommendations(
     const candidateEmbeddings = await Promise.all(
       candidates.map(candidate => {
         const candidateText = `${candidate.name} - ${candidate.bio} - Skills: ${candidate.skills.join(', ')} - Experience: ${candidate.experience}`;
-        return getEmbedding(candidateText);
+        return getEmbedding(candidateText).catch(err => {
+          console.warn(`AI Quality: Failed to get embedding for candidate ${candidate.id}`, err);
+          return [] as number[];
+        });
       })
     );
 
@@ -331,6 +334,10 @@ export async function generateEnhancedCastingRecommendations(
       const candidate = candidates[i];
       const candidateEmbedding = candidateEmbeddings[i];
       
+      if (!candidateEmbedding || candidateEmbedding.length === 0) {
+        continue;
+      }
+
       // Calculate cosine similarity
       const similarity = cosineSimilarity(roleEmbedding, candidateEmbedding);
       
