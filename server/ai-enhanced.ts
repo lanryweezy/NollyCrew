@@ -259,22 +259,24 @@ ${scriptText.substring(0, 8000)} // Limit to avoid token limits
     // Add analyzedAt timestamp
     analysis.analyzedAt = new Date().toISOString();
     
-    // Ensure all required fields exist
+    // AI Quality: Add structural validation. Since the prompt lacks strict JSON schema constraints,
+    // models can return malformed JSON (e.g. an array where a string is expected, or vice versa).
+    // Ensure expected array fields are actually arrays to prevent silent `.map()` crashes.
     return {
       scenes: analysis.scenes || 0,
-      sceneList: analysis.sceneList || [],
-      characters: analysis.characters || [],
-      locations: analysis.locations || [],
+      sceneList: Array.isArray(analysis.sceneList) ? analysis.sceneList : [],
+      characters: Array.isArray(analysis.characters) ? analysis.characters : [],
+      locations: Array.isArray(analysis.locations) ? analysis.locations : [],
       estimatedCrew: analysis.estimatedCrew || {},
-      props: analysis.props || [],
-      wardrobe: analysis.wardrobe || [],
-      vfx: analysis.vfx || [],
-      soundDesign: analysis.soundDesign || [],
-      lightingSetup: analysis.lightingSetup || [],
-      cameraEquipment: analysis.cameraEquipment || [],
+      props: Array.isArray(analysis.props) ? analysis.props : [],
+      wardrobe: Array.isArray(analysis.wardrobe) ? analysis.wardrobe : [],
+      vfx: Array.isArray(analysis.vfx) ? analysis.vfx : [],
+      soundDesign: Array.isArray(analysis.soundDesign) ? analysis.soundDesign : [],
+      lightingSetup: Array.isArray(analysis.lightingSetup) ? analysis.lightingSetup : [],
+      cameraEquipment: Array.isArray(analysis.cameraEquipment) ? analysis.cameraEquipment : [],
       budgetEstimate: analysis.budgetEstimate || { low: 0, high: 0, breakdown: {} },
       timeline: analysis.timeline || { preProduction: 0, shooting: 0, postProduction: 0, total: 0 },
-      risks: analysis.risks || [],
+      risks: Array.isArray(analysis.risks) ? analysis.risks : [],
       analyzedAt: analysis.analyzedAt
     };
 
@@ -505,9 +507,10 @@ Optimize for:
       throw new Error('No response from OpenAI');
     }
 
+    // AI Quality: Explicit structural validation to prevent downstream array manipulation crashes.
     const optimization = safeParseAIJSON<EnhancedScheduleOptimization>(response);
-    if (!optimization) {
-      throw new Error('Failed to parse schedule optimization as valid JSON');
+    if (!optimization || !Array.isArray(optimization.days)) {
+      throw new Error('Failed to parse schedule optimization as valid JSON or missing expected array structure');
     }
 
     return optimization;
@@ -618,9 +621,10 @@ Return JSON with:
       throw new Error('No response from OpenAI');
     }
 
+    // AI Quality: Explicit structural validation to prevent downstream array manipulation crashes.
     const marketingContent = safeParseAIJSON<any>(response);
-    if (!marketingContent) {
-      throw new Error('Failed to parse marketing content as valid JSON');
+    if (!marketingContent || !Array.isArray(marketingContent.socialMediaPosts)) {
+      throw new Error('Failed to parse marketing content as valid JSON or missing expected array structure');
     }
 
     return marketingContent;
