@@ -37,3 +37,7 @@
 ## 2026-08-26 - Resilient Batch AI Parallelization
 **Learning:** Unguarded batch parallel AI calls (e.g. `openai.embeddings.create` mapped inside a `Promise.all()`) are highly susceptible to failing the entire batch if a single prompt encounters an error like HTTP 429 (Rate Limit). If one fails, the whole `Promise.all()` rejects, bypassing all successful calls and triggering the application's top-level fallback mechanism (such as mock data generation).
 **Action:** When performing parallel operations that call an AI API, append a `.catch()` block to the individual promises inside the mapping function (e.g., resolving to `[]` for embeddings). Then, safely handle or filter out these fallback values in downstream logic to prevent data corruption or math errors (like `NaN` in `cosineSimilarity`).
+
+## 2026-09-03 - Graceful Fallback for External AI Services
+**Learning:** Wrapping an AI call with `withAIRetry` in a `try/catch` block that throws a raw error (`throw new Error(...)`) upon final failure bypasses graceful degradation. When the service (e.g., translation or legal document generation) is unavailable, the user receives a generic 500 Internal Server Error instead of a functional UI state.
+**Action:** Append a `.catch()` block directly to the `withAIRetry` call to return `null` or a sentinel value upon final failure. Then, check for this value to return a graceful fallback string (e.g., a service unavailable message or a draft template with provided context fields) to maintain UI stability and prevent hard crashes.

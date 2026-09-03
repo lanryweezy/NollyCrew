@@ -9,14 +9,16 @@ import {
   addWebSocketListener,
   removeWebSocketListener
 } from '../lib/websocket';
-import { authService } from '../lib/auth';
+import { getAuthToken } from '../lib/api';
 
-// Mock the auth service
-vi.mock('../lib/auth', () => ({
-  authService: {
-    getToken: vi.fn(),
-  },
-}));
+// Mock the api module for token
+vi.mock('../lib/api', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../lib/api')>();
+  return {
+    ...actual,
+    getAuthToken: vi.fn(),
+  };
+});
 
 describe('WebSocket Client', () => {
   let wsInstance: {
@@ -43,8 +45,8 @@ describe('WebSocket Client', () => {
     mockWebSocket.OPEN = 1; // Add the static OPEN property
     global.WebSocket = mockWebSocket;
 
-    // Mock authService to return a token
-    (authService.getToken as vi.Mock).mockReturnValue('mock-jwt-token');
+    // Mock api to return a token
+    vi.mocked(getAuthToken).mockReturnValue('mock-jwt-token');
   });
 
   afterEach(() => {
