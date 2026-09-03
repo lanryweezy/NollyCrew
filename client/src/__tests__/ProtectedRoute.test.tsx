@@ -54,7 +54,7 @@ describe('ProtectedRoute', () => {
     // Mock window.location
     const originalLocation = window.location;
     delete (window as any).location;
-    window.location = { href: '' } as any;
+    (window as any).location = { href: '' } as any;
 
     (useAuth as any).mockReturnValue({
       isAuthenticated: false,
@@ -69,7 +69,7 @@ describe('ProtectedRoute', () => {
     });
 
     // Restore window.location
-    window.location = originalLocation;
+    (window as any).location = originalLocation;
   });
 
   it('should redirect to onboarding when authenticated but no roles', async () => {
