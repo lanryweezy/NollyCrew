@@ -61,27 +61,30 @@ export async function translateScript(scriptText: string, targetLanguage: 'Yorub
     return "Translation API not configured.";
   }
 
-  try {
-    const response = await withAIRetry(() => openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: `You are an expert Nigerian linguist and screenwriter. Translate the following script from English to ${targetLanguage}. Maintain the dramatic nuance, emotional weight, and cultural context. Do not translate character names.`
-        },
-        {
-          role: "user",
-          content: scriptText
-        }
-      ],
-      temperature: 0.3
-    }, { timeout: 60000 }));
-
-    return response.choices[0]?.message?.content || "Translation failed.";
-  } catch (error) {
+  // AI Quality: Add graceful fallback instead of throwing error directly
+  const response = await withAIRetry(() => openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [
+      {
+        role: "system",
+        content: `You are an expert Nigerian linguist and screenwriter. Translate the following script from English to ${targetLanguage}. Maintain the dramatic nuance, emotional weight, and cultural context. Do not translate character names.`
+      },
+      {
+        role: "user",
+        content: scriptText
+      }
+    ],
+    temperature: 0.3
+  }, { timeout: 60000 })).catch((error) => {
     console.error('Translation error:', error);
-    throw new Error('Failed to translate script');
+    return null;
+  });
+
+  if (!response) {
+    return `[Translation Service Unavailable] - Failed to translate script to ${targetLanguage}`;
   }
+
+  return response.choices[0]?.message?.content || "Translation failed.";
 }
 
 // 22. Sentiment Analysis & Emotional Arc
@@ -138,31 +141,44 @@ export async function generateReleaseForm(talentName: string, roleName: string, 
     return "Legal AI not configured.";
   }
 
-  try {
-    const response = await withAIRetry(() => openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: "You are an entertainment lawyer specializing in Nollywood contracts. Generate a standard, legally binding talent release form."
-        },
-        {
-          role: "user",
-          content: `Generate a standard Talent Release Form for the Nigerian Film Industry.
-          Talent Name: ${talentName}
-          Role: ${roleName}
-          Project Title: ${projectName}
-          Negotiated Rate: ${rate} NGN.
-          Include standard clauses for name & likeness rights in perpetuity, non-disclosure, and payment terms.`
-        }
-      ]
-    }, { timeout: 60000 }));
-
-    return response.choices[0]?.message?.content || "Contract generation failed.";
-  } catch (error) {
+  // AI Quality: Add graceful fallback instead of throwing error directly
+  const response = await withAIRetry(() => openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [
+      {
+        role: "system",
+        content: "You are an entertainment lawyer specializing in Nollywood contracts. Generate a standard, legally binding talent release form."
+      },
+      {
+        role: "user",
+        content: `Generate a standard Talent Release Form for the Nigerian Film Industry.
+        Talent Name: ${talentName}
+        Role: ${roleName}
+        Project Title: ${projectName}
+        Negotiated Rate: ${rate} NGN.
+        Include standard clauses for name & likeness rights in perpetuity, non-disclosure, and payment terms.`
+      }
+    ]
+  }, { timeout: 60000 })).catch((error) => {
     console.error('Legal AI error:', error);
-    throw new Error('Failed to generate release form');
+    return null;
+  });
+
+  if (!response) {
+    // Return a template document so the user isn't stuck with an empty/broken view on failure
+    return `TALENT RELEASE FORM (DRAFT)
+
+Project: ${projectName}
+Talent: ${talentName}
+Role: ${roleName}
+Rate: ${rate} NGN
+
+[Standard clauses for name & likeness rights in perpetuity, non-disclosure, and payment terms to be inserted here.]
+
+*Note: This is a placeholder document. The Legal AI service is currently unavailable.*`;
   }
+
+  return response.choices[0]?.message?.content || "Contract generation failed.";
 }
 
 // 30. Fatigue Prediction
