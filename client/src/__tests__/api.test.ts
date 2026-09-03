@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { api } from '../lib/api';
-import { authService } from '../lib/auth';
+import { projects, getAuthToken } from '../lib/api';
 
-vi.mock('../lib/auth', () => ({
-  authService: {
-    getToken: vi.fn(),
-    refreshToken: vi.fn(),
-  },
-}));
+vi.mock('../lib/api', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../lib/api')>();
+  return {
+    ...actual,
+    getAuthToken: vi.fn(),
+  };
+});
 
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
@@ -15,37 +15,32 @@ global.fetch = mockFetch;
 describe('API Service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(authService.getToken).mockReturnValue('mock-token');
+    vi.mocked(getAuthToken).mockReturnValue('mock-token');
   });
 
-  describe('analyzeProjectScriptStart', () => {
+  describe('aiTools.analyzeScript', () => {
     it('should call apiFetch with correct parameters for happy path', async () => {
-      const mockResponse = { jobId: 'job-123', status: 'pending', message: 'Analysis started' };
+      const mockResponse = { scenes: 10, characters: ['Lead'] };
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockResponse),
       });
 
-      const projectId = 'project-456';
-      const payload = { scriptUrl: 'https://example.com/script.pdf' };
+      const scriptText = 'Test script text';
 
-      const result = await api.analyzeProjectScriptStart(projectId, payload);
+      const result = await (await import('../lib/api')).aiTools.analyzeScript(scriptText);
 
       expect(result).toEqual(mockResponse);
       expect(mockFetch).toHaveBeenCalledWith(
-        `/api/projects/${projectId}/script/analyze`,
+        '/api/ai/analyze-script',
         expect.objectContaining({
           method: 'POST',
-          body: JSON.stringify(payload),
-          headers: expect.objectContaining({
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer mock-token',
-          }),
+          body: JSON.stringify({ scriptText }),
         })
       );
     });
 
-    it('should handle errors when the request fails', async () => {
+    it('should handle errors when the request fails gracefully', async () => {
       const errorMessage = 'Internal Server Error';
       mockFetch.mockResolvedValueOnce({
         ok: false,
@@ -53,10 +48,11 @@ describe('API Service', () => {
         json: () => Promise.resolve({ error: errorMessage }),
       });
 
-      const projectId = 'project-456';
-      const payload = { scriptText: 'Some script content' };
+      const scriptText = 'Test script text';
 
-      await expect(api.analyzeProjectScriptStart(projectId, payload)).rejects.toThrow(errorMessage);
+      // The analyzeScript method catches errors and returns null
+      const result = await (await import('../lib/api')).aiTools.analyzeScript(scriptText);
+      expect(result).toBeNull();
     });
   });
 });

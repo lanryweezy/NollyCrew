@@ -5,7 +5,7 @@ import { registerRoutes } from './routes';
 import { Server } from 'http';
 import { storage } from './storage';
 import bcrypt from 'bcryptjs';
-import { sign, verify } from './utils/jwt.js';
+import { signToken } from './middleware/auth.js';
 
 // Mock the storage module
 vi.mock('./storage', () => {
@@ -16,10 +16,11 @@ vi.mock('./storage', () => {
   return { storage: mockStorage };
 });
 
-// Mock JWT
-vi.mock('./utils/jwt.js', () => ({
-  sign: vi.fn(),
-  verify: vi.fn(),
+// Mock Auth Middleware
+vi.mock('./middleware/auth.js', () => ({
+  signToken: vi.fn(() => 'mockToken'),
+  verifyToken: vi.fn(),
+  authenticateToken: vi.fn((req, res, next) => next()),
 }));
 
 vi.mock('bcryptjs');
@@ -54,7 +55,7 @@ describe('Auth Routes', () => {
 
       (storage.getUserByEmail as any).mockResolvedValue(null);
       (storage.createUser as any).mockResolvedValue({ ...newUser, id: '1', passwordHash: 'hashedpassword' });
-      (sign as any).mockReturnValue('mockToken');
+      (signToken as any).mockReturnValue('mockToken');
       (bcrypt.hash as any).mockResolvedValue('hashedpassword');
 
       const response = await request(app).post('/api/auth/register').send(newUser);
@@ -91,7 +92,7 @@ describe('Auth Routes', () => {
 
       (storage.getUserByEmail as any).mockResolvedValue(user);
       (bcrypt.compare as any).mockImplementation((password, hash) => password === 'password123');
-      (sign as any).mockReturnValue('mockToken');
+      (signToken as any).mockReturnValue('mockToken');
 
       const response = await request(app).post('/api/auth/login').send({ email: user.email, password: user.password });
 
