@@ -2,6 +2,11 @@ import OpenAI from 'openai';
 import pdf from 'pdf-parse';
 import { withAIRetry, safeParseAIJSON } from './ai.js';
 
+// AI Quality: Extracted inline system prompts into versioned constants for better maintainability and tracking
+const SCRIPT_ANALYSIS_SYSTEM_PROMPT_V1 = "You are a professional film script analyst. Extract detailed production information from scripts. Always return valid JSON. Be comprehensive and specific in your analysis.";
+const SCHEDULE_OPTIMIZATION_SYSTEM_PROMPT_V1 = "You are a professional film production scheduler. Create optimal shooting schedules that minimize costs and maximize efficiency. Always return valid JSON. Consider all constraints carefully.";
+const MARKETING_CONTENT_SYSTEM_PROMPT_V1 = "You are a professional film marketing expert. Create comprehensive marketing content that resonates with target audiences and maximizes commercial potential.";
+
 // Initialize OpenAI client
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -234,7 +239,7 @@ ${scriptText.substring(0, 8000)} // Limit to avoid token limits
       messages: [
         {
           role: "system",
-          content: "You are a professional film script analyst. Extract detailed production information from scripts. Always return valid JSON. Be comprehensive and specific in your analysis."
+          content: SCRIPT_ANALYSIS_SYSTEM_PROMPT_V1
         },
         {
           role: "user",
@@ -489,7 +494,7 @@ Optimize for:
       messages: [
         {
           role: "system",
-          content: "You are a professional film production scheduler. Create optimal shooting schedules that minimize costs and maximize efficiency. Always return valid JSON. Consider all constraints carefully."
+          content: SCHEDULE_OPTIMIZATION_SYSTEM_PROMPT_V1
         },
         {
           role: "user",
@@ -602,7 +607,7 @@ Return JSON with:
       messages: [
         {
           role: "system",
-          content: "You are a professional film marketing expert. Create comprehensive marketing content that resonates with target audiences and maximizes commercial potential."
+          content: MARKETING_CONTENT_SYSTEM_PROMPT_V1
         },
         {
           role: "user",
