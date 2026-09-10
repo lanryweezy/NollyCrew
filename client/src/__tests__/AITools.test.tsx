@@ -1,131 +1,97 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import AITools from '../pages/AITools';
+import * as api from '../lib/api';
 
-// Mock dependencies
-vi.mock('wouter', () => ({
-  useLocation: () => [null, vi.fn()]
+// Mock the API tools
+vi.mock('../lib/api', () => ({
+  aiTools: {
+    analyzeScript: vi.fn(),
+    generateCastingRecommendations: vi.fn(),
+    optimizeSchedule: vi.fn(),
+    generateMarketingContent: vi.fn(),
+    directorChat: vi.fn(),
+    translateScript: vi.fn()
+  },
+  queryClient: {
+    invalidateQueries: vi.fn()
+  }
 }));
 
-// Mock components
-vi.mock('../components/Navigation', () => ({
-  default: () => <div data-testid="navigation">Navigation</div>
+// Mock the toast component
+vi.mock('../hooks/use-toast', () => ({
+  useToast: () => ({
+    toast: vi.fn()
+  })
 }));
 
-vi.mock('../components/ThemeToggle', () => ({
-  default: () => <div data-testid="theme-toggle">Theme Toggle</div>
-}));
-
-vi.mock('../components/PageHeader', () => ({
-  default: ({ title, subtitle }: { title: string; subtitle: string }) => (
-    <div data-testid="page-header">
-      <h1>{title}</h1>
-      <p>{subtitle}</p>
-    </div>
-  )
-}));
-
-vi.mock('../components/ResponsiveGrid', () => ({
-  default: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="responsive-grid">{children}</div>
-  )
-}));
-
-vi.mock('../components/ResponsiveSection', () => ({
-  default: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="responsive-section">{children}</div>
-  )
-}));
-
-vi.mock('../components/ResponsiveButton', () => ({
-  default: ({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) => (
-    <button data-testid="responsive-button" onClick={onClick}>
-      {children}
-    </button>
-  )
-}));
-
-vi.mock('../components/ResponsiveTypography', () => ({
-  default: ({ children, variant }: { children: React.ReactNode; variant: string }) => (
-    <div data-testid={`typography-${variant}`}>{children}</div>
-  )
-}));
+// Mock window.scroll
+Object.defineProperty(window, 'scroll', {
+  value: vi.fn(),
+  writable: true
+});
 
 describe('AITools', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should render the AI tools page with all main components', () => {
+  it('should render all AI tools cards', () => {
     render(<AITools />);
     
-    // Check if main components are rendered
-    expect(screen.getByTestId('navigation')).toBeInTheDocument();
-    expect(screen.getByTestId('theme-toggle')).toBeInTheDocument();
-    expect(screen.getByTestId('page-header')).toBeInTheDocument();
-    expect(screen.getByTestId('responsive-section')).toBeInTheDocument();
-    
-    // Check if page title is rendered
-    expect(screen.getByRole('heading', { name: /Intelligence Center/i })).toBeInTheDocument();
-    expect(screen.getByText('The algorithmic heart of your next blockbuster.')).toBeInTheDocument();
-  }, 10000);
-
-  it('should render all AI tool tabs', () => {
-    render(<AITools />);
-    
-    // Check if all tabs are rendered in the sidebar
-    expect(screen.getByText('Script')).toBeInTheDocument();
-    expect(screen.getByText('Casting')).toBeInTheDocument();
-    expect(screen.getByText('Schedule')).toBeInTheDocument();
-    expect(screen.getByText('Marketing')).toBeInTheDocument();
-  }, 10000);
+    expect(screen.getByText('Script Breakdown')).toBeInTheDocument();
+    expect(screen.getByText('Casting AI')).toBeInTheDocument();
+    expect(screen.getByText('Schedule Optimizer')).toBeInTheDocument();
+    expect(screen.getByText('Marketing Content')).toBeInTheDocument();
+    expect(screen.getByText('Virtual Director')).toBeInTheDocument();
+    expect(screen.getByText('Script Translator')).toBeInTheDocument();
+  });
 
   it('should switch between different AI tools', async () => {
     render(<AITools />);
     
-    // Check if default tab (Script Analysis) content is shown
-    expect(screen.getByText('Script Analysis')).toBeInTheDocument();
+    // Default tab might require clicking to show inputs, or they are shown immediately.
+    // The previous test suite had a problem finding the placeholder. Let's click the card first.
+    const scriptCard = screen.getByText('Script Breakdown');
+    fireEvent.click(scriptCard);
     
-    // Switch to Casting tab via Sidebar
-    const castingTool = screen.getByText('Casting');
-    fireEvent.click(castingTool);
+    // Check if default tool (Script Breakdown) inputs are shown
+    expect(screen.getByPlaceholderText(/Paste your full script here/)).toBeInTheDocument();
     
-    // Check if Casting tab content is shown (Placeholder for now since it shows upgraded polish message)
-    expect(screen.getByText(/This module is receiving the final cinematic polish/)).toBeInTheDocument();
-  }, 10000);
+    // Click on Casting AI card
+    const castingCard = screen.getByText('Casting AI');
+    fireEvent.click(castingCard);
+    
+    // Check if Casting tool inputs are shown
+    expect(screen.getByPlaceholderText(/e.g. Lead/)).toBeInTheDocument();
+  });
 
-  it('should handle script analysis functionality', () => {
+  it('should handle script analysis functionality', async () => {
+    const mockAnalysisResult = {
+      scenes: 10,
+      characters: ['John', 'Jane'],
+      sceneList: []
+    };
+    
+    (api.aiTools.analyzeScript as any).mockResolvedValue(mockAnalysisResult);
+    
     render(<AITools />);
     
-    // Fill in script text
-    const scriptTextarea = screen.getByPlaceholderText(/Paste your script text here/) as HTMLTextAreaElement;
-    fireEvent.change(scriptTextarea, { target: { value: 'This is a test script for analysis.' } });
+    // Click on Script Breakdown card to ensure it's active
+    const scriptCard = screen.getByText('Script Breakdown');
+    fireEvent.click(scriptCard);
     
-    // Click analyze button
-    const analyzeButton = screen.getByText('Execute Intelligence');
-    fireEvent.click(analyzeButton);
-    
-    // Check if analysis started (button should show loading state)
-    expect(screen.getByText('Processing...')).toBeInTheDocument();
-  }, 10000);
+    // Enter script text
+    const textarea = screen.getByPlaceholderText(/Paste your full script here/);
+    fireEvent.change(textarea, { target: { value: 'INT. COFFEE SHOP - DAY' } });
 
-  it('should render AI tools sidebar with all tools', () => {
-    render(<AITools />);
-    
-    // Check if AI tools are listed in sidebar using labels
-    expect(screen.getByText('Script')).toBeInTheDocument();
-    expect(screen.getByText('Director')).toBeInTheDocument();
-    expect(screen.getByText('Casting')).toBeInTheDocument();
-    expect(screen.getByText('Schedule')).toBeInTheDocument();
-    expect(screen.getByText('Marketing')).toBeInTheDocument();
-    expect(screen.getByText('Legal')).toBeInTheDocument();
-  }, 10000);
+    // Click analyze
+    const analyzeBtn = screen.getByText('Run Full Breakdown');
+    fireEvent.click(analyzeBtn);
 
-  it('should render credits and tokens info', () => {
-    render(<AITools />);
-    
-    // Check if credits section is rendered
-    expect(screen.getByText('Credits Available')).toBeInTheDocument();
-    expect(screen.getByText('750 / 1000 tokens remaining')).toBeInTheDocument();
-  }, 10000);
+    // Check if API was called
+    await waitFor(() => {
+      expect(api.aiTools.analyzeScript).toHaveBeenCalledWith('INT. COFFEE SHOP - DAY');
+    });
+  });
 });
