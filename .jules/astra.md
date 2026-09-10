@@ -37,3 +37,7 @@
 ## 2026-08-26 - Resilient Batch AI Parallelization
 **Learning:** Unguarded batch parallel AI calls (e.g. `openai.embeddings.create` mapped inside a `Promise.all()`) are highly susceptible to failing the entire batch if a single prompt encounters an error like HTTP 429 (Rate Limit). If one fails, the whole `Promise.all()` rejects, bypassing all successful calls and triggering the application's top-level fallback mechanism (such as mock data generation).
 **Action:** When performing parallel operations that call an AI API, append a `.catch()` block to the individual promises inside the mapping function (e.g., resolving to `[]` for embeddings). Then, safely handle or filter out these fallback values in downstream logic to prevent data corruption or math errors (like `NaN` in `cosineSimilarity`).
+
+## 2026-09-10 - Versioning System Prompts and Isolating Dynamic Variables
+**Learning:** Hardcoding system prompts directly inside API calls obscures the core AI behavior of a function and makes it harder to audit and update. Furthermore, embedding dynamic user variables directly into the `role: "system"` instructions exposes the model to prompt injection attacks and instruction confusion.
+**Action:** Always extract system instructions into versioned constants at the top of the file (e.g., `SYSTEM_PROMPT_TRANSLATOR_V1`). Always move dynamic user inputs into the `role: "user"` message payload rather than interpolating them directly into the system prompt string.

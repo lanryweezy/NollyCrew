@@ -5,6 +5,12 @@ const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 }) : null;
 
+// Versioned System Prompts
+const SYSTEM_PROMPT_TRANSLATOR_V1 = "You are an expert Nigerian linguist and screenwriter. Translate the following script from English to the target language specified by the user. Maintain the dramatic nuance, emotional weight, and cultural context. Do not translate character names.";
+const SYSTEM_PROMPT_STORY_ANALYST_V1 = "You are a story analyst. Extract the emotional tension arc of a script.";
+const SYSTEM_PROMPT_LEGAL_V1 = "You are an entertainment lawyer specializing in Nollywood contracts. Generate a standard, legally binding talent release form.";
+const SYSTEM_PROMPT_LINE_PRODUCER_V1 = "You are an experienced line producer focused on crew safety.";
+
 let GoogleGenerativeAI: any = null;
 let genAI: any = null;
 try {
@@ -67,11 +73,11 @@ export async function translateScript(scriptText: string, targetLanguage: 'Yorub
       messages: [
         {
           role: "system",
-          content: `You are an expert Nigerian linguist and screenwriter. Translate the following script from English to ${targetLanguage}. Maintain the dramatic nuance, emotional weight, and cultural context. Do not translate character names.`
+          content: SYSTEM_PROMPT_TRANSLATOR_V1
         },
         {
           role: "user",
-          content: scriptText
+          content: `Target Language: ${targetLanguage}\n\nScript Text:\n${scriptText}`
         }
       ],
       temperature: 0.3
@@ -101,7 +107,7 @@ export async function analyzeSentiment(scriptText: string): Promise<any> {
       messages: [
         {
           role: "system",
-          content: "You are a story analyst. Extract the emotional tension arc of a script."
+          content: SYSTEM_PROMPT_STORY_ANALYST_V1
         },
         {
           role: "user",
@@ -144,7 +150,7 @@ export async function generateReleaseForm(talentName: string, roleName: string, 
       messages: [
         {
           role: "system",
-          content: "You are an entertainment lawyer specializing in Nollywood contracts. Generate a standard, legally binding talent release form."
+          content: SYSTEM_PROMPT_LEGAL_V1
         },
         {
           role: "user",
@@ -185,7 +191,7 @@ export async function predictFatigue(scheduleDays: any[]): Promise<any> {
       messages: [
         {
           role: "system",
-          content: "You are an experienced line producer focused on crew safety."
+          content: SYSTEM_PROMPT_LINE_PRODUCER_V1
         },
         {
           role: "user",
