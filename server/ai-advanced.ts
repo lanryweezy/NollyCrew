@@ -13,6 +13,15 @@ try {
   genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
 } catch {}
 
+// AI Quality: Versioned system prompts for explicit roles, output schemas, and maintainability
+const TRANSLATION_SYSTEM_PROMPT_V1 = `You are an expert Nigerian linguist and screenwriter. Translate the script from English to the target language. Maintain the dramatic nuance, emotional weight, and cultural context. Do not translate character names.`;
+
+const SENTIMENT_SYSTEM_PROMPT_V1 = `You are a story analyst. Extract the emotional tension arc of a script.`;
+
+const LEGAL_SYSTEM_PROMPT_V1 = `You are an entertainment lawyer specializing in Nollywood contracts. Generate a standard, legally binding talent release form.`;
+
+const FATIGUE_SYSTEM_PROMPT_V1 = `You are an experienced line producer focused on crew safety. Analyze the schedule and output risks in the expected JSON format.`;
+
 // 17. Video Analysis using Gemini 1.5 Pro
 export async function analyzeAuditionVideo(videoUri: string, mimeType: string): Promise<any> {
   if (!genAI) {
@@ -67,11 +76,11 @@ export async function translateScript(scriptText: string, targetLanguage: 'Yorub
       messages: [
         {
           role: "system",
-          content: `You are an expert Nigerian linguist and screenwriter. Translate the following script from English to ${targetLanguage}. Maintain the dramatic nuance, emotional weight, and cultural context. Do not translate character names.`
+          content: TRANSLATION_SYSTEM_PROMPT_V1
         },
         {
           role: "user",
-          content: scriptText
+          content: `Target Language: ${targetLanguage}\n\nScript:\n${scriptText}`
         }
       ],
       temperature: 0.3
@@ -101,7 +110,7 @@ export async function analyzeSentiment(scriptText: string): Promise<any> {
       messages: [
         {
           role: "system",
-          content: "You are a story analyst. Extract the emotional tension arc of a script."
+          content: SENTIMENT_SYSTEM_PROMPT_V1
         },
         {
           role: "user",
@@ -144,7 +153,7 @@ export async function generateReleaseForm(talentName: string, roleName: string, 
       messages: [
         {
           role: "system",
-          content: "You are an entertainment lawyer specializing in Nollywood contracts. Generate a standard, legally binding talent release form."
+          content: LEGAL_SYSTEM_PROMPT_V1
         },
         {
           role: "user",
@@ -185,7 +194,7 @@ export async function predictFatigue(scheduleDays: any[]): Promise<any> {
       messages: [
         {
           role: "system",
-          content: "You are an experienced line producer focused on crew safety."
+          content: FATIGUE_SYSTEM_PROMPT_V1
         },
         {
           role: "user",
