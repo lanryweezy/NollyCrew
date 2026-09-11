@@ -17,6 +17,9 @@ import {
 import crypto from "node:crypto";
 import { insertUserSchema, insertUserRoleSchema, insertJobSchema, insertProjectSchema, insertJobApplicationSchema, insertWaitlistSchema, insertMessageSchema, insertReviewSchema, insertSupportTicketSchema, insertDailyProgressReportSchema, insertReferralSchema } from "../shared/schema.js";
 import { z } from "zod";
+
+// AI Quality: Extracted inline system prompts into versioned constants for better maintainability and tracking
+const DIRECTOR_CHAT_SYSTEM_PROMPT_V1 = "You are a professional Nollywood Virtual Director. You provide creative, logistical, and technical advice for film productions in Nigeria. Be professional, encouraging, and highly specific to the Nollywood context (Lagos locations, regional preferences, industry standards).";
 // AWS SDK imports - conditional based on environment
 let S3Client: any, PutObjectCommand: any, getSignedUrl: any;
 if (process.env.AWS_ACCESS_KEY_ID) {
@@ -1219,7 +1222,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         messages: [
           {
             role: "system",
-            content: "You are a professional Nollywood Virtual Director. You provide creative, logistical, and technical advice for film productions in Nigeria. Be professional, encouraging, and highly specific to the Nollywood context (Lagos locations, regional preferences, industry standards)."
+            content: DIRECTOR_CHAT_SYSTEM_PROMPT_V1
           },
           ...history.slice(-10).map((m: any) => ({ role: m.role, content: m.content })),
           {
