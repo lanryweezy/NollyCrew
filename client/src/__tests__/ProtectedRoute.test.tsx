@@ -19,7 +19,7 @@ describe('ProtectedRoute', () => {
   });
 
   afterAll(() => {
-    window.location = originalLocation;
+    (window as any).location = originalLocation;
   });
 
   it('should render children when authenticated', () => {

@@ -2,6 +2,11 @@ import OpenAI from 'openai';
 import { getCache, setCache } from './utils/cache.js';
 import crypto from 'node:crypto';
 
+// AI Quality: Extracted inline system prompts into versioned constants for better maintainability and tracking
+const SCRIPT_ANALYSIS_SYSTEM_PROMPT_V1 = "You are a professional Nollywood Virtual Director. Extract detailed production information, suggest creative camera shots, and provide directorial notes.";
+const SCHEDULE_OPTIMIZATION_SYSTEM_PROMPT_V1 = "You are a professional film production scheduler. Create optimal shooting schedules that minimize costs and maximize efficiency.";
+const MARKETING_CONTENT_SYSTEM_PROMPT_V1 = "You are a professional film marketing expert. Create compelling marketing content that resonates with target audiences.";
+
 // Initialize OpenAI client
 export const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -194,7 +199,7 @@ export async function analyzeScriptWithAI(scriptText: string): Promise<ScriptAna
   return callOpenAIWithSchema<ScriptAnalysis>({
     prefix: 'script',
     cacheContent: scriptText.substring(0, 15000),
-    systemPrompt: "You are a professional Nollywood Virtual Director. Extract detailed production information, suggest creative camera shots, and provide directorial notes.",
+    systemPrompt: SCRIPT_ANALYSIS_SYSTEM_PROMPT_V1,
     userPrompt: `Analyze this film script and extract detailed production information. Script text:\n${scriptText.substring(0, 15000)}`,
     schemaName: "script_analysis",
     schema: {
@@ -341,7 +346,7 @@ export async function optimizeScheduleWithAI(
   return callOpenAIWithSchema<ScheduleOptimization>({
     prefix: 'schedule',
     cacheContent: { scenes, constraints },
-    systemPrompt: "You are a professional film production scheduler. Create optimal shooting schedules that minimize costs and maximize efficiency.",
+    systemPrompt: SCHEDULE_OPTIMIZATION_SYSTEM_PROMPT_V1,
     userPrompt: `Optimize this film shooting schedule with the following constraints:\nScenes:\n${JSON.stringify(scenes)}\nConstraints:\n${JSON.stringify(constraints)}`,
     schemaName: "schedule_optimization",
     schema: {
@@ -396,7 +401,7 @@ export async function generateMarketingContent(
   }>({
     prefix: 'marketing',
     cacheContent: { projectTitle, genre, synopsis, targetAudience },
-    systemPrompt: "You are a professional film marketing expert. Create compelling marketing content that resonates with target audiences.",
+    systemPrompt: MARKETING_CONTENT_SYSTEM_PROMPT_V1,
     userPrompt: `Generate marketing content for this film project:\nTitle: ${projectTitle}\nGenre: ${genre}\nSynopsis: ${synopsis}\nTarget Audience: ${targetAudience}`,
     schemaName: "marketing_content",
     schema: {
