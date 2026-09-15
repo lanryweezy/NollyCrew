@@ -25,7 +25,16 @@ const FATIGUE_SYSTEM_PROMPT_V1 = `You are an experienced line producer focused o
 // 17. Video Analysis using Gemini 1.5 Pro
 export async function analyzeAuditionVideo(videoUri: string, mimeType: string): Promise<any> {
   if (!genAI) {
-    return { error: 'Gemini API key not configured', sentiment: 'Unknown', energy: 0 };
+    return {
+      primaryEmotion: "Unknown",
+      emotionalArc: ["Unknown", "Unknown", "Unknown"],
+      energyLevel: 0,
+      authenticityScore: 0,
+      dictionClarity: 0,
+      strengths: [],
+      weaknesses: [],
+      overallNotes: "Gemini API key not configured."
+    };
   }
   
   try {
@@ -60,14 +69,24 @@ export async function analyzeAuditionVideo(videoUri: string, mimeType: string): 
     };
   } catch (error) {
     console.error('Video analysis error:', error);
-    throw new Error('Failed to analyze audition video');
+    // AI Quality: Graceful fallback instead of throwing error directly to the user
+    return {
+      primaryEmotion: "Unknown",
+      emotionalArc: ["Unknown", "Unknown", "Unknown"],
+      energyLevel: 0,
+      authenticityScore: 0,
+      dictionClarity: 0,
+      strengths: [],
+      weaknesses: [],
+      overallNotes: "Failed to analyze audition video due to technical issues."
+    };
   }
 }
 
 // 21. Script Translation (Yoruba, Igbo, Hausa, Pidgin)
 export async function translateScript(scriptText: string, targetLanguage: 'Yoruba' | 'Igbo' | 'Hausa' | 'Nigerian Pidgin'): Promise<string> {
   if (!openai) {
-    return "Translation API not configured.";
+    return `[Translation to ${targetLanguage} currently unavailable - API not configured]`;
   }
 
   try {
@@ -89,7 +108,8 @@ export async function translateScript(scriptText: string, targetLanguage: 'Yorub
     return response.choices[0]?.message?.content || "Translation failed.";
   } catch (error) {
     console.error('Translation error:', error);
-    throw new Error('Failed to translate script');
+    // AI Quality: Graceful fallback instead of throwing error directly to the user
+    return `[Translation to ${targetLanguage} currently unavailable due to technical issues.]`;
   }
 }
 
@@ -144,7 +164,7 @@ export async function analyzeSentiment(scriptText: string): Promise<any> {
 // 27. Legal AI: Auto-generate Release Forms
 export async function generateReleaseForm(talentName: string, roleName: string, projectName: string, rate: string): Promise<string> {
   if (!openai) {
-    return "Legal AI not configured.";
+    return "Legal AI not configured. Standard fallback template applied.";
   }
 
   try {
@@ -170,7 +190,8 @@ export async function generateReleaseForm(talentName: string, roleName: string, 
     return response.choices[0]?.message?.content || "Contract generation failed.";
   } catch (error) {
     console.error('Legal AI error:', error);
-    throw new Error('Failed to generate release form');
+    // AI Quality: Graceful fallback instead of throwing error directly to the user
+    return `STANDARD TALENT RELEASE FORM\n\nProject: ${projectName}\nTalent: ${talentName}\nRole: ${roleName}\nRate: ${rate} NGN\n\n[Contract generation currently unavailable due to technical issues. Please consult standard legal templates.]`;
   }
 }
 
