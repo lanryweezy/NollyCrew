@@ -41,3 +41,7 @@
 ## 2026-09-04 - Version and Name Inline System Prompts
 **Learning:** Extracting inline system prompts to static, versioned constants (e.g., `TRANSLATION_SYSTEM_PROMPT_V1`) significantly improves prompt maintainability. Furthermore, moving dynamic variables (like `${targetLanguage}`) out of the system prompt and into the user prompt ensures the system prompt remains entirely static, which is critical for future prompt caching features and ensures more consistent model behavior across variations.
 **Action:** When creating or modifying AI feature code, define system prompts as versioned constants at the module level. Keep dynamic variables strictly within the `user` prompt role.
+
+## 2026-09-04 - Prevent 500 Server Errors from Advanced AI Fallbacks
+**Learning:** Functions like `analyzeAuditionVideo`, `translateScript`, and `generateReleaseForm` in `server/ai-advanced.ts` were throwing bare `Error` exceptions upon AI API failures. Because these errors bubble up to Express routes that wrap the call in a basic `try/catch`, it resulted in a generic HTTP 500 Server Error to the client. This breaks the UI and violates our graceful degradation principles.
+**Action:** Always return a structurally valid mock object or localized fallback string from the AI utility function's `catch` block (e.g. returning a boilerplate contract string for `generateReleaseForm`). This ensures downstream components receive the shape they expect and can degrade the user experience gracefully, rather than crashing with a 500 status.
