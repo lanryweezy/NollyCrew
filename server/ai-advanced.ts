@@ -89,7 +89,8 @@ export async function translateScript(scriptText: string, targetLanguage: 'Yorub
     return response.choices[0]?.message?.content || "Translation failed.";
   } catch (error) {
     console.error('Translation error:', error);
-    throw new Error('Failed to translate script');
+    // AI Quality: Graceful fallback instead of throwing error directly to the user
+    return `Translation to ${targetLanguage} is temporarily unavailable. Please try again later.`;
   }
 }
 
@@ -170,7 +171,8 @@ export async function generateReleaseForm(talentName: string, roleName: string, 
     return response.choices[0]?.message?.content || "Contract generation failed.";
   } catch (error) {
     console.error('Legal AI error:', error);
-    throw new Error('Failed to generate release form');
+    // AI Quality: Graceful fallback instead of throwing error directly to the user
+    return "Legal document generation is temporarily unavailable. Please try again later.";
   }
 }
 
