@@ -41,3 +41,7 @@
 ## 2026-09-04 - Version and Name Inline System Prompts
 **Learning:** Extracting inline system prompts to static, versioned constants (e.g., `TRANSLATION_SYSTEM_PROMPT_V1`) significantly improves prompt maintainability. Furthermore, moving dynamic variables (like `${targetLanguage}`) out of the system prompt and into the user prompt ensures the system prompt remains entirely static, which is critical for future prompt caching features and ensures more consistent model behavior across variations.
 **Action:** When creating or modifying AI feature code, define system prompts as versioned constants at the module level. Keep dynamic variables strictly within the `user` prompt role.
+
+## 2026-09-17 - Add error handling to unguarded API calls
+**Learning:** When using `Promise.all` with parallel AI API calls (like embeddings), an unguarded call outside the array can still crash the entire block if it throws an error (e.g., `roleEmbedding` failing before mapping candidate embeddings). Additionally, simply replacing `throw new Error()` with dummy values in utility functions causes silent failures if upstream routes expect errors to return 500s.
+**Action:** Add `.catch()` blocks directly on critical path AI calls to return graceful fallback data (like mock generator functions native to the file), ensuring the route does not crash but the failure is still handled securely without silent data corruption.
