@@ -261,6 +261,11 @@ ${scriptText.substring(0, 8000)} // Limit to avoid token limits
       throw new Error('Failed to parse AI response as valid JSON');
     }
     
+    // AI Quality: Validate expected output structure before use
+    if (!Array.isArray(analysis.sceneList) || !Array.isArray(analysis.characters) || !Array.isArray(analysis.locations)) {
+      throw new Error('AI response missing required structural arrays');
+    }
+
     // Add analyzedAt timestamp
     analysis.analyzedAt = new Date().toISOString();
     
@@ -515,6 +520,11 @@ Optimize for:
       throw new Error('Failed to parse schedule optimization as valid JSON');
     }
 
+    // AI Quality: Validate expected output structure before use
+    if (!optimization.days || !Array.isArray(optimization.days)) {
+      throw new Error('Schedule optimization missing required days array');
+    }
+
     return optimization;
     
   } catch (error) {
@@ -626,6 +636,11 @@ Return JSON with:
     const marketingContent = safeParseAIJSON<any>(response);
     if (!marketingContent) {
       throw new Error('Failed to parse marketing content as valid JSON');
+    }
+
+    // AI Quality: Validate expected output structure before use
+    if (!marketingContent.tagline || !Array.isArray(marketingContent.socialMediaPosts)) {
+      throw new Error('Marketing content missing required fields or arrays');
     }
 
     return marketingContent;
