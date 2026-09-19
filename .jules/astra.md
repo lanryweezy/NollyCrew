@@ -41,3 +41,7 @@
 ## 2026-09-04 - Version and Name Inline System Prompts
 **Learning:** Extracting inline system prompts to static, versioned constants (e.g., `TRANSLATION_SYSTEM_PROMPT_V1`) significantly improves prompt maintainability. Furthermore, moving dynamic variables (like `${targetLanguage}`) out of the system prompt and into the user prompt ensures the system prompt remains entirely static, which is critical for future prompt caching features and ensures more consistent model behavior across variations.
 **Action:** When creating or modifying AI feature code, define system prompts as versioned constants at the module level. Keep dynamic variables strictly within the `user` prompt role.
+
+## 2024-10-18 - Structural Validation for Parsed AI JSON
+**Learning:** Parsing model output (e.g. via `safeParseAIJSON`) only verifies JSON syntax, not schema correctness. If a model hallucinates a response shape (like returning an empty string or object instead of an expected array), mapping over these fields silently corrupts data or crashes React components downstream with `TypeError: .map is not a function`.
+**Action:** Always follow `safeParseAIJSON()` calls with explicit runtime structural validation (e.g., using `Array.isArray()`) for required schema shapes before returning or interacting with the data. If data doesn't match the schema, throw an error or provide a graceful fallback.
