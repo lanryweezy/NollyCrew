@@ -328,7 +328,15 @@ export async function generateEnhancedCastingRecommendations(
   }
 
   try {
-    const roleEmbedding = await getEmbedding(`${role}: ${characterDescription} - ${requirements}`);
+    const roleEmbedding = await getEmbedding(`${role}: ${characterDescription} - ${requirements}`).catch(err => {
+      console.warn('AI Quality: Failed to get embedding for role', err);
+      return [] as number[];
+    });
+
+    if (!roleEmbedding || roleEmbedding.length === 0) {
+      console.warn('AI Quality: Role embedding failed, falling back to mock recommendations');
+      return generateMockEnhancedCastingRecommendations(candidates);
+    }
     
     const recommendations: EnhancedCastingRecommendation[] = [];
     
