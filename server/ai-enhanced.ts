@@ -261,6 +261,14 @@ ${scriptText.substring(0, 8000)} // Limit to avoid token limits
       throw new Error('Failed to parse AI response as valid JSON');
     }
     
+    // AI Quality: Validate expected output structure before use to prevent silent failures
+    if (typeof analysis !== 'object' || Array.isArray(analysis)) {
+      throw new Error('AI Quality: Script analysis returned unexpected schema (not an object), falling back');
+    }
+    if (analysis.sceneList && !Array.isArray(analysis.sceneList)) {
+      throw new Error('AI Quality: Script analysis returned unexpected schema (sceneList is not an array), falling back');
+    }
+
     // Add analyzedAt timestamp
     analysis.analyzedAt = new Date().toISOString();
     
@@ -515,6 +523,14 @@ Optimize for:
       throw new Error('Failed to parse schedule optimization as valid JSON');
     }
 
+    // AI Quality: Validate expected output structure before use to prevent silent failures
+    if (typeof optimization !== 'object' || Array.isArray(optimization)) {
+      throw new Error('AI Quality: Schedule optimization returned unexpected schema (not an object), falling back');
+    }
+    if (!Array.isArray(optimization.days)) {
+      throw new Error('AI Quality: Schedule optimization returned unexpected schema (days is missing or not an array), falling back');
+    }
+
     return optimization;
     
   } catch (error) {
@@ -626,6 +642,14 @@ Return JSON with:
     const marketingContent = safeParseAIJSON<any>(response);
     if (!marketingContent) {
       throw new Error('Failed to parse marketing content as valid JSON');
+    }
+
+    // AI Quality: Validate expected output structure before use to prevent silent failures
+    if (typeof marketingContent !== 'object' || Array.isArray(marketingContent)) {
+      throw new Error('AI Quality: Marketing content returned unexpected schema (not an object), falling back');
+    }
+    if (marketingContent.socialMediaPosts && !Array.isArray(marketingContent.socialMediaPosts)) {
+      throw new Error('AI Quality: Marketing content returned unexpected schema (socialMediaPosts is not an array), falling back');
     }
 
     return marketingContent;
