@@ -109,7 +109,7 @@ export async function translateScript(scriptText: string, targetLanguage: 'Yorub
   } catch (error) {
     console.error('Translation error:', error);
     // AI Quality: Graceful fallback instead of throwing error directly to the user
-    return `[Translation to ${targetLanguage} currently unavailable due to technical issues.]`;
+    return `Translation to ${targetLanguage} is temporarily unavailable. Please try again later.`;
   }
 }
 
@@ -191,7 +191,7 @@ export async function generateReleaseForm(talentName: string, roleName: string, 
   } catch (error) {
     console.error('Legal AI error:', error);
     // AI Quality: Graceful fallback instead of throwing error directly to the user
-    return `STANDARD TALENT RELEASE FORM\n\nProject: ${projectName}\nTalent: ${talentName}\nRole: ${roleName}\nRate: ${rate} NGN\n\n[Contract generation currently unavailable due to technical issues. Please consult standard legal templates.]`;
+    return "Legal document generation is temporarily unavailable. Please try again later.";
   }
 }
 

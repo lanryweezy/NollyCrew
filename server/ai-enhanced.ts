@@ -257,29 +257,37 @@ ${scriptText.substring(0, 8000)} // Limit to avoid token limits
 
     // Parse JSON response safely
     const analysis = safeParseAIJSON<any>(response);
-    if (!analysis) {
-      throw new Error('Failed to parse AI response as valid JSON');
+    if (!analysis || typeof analysis !== 'object') {
+      throw new Error('Failed to parse AI response as valid JSON object');
     }
     
+    // AI Quality: Validate expected output structure before use to prevent silent failures
+    if (typeof analysis !== 'object' || Array.isArray(analysis)) {
+      throw new Error('AI Quality: Script analysis returned unexpected schema (not an object), falling back');
+    }
+    if (analysis.sceneList && !Array.isArray(analysis.sceneList)) {
+      throw new Error('AI Quality: Script analysis returned unexpected schema (sceneList is not an array), falling back');
+    }
+
     // Add analyzedAt timestamp
     analysis.analyzedAt = new Date().toISOString();
     
-    // Ensure all required fields exist
+    // Ensure all required fields exist and validate array structures
     return {
       scenes: analysis.scenes || 0,
-      sceneList: analysis.sceneList || [],
-      characters: analysis.characters || [],
-      locations: analysis.locations || [],
+      sceneList: Array.isArray(analysis.sceneList) ? analysis.sceneList : [],
+      characters: Array.isArray(analysis.characters) ? analysis.characters : [],
+      locations: Array.isArray(analysis.locations) ? analysis.locations : [],
       estimatedCrew: analysis.estimatedCrew || {},
-      props: analysis.props || [],
-      wardrobe: analysis.wardrobe || [],
-      vfx: analysis.vfx || [],
-      soundDesign: analysis.soundDesign || [],
-      lightingSetup: analysis.lightingSetup || [],
-      cameraEquipment: analysis.cameraEquipment || [],
+      props: Array.isArray(analysis.props) ? analysis.props : [],
+      wardrobe: Array.isArray(analysis.wardrobe) ? analysis.wardrobe : [],
+      vfx: Array.isArray(analysis.vfx) ? analysis.vfx : [],
+      soundDesign: Array.isArray(analysis.soundDesign) ? analysis.soundDesign : [],
+      lightingSetup: Array.isArray(analysis.lightingSetup) ? analysis.lightingSetup : [],
+      cameraEquipment: Array.isArray(analysis.cameraEquipment) ? analysis.cameraEquipment : [],
       budgetEstimate: analysis.budgetEstimate || { low: 0, high: 0, breakdown: {} },
       timeline: analysis.timeline || { preProduction: 0, shooting: 0, postProduction: 0, total: 0 },
-      risks: analysis.risks || [],
+      risks: Array.isArray(analysis.risks) ? analysis.risks : [],
       analyzedAt: analysis.analyzedAt
     };
 
@@ -320,7 +328,15 @@ export async function generateEnhancedCastingRecommendations(
   }
 
   try {
-    const roleEmbedding = await getEmbedding(`${role}: ${characterDescription} - ${requirements}`);
+    const roleEmbedding = await getEmbedding(`${role}: ${characterDescription} - ${requirements}`).catch(err => {
+      console.warn('AI Quality: Failed to get embedding for role', err);
+      return [] as number[];
+    });
+
+    if (!roleEmbedding || roleEmbedding.length === 0) {
+      console.warn('AI Quality: Role embedding failed, falling back to mock recommendations');
+      return generateMockEnhancedCastingRecommendations(candidates);
+    }
     
     const recommendations: EnhancedCastingRecommendation[] = [];
     
@@ -515,6 +531,14 @@ Optimize for:
       throw new Error('Failed to parse schedule optimization as valid JSON');
     }
 
+    // AI Quality: Validate expected output structure before use to prevent silent failures
+    if (typeof optimization !== 'object' || Array.isArray(optimization)) {
+      throw new Error('AI Quality: Schedule optimization returned unexpected schema (not an object), falling back');
+    }
+    if (!Array.isArray(optimization.days)) {
+      throw new Error('AI Quality: Schedule optimization returned unexpected schema (days is missing or not an array), falling back');
+    }
+
     return optimization;
     
   } catch (error) {
@@ -626,6 +650,14 @@ Return JSON with:
     const marketingContent = safeParseAIJSON<any>(response);
     if (!marketingContent) {
       throw new Error('Failed to parse marketing content as valid JSON');
+    }
+
+    // AI Quality: Validate expected output structure before use to prevent silent failures
+    if (typeof marketingContent !== 'object' || Array.isArray(marketingContent)) {
+      throw new Error('AI Quality: Marketing content returned unexpected schema (not an object), falling back');
+    }
+    if (marketingContent.socialMediaPosts && !Array.isArray(marketingContent.socialMediaPosts)) {
+      throw new Error('AI Quality: Marketing content returned unexpected schema (socialMediaPosts is not an array), falling back');
     }
 
     return marketingContent;
