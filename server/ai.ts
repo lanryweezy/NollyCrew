@@ -102,6 +102,30 @@ async function callOpenAIWithSchema<T>(options: {
       throw new Error(`Failed to parse AI response as valid JSON for schema ${options.schemaName}`);
     }
 
+    // AI Quality: Validate expected output structure before use to prevent silent failures downstream
+    if (typeof result !== 'object' || Array.isArray(result) || result === null) {
+      throw new Error(`AI Quality: Model returned unexpected schema shape (not an object) for ${options.schemaName}`);
+    }
+
+    if (options.schema?.required) {
+      for (const field of options.schema.required) {
+        if ((result as Record<string, any>)[field] === undefined) {
+          throw new Error(`AI Quality: Missing required field '${field}' in response for ${options.schemaName}`);
+        }
+      }
+    }
+
+    if (options.schema?.properties) {
+      for (const [key, propSchema] of Object.entries(options.schema.properties)) {
+        if ((propSchema as any).type === 'array') {
+          const val = (result as Record<string, any>)[key];
+          if (val !== undefined && !Array.isArray(val)) {
+            throw new Error(`AI Quality: Field '${key}' must be an array in response for ${options.schemaName}`);
+          }
+        }
+      }
+    }
+
     await setCache(cacheKey, result, options.ttl || 86400);
     return result;
   } catch (error) {
