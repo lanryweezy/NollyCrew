@@ -538,6 +538,12 @@ Optimize for:
     if (!Array.isArray(optimization.days)) {
       throw new Error('AI Quality: Schedule optimization returned unexpected schema (days is missing or not an array), falling back');
     }
+    if (!optimization.riskAssessment || !Array.isArray(optimization.riskAssessment.highRiskDays) || !Array.isArray(optimization.riskAssessment.weatherDependencies) || !Array.isArray(optimization.riskAssessment.crewFatigueFactors)) {
+      throw new Error('AI Quality: Schedule optimization missing required riskAssessment arrays, falling back');
+    }
+    if (!optimization.resourceAllocation || typeof optimization.resourceAllocation.crew !== 'object' || optimization.resourceAllocation.crew === null || typeof optimization.resourceAllocation.equipment !== 'object' || optimization.resourceAllocation.equipment === null || typeof optimization.resourceAllocation.locations !== 'object' || optimization.resourceAllocation.locations === null) {
+      throw new Error('AI Quality: Schedule optimization missing required resourceAllocation objects, falling back');
+    }
 
     return optimization;
     
@@ -658,6 +664,12 @@ Return JSON with:
     }
     if (marketingContent.socialMediaPosts && !Array.isArray(marketingContent.socialMediaPosts)) {
       throw new Error('AI Quality: Marketing content returned unexpected schema (socialMediaPosts is not an array), falling back');
+    }
+    if (!marketingContent.pressKit || !Array.isArray(marketingContent.pressKit.themes) || !Array.isArray(marketingContent.pressKit.keyCast) || !Array.isArray(marketingContent.pressKit.crewHighlights)) {
+      throw new Error('AI Quality: Marketing content missing required pressKit arrays, falling back');
+    }
+    if (!marketingContent.distributionStrategy || !Array.isArray(marketingContent.distributionStrategy.platforms) || !Array.isArray(marketingContent.distributionStrategy.promotionalTactics)) {
+      throw new Error('AI Quality: Marketing content missing required distributionStrategy arrays, falling back');
     }
 
     return marketingContent;
