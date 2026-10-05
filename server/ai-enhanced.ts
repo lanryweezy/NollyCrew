@@ -272,6 +272,31 @@ ${scriptText.substring(0, 8000)} // Limit to avoid token limits
     // Add analyzedAt timestamp
     analysis.analyzedAt = new Date().toISOString();
     
+    // AI Quality: Deep validation for nested arrays to prevent silent crashes when mapping
+    if (Array.isArray(analysis.sceneList)) {
+      for (const scene of analysis.sceneList) {
+        scene.characters = Array.isArray(scene.characters) ? scene.characters : [];
+        scene.props = Array.isArray(scene.props) ? scene.props : [];
+        scene.wardrobe = Array.isArray(scene.wardrobe) ? scene.wardrobe : [];
+        scene.vfx = Array.isArray(scene.vfx) ? scene.vfx : [];
+        scene.soundEffects = Array.isArray(scene.soundEffects) ? scene.soundEffects : [];
+        scene.lighting = Array.isArray(scene.lighting) ? scene.lighting : [];
+        scene.cameraAngles = Array.isArray(scene.cameraAngles) ? scene.cameraAngles : [];
+      }
+    }
+    if (Array.isArray(analysis.characters)) {
+      for (const char of analysis.characters) {
+        char.emotionalRange = Array.isArray(char.emotionalRange) ? char.emotionalRange : [];
+        char.keyTraits = Array.isArray(char.keyTraits) ? char.keyTraits : [];
+      }
+    }
+    if (Array.isArray(analysis.locations)) {
+      for (const loc of analysis.locations) {
+        loc.lightingRequirements = Array.isArray(loc.lightingRequirements) ? loc.lightingRequirements : [];
+        loc.soundRequirements = Array.isArray(loc.soundRequirements) ? loc.soundRequirements : [];
+      }
+    }
+
     // Ensure all required fields exist and validate array structures
     return {
       scenes: analysis.scenes || 0,
@@ -538,6 +563,14 @@ Optimize for:
     if (!Array.isArray(optimization.days)) {
       throw new Error('AI Quality: Schedule optimization returned unexpected schema (days is missing or not an array), falling back');
     }
+
+    // AI Quality: Deep Structural Validation for nested arrays within days
+    for (const day of optimization.days) {
+      if (!Array.isArray(day.scenes) || !Array.isArray(day.locations) || !Array.isArray(day.equipmentNeeded) || !Array.isArray(day.specialRequirements) || !Array.isArray(day.weatherDependencies)) {
+        throw new Error('AI Quality: Schedule optimization missing required nested arrays in days, falling back');
+      }
+    }
+
     if (!optimization.riskAssessment || !Array.isArray(optimization.riskAssessment.highRiskDays) || !Array.isArray(optimization.riskAssessment.weatherDependencies) || !Array.isArray(optimization.riskAssessment.crewFatigueFactors)) {
       throw new Error('AI Quality: Schedule optimization missing required riskAssessment arrays, falling back');
     }
