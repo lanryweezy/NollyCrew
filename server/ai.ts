@@ -116,14 +116,41 @@ async function callOpenAIWithSchema<T>(options: {
     }
 
     if (options.schema?.properties) {
-      for (const [key, propSchema] of Object.entries(options.schema.properties)) {
-        if ((propSchema as any).type === 'array') {
-          const val = (result as Record<string, any>)[key];
-          if (val !== undefined && !Array.isArray(val)) {
-            throw new Error(`AI Quality: Field '${key}' must be an array in response for ${options.schemaName}`);
+      function validateSchemaRecursive(data: any, schema: any, path: string) {
+        if (!schema || !data || typeof data !== 'object') return;
+
+        if (schema.required) {
+          for (const field of schema.required) {
+            if (data[field] === undefined) {
+              throw new Error(`AI Quality: Missing required field '${path ? path + '.' + field : field}' in response for ${options.schemaName}`);
+            }
+          }
+        }
+
+        if (schema.properties) {
+          for (const [key, propSchema] of Object.entries<any>(schema.properties)) {
+            const val = data[key];
+            if (val === undefined) continue;
+
+            const currentPath = path ? `${path}.${key}` : key;
+
+            if (propSchema.type === 'array') {
+              if (!Array.isArray(val)) {
+                throw new Error(`AI Quality: Field '${currentPath}' must be an array in response for ${options.schemaName}`);
+              }
+              if (propSchema.items && val.length > 0) {
+                val.forEach((item: any, index: number) => {
+                  validateSchemaRecursive(item, propSchema.items, `${currentPath}[${index}]`);
+                });
+              }
+            } else if (propSchema.type === 'object') {
+              validateSchemaRecursive(val, propSchema, currentPath);
+            }
           }
         }
       }
+
+      validateSchemaRecursive(result, options.schema, '');
     }
 
     await setCache(cacheKey, result, options.ttl || 86400);

@@ -275,7 +275,14 @@ ${scriptText.substring(0, 8000)} // Limit to avoid token limits
     // Ensure all required fields exist and validate array structures
     return {
       scenes: analysis.scenes || 0,
-      sceneList: Array.isArray(analysis.sceneList) ? analysis.sceneList : [],
+      sceneList: Array.isArray(analysis.sceneList) ? analysis.sceneList.map((scene: any) => ({
+        ...scene,
+        characters: Array.isArray(scene.characters) ? scene.characters : [],
+        props: Array.isArray(scene.props) ? scene.props : [],
+        wardrobe: Array.isArray(scene.wardrobe) ? scene.wardrobe : [],
+        vfx: Array.isArray(scene.vfx) ? scene.vfx : [],
+        cameraShots: Array.isArray(scene.cameraShots) ? scene.cameraShots : []
+      })) : [],
       characters: Array.isArray(analysis.characters) ? analysis.characters : [],
       locations: Array.isArray(analysis.locations) ? analysis.locations : [],
       estimatedCrew: analysis.estimatedCrew || {},
@@ -544,6 +551,16 @@ Optimize for:
     if (!optimization.resourceAllocation || typeof optimization.resourceAllocation.crew !== 'object' || optimization.resourceAllocation.crew === null || typeof optimization.resourceAllocation.equipment !== 'object' || optimization.resourceAllocation.equipment === null || typeof optimization.resourceAllocation.locations !== 'object' || optimization.resourceAllocation.locations === null) {
       throw new Error('AI Quality: Schedule optimization missing required resourceAllocation objects, falling back');
     }
+
+    // AI Quality: Default nested arrays in days to prevent silent downstream crashes
+    optimization.days = optimization.days.map((day: any) => ({
+      ...day,
+      scenes: Array.isArray(day.scenes) ? day.scenes : [],
+      locations: Array.isArray(day.locations) ? day.locations : [],
+      equipmentNeeded: Array.isArray(day.equipmentNeeded) ? day.equipmentNeeded : [],
+      specialRequirements: Array.isArray(day.specialRequirements) ? day.specialRequirements : [],
+      weatherDependencies: Array.isArray(day.weatherDependencies) ? day.weatherDependencies : [],
+    }));
 
     return optimization;
     
