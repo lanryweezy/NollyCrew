@@ -153,6 +153,16 @@ export async function analyzeSentiment(scriptText: string): Promise<any> {
       return { arc: [] };
     }
 
+    // AI Quality: Deep Structural Validation to ensure elements inside the array match expectations
+    for (const beat of parsed.arc) {
+      if (typeof beat !== 'object' || beat === null) {
+        throw new Error('AI Quality: Sentiment analysis beat is not an object');
+      }
+      if (typeof beat.beat !== 'string' || typeof beat.tension !== 'number' || typeof beat.primaryEmotion !== 'string') {
+        throw new Error('AI Quality: Sentiment analysis beat is missing required properties or has incorrect types');
+      }
+    }
+
     return parsed;
   } catch (error) {
     console.error('Sentiment analysis error:', error);
@@ -236,6 +246,16 @@ export async function predictFatigue(scheduleDays: any[]): Promise<any> {
     if (!parsed || !Array.isArray(parsed.warnings)) {
       console.warn('AI Quality: Fatigue prediction returned unexpected schema, falling back');
       return { warnings: [] };
+    }
+
+    // AI Quality: Deep Structural Validation to ensure elements inside the array match expectations
+    for (const warning of parsed.warnings) {
+      if (typeof warning !== 'object' || warning === null) {
+        throw new Error('AI Quality: Fatigue prediction warning is not an object');
+      }
+      if (typeof warning.day !== 'number' || typeof warning.issue !== 'string' || typeof warning.severity !== 'string' || typeof warning.suggestion !== 'string') {
+        throw new Error('AI Quality: Fatigue prediction warning is missing required properties or has incorrect types');
+      }
     }
 
     return parsed;
