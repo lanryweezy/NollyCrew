@@ -8,4 +8,4 @@ vite.config.ts.*
 .local/
 verification/screenshots/*.png
 verification/videos/*.webm
-public/assets/
+public/assets/logs/
