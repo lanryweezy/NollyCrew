@@ -70,17 +70,8 @@ export async function analyzeAuditionVideo(videoUri: string, mimeType: string): 
     };
   } catch (error) {
     console.error('Video analysis error:', error);
-    // AI Quality: Graceful fallback instead of throwing error directly to the user
-    return {
-      primaryEmotion: "Unknown",
-      emotionalArc: ["Unknown", "Unknown", "Unknown"],
-      energyLevel: 0,
-      authenticityScore: 0,
-      dictionClarity: 0,
-      strengths: [],
-      weaknesses: [],
-      overallNotes: "Failed to analyze audition video due to technical issues."
-    };
+    // AI Quality: Rethrow error so upstream Express handlers can return HTTP 500
+    throw error;
   }
 }
 
@@ -109,8 +100,8 @@ export async function translateScript(scriptText: string, targetLanguage: 'Yorub
     return response.choices[0]?.message?.content || "Translation failed.";
   } catch (error) {
     console.error('Translation error:', error);
-    // AI Quality: Graceful fallback instead of throwing error directly to the user
-    return `Translation to ${targetLanguage} is temporarily unavailable. Please try again later.`;
+    // AI Quality: Rethrow error so upstream Express handlers can return HTTP 500
+    throw error;
   }
 }
 
@@ -144,14 +135,12 @@ export async function analyzeSentiment(scriptText: string): Promise<any> {
     const parsed = safeParseAIJSON<{ arc: any[] }>(content);
 
     if (!parsed) {
-      console.warn('AI Quality: Failed to parse sentiment analysis JSON, falling back');
-      return { arc: [] };
+      throw new Error('AI Quality: Failed to parse sentiment analysis JSON');
     }
 
     // AI Quality: Validate expected output structure before use
     if (!parsed || !Array.isArray(parsed.arc)) {
-      console.warn('AI Quality: Sentiment analysis returned unexpected schema, falling back');
-      return { arc: [] };
+      throw new Error('AI Quality: Sentiment analysis returned unexpected schema');
     }
 
     // AI Quality: Deep Structural Validation to ensure elements inside the array match expectations
@@ -167,8 +156,8 @@ export async function analyzeSentiment(scriptText: string): Promise<any> {
     return parsed;
   } catch (error) {
     console.error('Sentiment analysis error:', error);
-    // AI Quality: Graceful fallback instead of throwing error directly to the user
-    return { arc: [] };
+    // AI Quality: Rethrow error so upstream Express handlers can return HTTP 500
+    throw error;
   }
 }
 
@@ -203,8 +192,8 @@ export async function generateReleaseForm(talentName: string, roleName: string, 
     return response.choices[0]?.message?.content || "Contract generation failed.";
   } catch (error) {
     console.error('Legal AI error:', error);
-    // AI Quality: Graceful fallback instead of throwing error directly to the user
-    return "Legal document generation is temporarily unavailable. Please try again later.";
+    // AI Quality: Rethrow error so upstream Express handlers can return HTTP 500
+    throw error;
   }
 }
 
@@ -243,14 +232,12 @@ export async function predictFatigue(scheduleDays: any[]): Promise<any> {
     const parsed = safeParseAIJSON<{ warnings: any[] }>(content);
 
     if (!parsed) {
-      console.warn('AI Quality: Failed to parse fatigue prediction JSON, falling back');
-      return { warnings: [] };
+      throw new Error('AI Quality: Failed to parse fatigue prediction JSON');
     }
 
     // AI Quality: Validate expected output structure before use
     if (!parsed || !Array.isArray(parsed.warnings)) {
-      console.warn('AI Quality: Fatigue prediction returned unexpected schema, falling back');
-      return { warnings: [] };
+      throw new Error('AI Quality: Fatigue prediction returned unexpected schema');
     }
 
     // AI Quality: Deep Structural Validation to ensure elements inside the array match expectations
@@ -266,7 +253,7 @@ export async function predictFatigue(scheduleDays: any[]): Promise<any> {
     return parsed;
   } catch (error) {
     console.error('Fatigue prediction error:', error);
-    // AI Quality: Graceful fallback instead of throwing error directly to the user
-    return { warnings: [] };
+    // AI Quality: Rethrow error so upstream Express handlers can return HTTP 500
+    throw error;
   }
 }
