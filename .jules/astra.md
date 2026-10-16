@@ -81,3 +81,7 @@
 ## 2026-10-18 - Prevent Prompt Injection via XML Delimiters
 **Learning:** Embedding raw user input (like `scriptText` or `scheduleDays`) directly into prompt templates leaves the application vulnerable to prompt injection, where malicious instructions within the input could override the system prompt.
 **Action:** When passing user-generated data to AI prompts, wrap the content in explicit XML tags (e.g., `<data>...</data>`) and add clear instructions to the system prompt to treat the contents of these tags strictly as data, ignoring any conversational text or adversarial commands.
+
+## 2024-10-18 - Prevent silent data corruption by throwing errors on AI API failures instead of returning mock fallback objects
+**Learning:** When an AI utility function (like those in `server/ai-advanced.ts`) catches an AI API error and returns a mock or empty fallback object, it bypasses the upstream Express route handler's `try/catch` block. This causes the API to return a 200 OK status code with the fake data instead of a 500 Internal Server Error, leading to silent data corruption on the frontend (e.g., users incorrectly assuming their schedule has no fatigue risks).
+**Action:** Ensure that utility functions either let API and parsing errors propagate or rethrow them, so that route handlers can properly catch them and return the appropriate HTTP error status, preventing silent failures.
