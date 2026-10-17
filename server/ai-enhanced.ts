@@ -565,22 +565,33 @@ Optimize for:
     if (typeof optimization !== 'object' || Array.isArray(optimization)) {
       throw new Error('AI Quality: Schedule optimization returned unexpected schema (not an object), falling back');
     }
-    if (!Array.isArray(optimization.days)) {
-      throw new Error('AI Quality: Schedule optimization returned unexpected schema (days is missing or not an array), falling back');
-    }
+
+    optimization.days = Array.isArray(optimization.days) ? optimization.days : [];
+    optimization.optimizationNotes = Array.isArray(optimization.optimizationNotes) ? optimization.optimizationNotes : [];
 
     // AI Quality: Deep Structural Validation for nested arrays within days
     for (const day of optimization.days) {
-      if (!Array.isArray(day.scenes) || !Array.isArray(day.locations) || !Array.isArray(day.equipmentNeeded) || !Array.isArray(day.specialRequirements) || !Array.isArray(day.weatherDependencies)) {
-        throw new Error('AI Quality: Schedule optimization missing required nested arrays in days, falling back');
-      }
+      day.scenes = Array.isArray(day.scenes) ? day.scenes : [];
+      day.locations = Array.isArray(day.locations) ? day.locations : [];
+      day.equipmentNeeded = Array.isArray(day.equipmentNeeded) ? day.equipmentNeeded : [];
+      day.specialRequirements = Array.isArray(day.specialRequirements) ? day.specialRequirements : [];
+      day.weatherDependencies = Array.isArray(day.weatherDependencies) ? day.weatherDependencies : [];
     }
 
-    if (!optimization.riskAssessment || !Array.isArray(optimization.riskAssessment.highRiskDays) || !Array.isArray(optimization.riskAssessment.weatherDependencies) || !Array.isArray(optimization.riskAssessment.crewFatigueFactors)) {
-      throw new Error('AI Quality: Schedule optimization missing required riskAssessment arrays, falling back');
+    if (!optimization.riskAssessment || typeof optimization.riskAssessment !== 'object') {
+      optimization.riskAssessment = { highRiskDays: [], weatherDependencies: [], crewFatigueFactors: [] };
+    } else {
+      optimization.riskAssessment.highRiskDays = Array.isArray(optimization.riskAssessment.highRiskDays) ? optimization.riskAssessment.highRiskDays : [];
+      optimization.riskAssessment.weatherDependencies = Array.isArray(optimization.riskAssessment.weatherDependencies) ? optimization.riskAssessment.weatherDependencies : [];
+      optimization.riskAssessment.crewFatigueFactors = Array.isArray(optimization.riskAssessment.crewFatigueFactors) ? optimization.riskAssessment.crewFatigueFactors : [];
     }
-    if (!optimization.resourceAllocation || typeof optimization.resourceAllocation.crew !== 'object' || optimization.resourceAllocation.crew === null || typeof optimization.resourceAllocation.equipment !== 'object' || optimization.resourceAllocation.equipment === null || typeof optimization.resourceAllocation.locations !== 'object' || optimization.resourceAllocation.locations === null) {
-      throw new Error('AI Quality: Schedule optimization missing required resourceAllocation objects, falling back');
+
+    if (!optimization.resourceAllocation || typeof optimization.resourceAllocation !== 'object') {
+      optimization.resourceAllocation = { crew: {}, equipment: {}, locations: {} };
+    } else {
+      optimization.resourceAllocation.crew = (typeof optimization.resourceAllocation.crew === 'object' && optimization.resourceAllocation.crew !== null) ? optimization.resourceAllocation.crew : {};
+      optimization.resourceAllocation.equipment = (typeof optimization.resourceAllocation.equipment === 'object' && optimization.resourceAllocation.equipment !== null) ? optimization.resourceAllocation.equipment : {};
+      optimization.resourceAllocation.locations = (typeof optimization.resourceAllocation.locations === 'object' && optimization.resourceAllocation.locations !== null) ? optimization.resourceAllocation.locations : {};
     }
 
     return optimization;
@@ -702,14 +713,22 @@ Return JSON with:
     if (typeof marketingContent !== 'object' || Array.isArray(marketingContent)) {
       throw new Error('AI Quality: Marketing content returned unexpected schema (not an object), falling back');
     }
-    if (marketingContent.socialMediaPosts && !Array.isArray(marketingContent.socialMediaPosts)) {
-      throw new Error('AI Quality: Marketing content returned unexpected schema (socialMediaPosts is not an array), falling back');
+
+    marketingContent.socialMediaPosts = Array.isArray(marketingContent.socialMediaPosts) ? marketingContent.socialMediaPosts : [];
+
+    if (!marketingContent.pressKit || typeof marketingContent.pressKit !== 'object') {
+      marketingContent.pressKit = { themes: [], keyCast: [], crewHighlights: [] };
+    } else {
+      marketingContent.pressKit.themes = Array.isArray(marketingContent.pressKit.themes) ? marketingContent.pressKit.themes : [];
+      marketingContent.pressKit.keyCast = Array.isArray(marketingContent.pressKit.keyCast) ? marketingContent.pressKit.keyCast : [];
+      marketingContent.pressKit.crewHighlights = Array.isArray(marketingContent.pressKit.crewHighlights) ? marketingContent.pressKit.crewHighlights : [];
     }
-    if (!marketingContent.pressKit || !Array.isArray(marketingContent.pressKit.themes) || !Array.isArray(marketingContent.pressKit.keyCast) || !Array.isArray(marketingContent.pressKit.crewHighlights)) {
-      throw new Error('AI Quality: Marketing content missing required pressKit arrays, falling back');
-    }
-    if (!marketingContent.distributionStrategy || !Array.isArray(marketingContent.distributionStrategy.platforms) || !Array.isArray(marketingContent.distributionStrategy.promotionalTactics)) {
-      throw new Error('AI Quality: Marketing content missing required distributionStrategy arrays, falling back');
+
+    if (!marketingContent.distributionStrategy || typeof marketingContent.distributionStrategy !== 'object') {
+      marketingContent.distributionStrategy = { platforms: [], promotionalTactics: [] };
+    } else {
+      marketingContent.distributionStrategy.platforms = Array.isArray(marketingContent.distributionStrategy.platforms) ? marketingContent.distributionStrategy.platforms : [];
+      marketingContent.distributionStrategy.promotionalTactics = Array.isArray(marketingContent.distributionStrategy.promotionalTactics) ? marketingContent.distributionStrategy.promotionalTactics : [];
     }
 
     return marketingContent;
