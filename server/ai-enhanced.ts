@@ -278,6 +278,7 @@ ${scriptText.substring(0, 8000)} // Limit to avoid token limits
     // AI Quality: Deep validation for nested arrays to prevent silent crashes when mapping
     if (Array.isArray(analysis.sceneList)) {
       for (const scene of analysis.sceneList) {
+        if (!scene || typeof scene !== 'object' || Array.isArray(scene)) continue;
         scene.characters = Array.isArray(scene.characters) ? scene.characters : [];
         scene.props = Array.isArray(scene.props) ? scene.props : [];
         scene.wardrobe = Array.isArray(scene.wardrobe) ? scene.wardrobe : [];
@@ -289,12 +290,14 @@ ${scriptText.substring(0, 8000)} // Limit to avoid token limits
     }
     if (Array.isArray(analysis.characters)) {
       for (const char of analysis.characters) {
+        if (!char || typeof char !== 'object' || Array.isArray(char)) continue;
         char.emotionalRange = Array.isArray(char.emotionalRange) ? char.emotionalRange : [];
         char.keyTraits = Array.isArray(char.keyTraits) ? char.keyTraits : [];
       }
     }
     if (Array.isArray(analysis.locations)) {
       for (const loc of analysis.locations) {
+        if (!loc || typeof loc !== 'object' || Array.isArray(loc)) continue;
         loc.lightingRequirements = Array.isArray(loc.lightingRequirements) ? loc.lightingRequirements : [];
         loc.soundRequirements = Array.isArray(loc.soundRequirements) ? loc.soundRequirements : [];
       }
@@ -571,6 +574,7 @@ Optimize for:
 
     // AI Quality: Deep Structural Validation for nested arrays within days
     for (const day of optimization.days) {
+      if (!day || typeof day !== 'object' || Array.isArray(day)) continue;
       day.scenes = Array.isArray(day.scenes) ? day.scenes : [];
       day.locations = Array.isArray(day.locations) ? day.locations : [];
       day.equipmentNeeded = Array.isArray(day.equipmentNeeded) ? day.equipmentNeeded : [];
