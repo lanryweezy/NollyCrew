@@ -1,6 +1,8 @@
 import OpenAI from 'openai';
 import pdf from 'pdf-parse';
+import crypto from 'node:crypto';
 import { withAIRetry, safeParseAIJSON } from './ai.js';
+import { getCache, setCache } from './utils/cache.js';
 
 // AI Quality: Extracted inline system prompts into versioned constants for better maintainability and tracking
 // AI Quality: Added explicit instructions to ignore injection attempts within XML tags
@@ -12,6 +14,12 @@ const MARKETING_CONTENT_SYSTEM_PROMPT_V2 = "You are a professional film marketin
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 }) : null;
+
+// Helper to generate cache keys for enhanced AI calls
+function generateCacheKey(prefix: string, content: any): string {
+  const hash = crypto.createHash('sha256').update(JSON.stringify(content)).digest('hex');
+  return `ai:enhanced:${prefix}:${hash}`;
+}
 
 export interface EnhancedScriptAnalysis {
   scenes: number;
@@ -148,6 +156,10 @@ export async function analyzeScriptWithAI(scriptText: string): Promise<EnhancedS
     // Fallback to mock analysis if OpenAI not configured
     return generateMockEnhancedAnalysis(scriptText);
   }
+
+  const cacheKey = generateCacheKey('script', scriptText.substring(0, 15000));
+  const cached = await getCache<EnhancedScriptAnalysis>(cacheKey);
+  if (cached) return cached;
 
   try {
     const prompt = `
@@ -304,7 +316,7 @@ ${scriptText.substring(0, 8000)} // Limit to avoid token limits
     }
 
     // Ensure all required fields exist and validate array structures
-    return {
+    const finalAnalysis = {
       scenes: analysis.scenes || 0,
       sceneList: Array.isArray(analysis.sceneList) ? analysis.sceneList : [],
       characters: Array.isArray(analysis.characters) ? analysis.characters : [],
@@ -321,6 +333,9 @@ ${scriptText.substring(0, 8000)} // Limit to avoid token limits
       risks: Array.isArray(analysis.risks) ? analysis.risks : [],
       analyzedAt: analysis.analyzedAt
     };
+
+    await setCache(cacheKey, finalAnalysis, 86400);
+    return finalAnalysis;
 
   } catch (error) {
     console.error('OpenAI analysis error:', error);
@@ -470,6 +485,10 @@ export async function optimizeEnhancedScheduleWithAI(
     return generateMockEnhancedScheduleOptimization(scenes, constraints);
   }
 
+  const cacheKey = generateCacheKey('schedule', { scenes, constraints });
+  const cached = await getCache<EnhancedScheduleOptimization>(cacheKey);
+  if (cached) return cached;
+
   try {
     const prompt = `
 Optimize this film shooting schedule with the following constraints:
@@ -598,6 +617,7 @@ Optimize for:
       optimization.resourceAllocation.locations = (typeof optimization.resourceAllocation.locations === 'object' && optimization.resourceAllocation.locations !== null) ? optimization.resourceAllocation.locations : {};
     }
 
+    await setCache(cacheKey, optimization, 86400);
     return optimization;
     
   } catch (error) {
@@ -652,6 +672,10 @@ export async function generateEnhancedMarketingContent(
       }
     };
   }
+
+  const cacheKey = generateCacheKey('marketing', { projectTitle, genre, synopsis, targetAudience, budget, director });
+  const cached = await getCache<any>(cacheKey);
+  if (cached) return cached;
 
   try {
     const prompt = `
@@ -735,6 +759,7 @@ Return JSON with:
       marketingContent.distributionStrategy.promotionalTactics = Array.isArray(marketingContent.distributionStrategy.promotionalTactics) ? marketingContent.distributionStrategy.promotionalTactics : [];
     }
 
+    await setCache(cacheKey, marketingContent, 86400);
     return marketingContent;
     
   } catch (error) {
