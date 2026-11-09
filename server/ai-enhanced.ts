@@ -789,12 +789,20 @@ Return JSON with:
 async function getEmbedding(text: string): Promise<number[]> {
   if (!openai) return [];
   
+  // AI Quality: Cache deterministic embedding calls to prevent redundant network requests and reduce costs for identical text
+  const cacheKey = generateCacheKey('embedding', text);
+  const cached = await getCache<number[]>(cacheKey);
+  if (cached) return cached;
+
   const response = await withAIRetry(() => openai.embeddings.create({
     model: "text-embedding-3-small",
     input: text
   }, { timeout: 15000 }));
   
-  return response.data[0].embedding;
+  const embedding = response.data[0].embedding;
+  // AI Quality: Embeddings are deterministic and immutable, caching for 7 days reduces latency in batch candidate scoring
+  await setCache(cacheKey, embedding, 86400 * 7); // Cache embeddings for a week
+  return embedding;
 }
 
 function cosineSimilarity(a: number[], b: number[]): number {

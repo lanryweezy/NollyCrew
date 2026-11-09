@@ -90,3 +90,7 @@
 **Action:** When performing deep structural validation manually for endpoints with complex, deeply nested objects, explicitly default the missing arrays or object hierarchies to empty values (e.g., `marketingContent.pressKit.themes = Array.isArray(...) ? ... : []`) instead of throwing an error. This prevents the downstream silent `TypeError: .map is not a function` crashes while preserving the useful portions of the AI output.
 
 ## 2024-10-21 - Deep Structural Validation for Arrays of Objects in AI JSON Outputs
+
+## 2024-11-09 - Caching Deterministic AI API Calls (Embeddings)
+**Learning:** Batch operations like candidate matching rely on repeated calls for AI embeddings (e.g., matching a role description against multiple candidates). Since identical text always yields the same embedding, failing to cache these results in redundant network calls, significantly increased latency for users, and wasted API costs.
+**Action:** Always wrap deterministic AI endpoint calls (such as `openai.embeddings.create`) with caching logic (`getCache`/`setCache`), using a hashed representation of the input text as the cache key, and a suitable TTL (e.g., 7 days for embeddings).
